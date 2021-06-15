@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
-
+//TODO make the database fetch just grab the file paths. The list can turn them into songs.
 class SongList extends StatefulWidget {
   const SongList({Key? key}) : super(key: key);
 
@@ -38,7 +38,7 @@ class _SongListState extends State<SongList> {
                           subtitle: Text(song.artist),
                           trailing: Text(song.duration),
                           //leading: Image.file(song.albumArt),
-                          leading: SizedBox(width: 50, height: 50,child: song.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.file(song.albumArt!)),
+                          leading: SizedBox(width: 50, height: 50,child: song.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(song.albumArt!)),
                           onTap: () => {
 
                           },

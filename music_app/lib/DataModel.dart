@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 
 import 'Song.dart';
-
+//TODO https://pub.dev/packages/audio_service
+//TODO https://pub.dev/packages/just_audio
+//TODO https://pub.dev/packages/assets_audio_player
 class DataModel extends ChangeNotifier {
 
   //added this
@@ -43,10 +46,10 @@ class DataModel extends ChangeNotifier {
           File file = File(filePath.path);
           await retriever.setFile(file);
           Metadata metaData = await retriever.metadata;
-          File? albumArt;
+          Uint8List? albumArt;
           if(retriever.albumArt != null)
             {
-              albumArt = File.fromRawPath(retriever.albumArt!);
+              albumArt = retriever.albumArt!;
             }
           songs.add(Song(metaData, file, albumArt));
         }

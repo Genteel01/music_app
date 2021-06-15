@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
@@ -14,7 +15,7 @@ class Song {
   int discNumber;
   int trackNumber;
   String year;
-  File? albumArt;
+  Uint8List? albumArt;
   //File albumArt;
 
   /*Song({required this.file,
@@ -28,7 +29,7 @@ class Song {
     this.year = "Unknown Year",
     this.durationNumber = 1,
   });*/
-  Song(Metadata metadata, File songFile, File? songAlbumArt)
+  Song(Metadata metadata, File songFile, Uint8List? songAlbumArt)
   :
     name = metadata.trackName == null ? songFile.path.split("/").last.split(".").first : metadata.trackName!,
     artist = metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!),
