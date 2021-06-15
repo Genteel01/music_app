@@ -20,6 +20,7 @@ class DataModel extends ChangeNotifier {
     fetch();
   }
 
+  //TODO to check for changes on startup store the old file map and check if the new one is different. If it is, get all the songs at the different spots, then sort all the lists again
   //added this
   Future<void> fetch() async
   {
@@ -34,15 +35,16 @@ class DataModel extends ChangeNotifier {
     var retriever = new MetadataRetriever();
     if(directoryPath != null)
     {
+      //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
       var directoryMap = Directory(directoryPath).listSync(recursive: true);
       await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
-        if(filePath.path.endsWith("mp3") || filePath.path.endsWith("flac"))
+        if(filePath.path.endsWith("mp3") || filePath.path.endsWith("flac") || filePath.path.endsWith("m4a"))
         {
           File file = File(filePath.path);
           await retriever.setFile(file);
           Metadata metaData = await retriever.metadata;
-          File albumArt = File.fromRawPath(retriever.albumArt!);
-          songs.add(Song(file: file, metaData: metaData, albumArt: albumArt));
+          //File albumArt = File.fromRawPath(retriever.albumArt!);
+          songs.add(Song(metaData, file));
         }
       });
     }

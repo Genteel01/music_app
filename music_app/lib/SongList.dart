@@ -30,13 +30,15 @@ class _SongListState extends State<SongList> {
                 child: ListView.builder(
                     itemBuilder: (_, index) {
                       var song = dataModel.songs[index];
+
                       return Container(height: 70, decoration: BoxDecoration(
                           border: Border(top: BorderSide(width: 0.5, color: Colors.grey),)),
                         child: ListTile(
-                          title: Text(song.metaData.trackName!),
-                          subtitle: Text(song.metaData.trackArtistNames![0]!),
-                          trailing: Text(song.metaData.albumName!),
-                          leading: Image.file(song.albumArt),
+                          title: Text(song.name),
+                          subtitle: Text(song.artist),
+                          trailing: Text(song.duration),
+                          //leading: Image.file(song.albumArt),
+                          leading: Text("Blah"),
                           onTap: () => {
 
                           },
