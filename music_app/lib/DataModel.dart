@@ -43,8 +43,12 @@ class DataModel extends ChangeNotifier {
           File file = File(filePath.path);
           await retriever.setFile(file);
           Metadata metaData = await retriever.metadata;
-          //File albumArt = File.fromRawPath(retriever.albumArt!);
-          songs.add(Song(metaData, file));
+          File? albumArt;
+          if(retriever.albumArt != null)
+            {
+              albumArt = File.fromRawPath(retriever.albumArt!);
+            }
+          songs.add(Song(metaData, file, albumArt));
         }
       });
     }

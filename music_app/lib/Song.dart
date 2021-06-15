@@ -14,6 +14,7 @@ class Song {
   int discNumber;
   int trackNumber;
   String year;
+  File? albumArt;
   //File albumArt;
 
   /*Song({required this.file,
@@ -27,7 +28,7 @@ class Song {
     this.year = "Unknown Year",
     this.durationNumber = 1,
   });*/
-  Song(Metadata metadata, File songFile)
+  Song(Metadata metadata, File songFile, File? songAlbumArt)
   :
     name = metadata.trackName == null ? songFile.path.split("/").last.split(".").first : metadata.trackName!,
     artist = metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!),
@@ -39,7 +40,8 @@ class Song {
     trackNumber = metadata.trackNumber == null ? 1 : metadata.trackNumber!,
     year = metadata.year == null ? "Unknown Year" : metadata.year.toString(),
     durationNumber = metadata.trackDuration == null ? 0 : metadata.trackDuration!,
-    file = songFile;
+    file = songFile,
+    albumArt = songAlbumArt;
 
   static String artistString(List<String?> originalList)
   {

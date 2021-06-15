@@ -38,7 +38,7 @@ class _SongListState extends State<SongList> {
                           subtitle: Text(song.artist),
                           trailing: Text(song.duration),
                           //leading: Image.file(song.albumArt),
-                          leading: SizedBox(width: 50, height: 50,child: Image.asset("assets/images/music_note.jpg")),
+                          leading: SizedBox(width: 50, height: 50,child: song.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.file(song.albumArt!)),
                           onTap: () => {
 
                           },
