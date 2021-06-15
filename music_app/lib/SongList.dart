@@ -17,7 +17,7 @@ class _SongListState extends State<SongList> {
         builder:buildScaffold
     );
   }
-
+//TODO replace the default image with one that I made
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _){
     return Scaffold(
       body: Center(
@@ -38,7 +38,7 @@ class _SongListState extends State<SongList> {
                           subtitle: Text(song.artist),
                           trailing: Text(song.duration),
                           //leading: Image.file(song.albumArt),
-                          leading: Text("Blah"),
+                          leading: SizedBox(width: 50, height: 50,child: Image.asset("assets/images/music_note.jpg")),
                           onTap: () => {
 
                           },
