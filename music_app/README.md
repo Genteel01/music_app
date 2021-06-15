@@ -1,6 +1,6 @@
-# music_player
+# music_app
 
-A music player
+A flutter app to play music.
 
 ## Getting Started
 
