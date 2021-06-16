@@ -38,7 +38,7 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
+#TODO Replace the default image with one that I made
 # The following section is specific to Flutter.
 flutter:
   assets:

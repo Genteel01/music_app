@@ -17,7 +17,6 @@ class _ArtistListState extends State<ArtistList> {
         builder:buildScaffold
     );
   }
-//TODO replace the default image with one that I made
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _){
     return Scaffold(
       body: Center(

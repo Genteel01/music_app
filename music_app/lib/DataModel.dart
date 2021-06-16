@@ -21,6 +21,8 @@ class DataModel extends ChangeNotifier {
   List<Artist> artists = [];
   List<Album> albums = [];
 
+  List<Song> currentlyPlaying = [];
+
   //replaced this
   DataModel()
   {
