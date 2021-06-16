@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
 
 class MyTabBar extends StatelessWidget {
   MyTabBar({Key? key}) : super(key: key);
-
+//TODO work out how to retain the list positions when you change tabs
   final List<Tab> myTabs = [
     Tab(child: Row(children: [Icon(Icons.music_note), Text(" Tracks")],mainAxisAlignment: MainAxisAlignment.center,),),
     Tab(child: Row(children: [Icon(Icons.person), Text(" Artists")],mainAxisAlignment: MainAxisAlignment.center,),),
