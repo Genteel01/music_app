@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/ArtistDetails.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
@@ -39,7 +40,10 @@ class _ArtistListState extends State<ArtistList> {
                           leading: SizedBox(width: 50, height: 50, child: !artist.songs.any((element) => dataModel.getAlbumArt(element) != null) ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != null))!)),
                           //leading: SizedBox(width: 50, height: 50, child: dataModel.getAlbumArt(artist.songs[0]) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(artist.songs[0])!)),
                           onTap: () => {
-
+                            Navigator.push(context, MaterialPageRoute(
+                                builder: (context) {
+                                  return ArtistDetails(index: index);
+                                }))
                           },
                         ),
                       );
