@@ -134,6 +134,7 @@ class DataModel extends ChangeNotifier {
     currentlyPlaying = song;
     upNext.clear();
     upNext.addAll(futureSongs);
+    //TODO at this point upNext needs to move elements so currentlyPlaying is the first element in the list (Maybe only if shuffle == false?)
     upNext.remove(currentlyPlaying);
     notifyListeners();
   }
