@@ -36,6 +36,14 @@ class MyTabBar extends StatelessWidget {
     return DefaultTabController(
       length: myTabs.length,
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.library_music), onPressed: () async => {
+            if(!Provider.of<DataModel>(context, listen: false).loading)
+              {
+                await Provider.of<DataModel>(context, listen: false).fetch()
+              }
+        },
+        ),
         appBar: AppBar(
           title: Text("Music App"),
           bottom: TabBar(
