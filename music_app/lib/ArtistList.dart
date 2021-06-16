@@ -3,14 +3,14 @@ import 'package:music_app/Song.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
-class SongList extends StatefulWidget {
-  const SongList({Key? key}) : super(key: key);
+class ArtistList extends StatefulWidget {
+  const ArtistList({Key? key}) : super(key: key);
 
   @override
-  _SongListState createState() => _SongListState();
+  _ArtistListState createState() => _ArtistListState();
 }
 
-class _SongListState extends State<SongList> {
+class _ArtistListState extends State<ArtistList> {
   @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(
@@ -31,23 +31,22 @@ class _SongListState extends State<SongList> {
                     addAutomaticKeepAlives: false,
                     addRepaintBoundaries: false,
                     itemBuilder: (_, index) {
-                      var song = dataModel.songs[index];
+                      var artist = dataModel.artists[index];
 
                       return Container(height: 70, decoration: BoxDecoration(
                           border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                         child: ListTile(
-                          title: Text(song.name),
-                          subtitle: Text(song.artist),
-                          trailing: Text(song.durationString()),
-                          //leading: Image.file(song.albumArt),
-                          leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
+                          title: Text(artist.name),
+                          trailing: Text(artist.songs.length.toString() + " tracks"),
+                          leading: SizedBox(width: 50, height: 50, child: !artist.songs.any((element) => dataModel.getAlbumArt(element) != null) ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != null))!)),
+                          //leading: SizedBox(width: 50, height: 50, child: dataModel.getAlbumArt(artist.songs[0]) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(artist.songs[0])!)),
                           onTap: () => {
 
                           },
                         ),
                       );
                     },
-                    itemCount: dataModel.songs.length
+                    itemCount: dataModel.artists.length
                 ),
               ),
             )

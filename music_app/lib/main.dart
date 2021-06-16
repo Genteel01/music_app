@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:music_app/ArtistList.dart';
 import 'package:provider/provider.dart';
 
+import 'AlbumList.dart';
 import 'DataModel.dart';
 import 'SongList.dart';
 void main() {
@@ -29,6 +31,8 @@ class MyTabBar extends StatelessWidget {
 
   final List<Tab> myTabs = [
     Tab(child: Row(children: [Icon(Icons.music_note), Text(" Tracks")],mainAxisAlignment: MainAxisAlignment.center,),),
+    Tab(child: Row(children: [Icon(Icons.person), Text(" Artists")],mainAxisAlignment: MainAxisAlignment.center,),),
+    Tab(child: Row(children: [Icon(Icons.album), Text(" Albums")],mainAxisAlignment: MainAxisAlignment.center,),),
   ];
 
   @override
@@ -53,6 +57,8 @@ class MyTabBar extends StatelessWidget {
         body: TabBarView(
           children: [
             SongList(),
+            ArtistList(),
+            AlbumList(),
           ],
         ),
       ),
