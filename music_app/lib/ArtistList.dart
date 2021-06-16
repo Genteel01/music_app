@@ -3,7 +3,6 @@ import 'package:music_app/Song.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
-//TODO make the database fetch just grab the file paths. The list can turn them into songs.
 class ArtistList extends StatefulWidget {
   const ArtistList({Key? key}) : super(key: key);
 
@@ -38,7 +37,7 @@ class _ArtistListState extends State<ArtistList> {
                           border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                         child: ListTile(
                           title: Text(artist.name),
-                          subtitle: Text(artist.songs.length.toString() + " tracks"),
+                          trailing: Text(artist.songs.length.toString() + " tracks"),
                           leading: SizedBox(width: 50, height: 50, child: !artist.songs.any((element) => dataModel.getAlbumArt(element) != null) ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != null))!)),
                           //leading: SizedBox(width: 50, height: 50, child: dataModel.getAlbumArt(artist.songs[0]) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(artist.songs[0])!)),
                           onTap: () => {

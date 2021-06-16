@@ -32,7 +32,7 @@ class Song {
     name = metadata.trackName == null ? songFilePath.split("/").last.split(".").first : metadata.trackName!,
     artist = metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!),
     album = metadata.albumName == null ? "Unknown Album" : metadata.albumName!,
-    albumArtist = metadata.albumArtistName == null ? "Unknown Artist" : metadata.albumArtistName!,
+    albumArtist = metadata.albumArtistName == null ? artistString(metadata.trackArtistNames!) : metadata.albumArtistName!,
     discNumber = metadata.discNumber == null ? 1 : metadata.discNumber!,
     trackNumber = metadata.trackNumber == null ? 1 : metadata.trackNumber!,
     year = metadata.year == null ? "Unknown Year" : metadata.year.toString(),

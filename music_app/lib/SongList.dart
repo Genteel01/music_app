@@ -3,7 +3,6 @@ import 'package:music_app/Song.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
-//TODO make the database fetch just grab the file paths. The list can turn them into songs.
 class SongList extends StatefulWidget {
   const SongList({Key? key}) : super(key: key);
 

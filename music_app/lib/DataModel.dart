@@ -33,6 +33,8 @@ class DataModel extends ChangeNotifier {
   {
     //clear any existing data we have gotten previously, to avoid duplicate data
     songs.clear();
+    artists.clear();
+    albums.clear();
 
     //indicate that we are loading
     loading = true;
