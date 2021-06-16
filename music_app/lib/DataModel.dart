@@ -102,17 +102,17 @@ class DataModel extends ChangeNotifier {
   //Sorts a list of songs by the track name
   void sortByTrackName(List<Song> songList)
   {
-    songList.sort((a, b) => a.name.compareTo(b.name));
+    songList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
   }
   //Sorts a list of albums by name
   void sortByAlbumName (List<Album> albumList)
   {
-    albumList.sort((a, b) => a.name.compareTo(b.name));
+    albumList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
   }
   //Sorts a list of artists by name
   void sortByArtistName (List<Artist> artistList)
   {
-    artistList.sort((a, b) => a.name.compareTo(b.name));
+    artistList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
   }
 
   Uint8List? getAlbumArt(Song song)
