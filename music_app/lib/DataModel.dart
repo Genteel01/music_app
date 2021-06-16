@@ -81,13 +81,38 @@ class DataModel extends ChangeNotifier {
         }
       });
     }
-    //TODO sort the song list by track name
-    //TODO sort the albums list by name
-    //TODO sort the artists list by name
-    //TODO sort the song list in each album by first discnumber then tracknumber
-    //TODO sort the song list in each artist by track name
+
+    sortByTrackName(songs);
+    sortByAlbumName(albums);
+    sortByArtistName(artists);
+    artists.forEach((element) {
+      sortByTrackName(element.songs);
+    });
+    albums.forEach((element) {
+      sortByNumber(element.songs);
+    });
     loading = false;
     notifyListeners();
+  }
+  //Sorts a list of songs by the disc and track numbers
+  void sortByNumber(List<Song> songList)
+  {
+    songList.sort((a, b) => a.discNumber.compareTo(b.discNumber) == 0 ? (a.trackNumber.compareTo(b.trackNumber)) : a.discNumber.compareTo(b.discNumber));
+  }
+  //Sorts a list of songs by the track name
+  void sortByTrackName(List<Song> songList)
+  {
+    songList.sort((a, b) => a.name.compareTo(b.name));
+  }
+  //Sorts a list of albums by name
+  void sortByAlbumName (List<Album> albumList)
+  {
+    albumList.sort((a, b) => a.name.compareTo(b.name));
+  }
+  //Sorts a list of artists by name
+  void sortByArtistName (List<Artist> artistList)
+  {
+    artistList.sort((a, b) => a.name.compareTo(b.name));
   }
 
   Uint8List? getAlbumArt(Song song)
