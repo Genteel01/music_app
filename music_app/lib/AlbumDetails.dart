@@ -54,7 +54,7 @@ class AlbumDetails extends StatelessWidget {
                             trailing: Text(song.durationString()),
                             leading: Text(song.trackNumber.toString()),
                             onTap: () => {
-                              dataModel.setCurrentlyPlaying(song),
+                              dataModel.setCurrentlyPlaying(song, album.songs),
                             },
                           ),
                         );

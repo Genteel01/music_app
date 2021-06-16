@@ -124,9 +124,12 @@ class DataModel extends ChangeNotifier {
     return albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.album == element.name).albumArt;
   }
   //Function that sets the currently playing song
-  void setCurrentlyPlaying(Song song)
+  void setCurrentlyPlaying(Song song, List<Song> futureSongs)
   {
     currentlyPlaying = song;
+    upNext.clear();
+    upNext.addAll(futureSongs);
+    upNext.remove(currentlyPlaying);
     notifyListeners();
   }
 }

@@ -41,7 +41,7 @@ class _SongListState extends State<SongList> {
                           //leading: Image.file(song.albumArt),
                           leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
                           onTap: () => {
-                            dataModel.setCurrentlyPlaying(song),
+                            dataModel.setCurrentlyPlaying(song, dataModel.songs),
                           },
                         ),
                       );
