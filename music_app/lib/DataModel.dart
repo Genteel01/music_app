@@ -37,6 +37,8 @@ class DataModel extends ChangeNotifier {
     songs.clear();
     artists.clear();
     albums.clear();
+    upNext.clear();
+    currentlyPlaying = null;
 
     //indicate that we are loading
     loading = true;
