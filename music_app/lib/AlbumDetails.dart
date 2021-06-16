@@ -3,6 +3,7 @@ import 'package:music_app/main.dart';
 import 'package:provider/provider.dart';
 
 import 'Album.dart';
+import 'AlbumArtView.dart';
 import 'DataModel.dart';
 
 class AlbumDetails extends StatelessWidget {
@@ -35,7 +36,11 @@ class AlbumDetails extends StatelessWidget {
                         if(index == 0)
                           {
                             return Column(children: [
-                              album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(album.albumArt!),
+                              InkWell(child: Hero(tag: "album_art", child: album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(album.albumArt!)), onTap: () =>
+                                  Navigator.push(context, MaterialPageRoute(
+                                      builder: (context) {
+                                        return AlbumArtView(image: album.albumArt);
+                                      })),),
                               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Text(album.albumArtist), Text("Tracks: " + album.songs.length.toString())],),
                             ],);
                           }
