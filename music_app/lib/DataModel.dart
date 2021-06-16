@@ -55,11 +55,38 @@ class DataModel extends ChangeNotifier {
             {
               albumArt = retriever.albumArt!;
             }
-          songs.add(Song(metaData, filePath.path, albumArt));
+          Song newSong = Song(metaData, filePath.path);
+          songs.add(newSong);
+          if(artists.any((element) => element.name == newSong.artist))
+            {
+                artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
+            }
+          else
+            {
+              Artist newArtist = Artist(songs: [], name: newSong.artist);
+              newArtist.songs.add(newSong);
+              artists.add(newArtist);
+            }
+          if(albums.any((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist))
+          {
+            albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist).songs.add(newSong);
+          }
+          else
+            {
+              Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt);
+              newAlbum.songs.add(newSong);
+              albums.add(newAlbum);
+            }
+
         }
       });
     }
     loading = false;
     notifyListeners();
+  }
+
+  Uint8List? getAlbumArt(Song song)
+  {
+    return albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.album == element.name).albumArt;
   }
 }
