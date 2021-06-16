@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/ArtistList.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +5,9 @@ import 'package:provider/provider.dart';
 import 'AlbumList.dart';
 import 'DataModel.dart';
 import 'SongList.dart';
+//Saving/loading from json
+//TODO https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
+//TODO https://pub.dev/packages/path_provider/example
 void main() {
   runApp(MyApp());
 }
@@ -48,6 +49,7 @@ class MyTabBar extends StatelessWidget {
               }
         },
         ),
+        bottomNavigationBar: CurrentlyPlayingBar(),
         appBar: AppBar(
           title: Text("Music App"),
           bottom: TabBar(
@@ -66,4 +68,40 @@ class MyTabBar extends StatelessWidget {
   }
 }
 
+class CurrentlyPlayingBar extends StatefulWidget {
+  const CurrentlyPlayingBar({Key? key}) : super(key: key);
+
+  @override
+  _CurrentlyPlayingBarState createState() => _CurrentlyPlayingBarState();
+}
+
+class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
+  @override
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<DataModel>(
+        builder:buildWidget
+    );
+  }
+  Widget buildWidget(BuildContext context, DataModel dataModel, _){
+    return Container(height: 65, decoration: BoxDecoration(
+        border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
+        child: dataModel.loading || dataModel.currentlyPlaying == null ? Row(children: [
+          SizedBox(width: 65, height: 65,child: Image.asset("assets/images/music_note.jpg")), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
+        ],) : Row(children: [
+          SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.currentlyPlaying!)!)),
+          Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            child: Container(width: 125,
+              child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Container(height: 30, child: Text(dataModel.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis,)),
+                Container(height: 30, child: Text(dataModel.currentlyPlaying!.artist, maxLines: 2, overflow: TextOverflow.ellipsis,)),
+              ],),
+            ),
+          ),
+          Text("Controls Placeholder"),
+        ],
+        ),
+    );
+  }
+}
 

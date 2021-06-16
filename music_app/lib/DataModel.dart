@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -21,7 +20,8 @@ class DataModel extends ChangeNotifier {
   List<Artist> artists = [];
   List<Album> albums = [];
 
-  List<Song> currentlyPlaying = [];
+  List<Song> upNext = [];
+  Song? currentlyPlaying;
 
   //replaced this
   DataModel()
@@ -77,11 +77,11 @@ class DataModel extends ChangeNotifier {
           }
           else
             {
-              Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt);
+              Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: metaData.year == null ? "Unknown Year" : metaData.year.toString(),);
               newAlbum.songs.add(newSong);
               albums.add(newAlbum);
             }
-          //TODO what if I save all the album arts to a file and just have the albums contain the path to that file. That way I would maybe use even less memory (might not be needed though)
+          //TODO what if I save all the album arts to a file and just have the albums contain the path to that file. That way I would maybe use even less memory (might be too slow and not needed though)
         }
       });
     }
@@ -122,5 +122,11 @@ class DataModel extends ChangeNotifier {
   Uint8List? getAlbumArt(Song song)
   {
     return albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.album == element.name).albumArt;
+  }
+  //Function that sets the currently playing song
+  void setCurrentlyPlaying(Song song)
+  {
+    currentlyPlaying = song;
+    notifyListeners();
   }
 }

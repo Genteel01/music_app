@@ -8,5 +8,6 @@ class Album{
   Uint8List? albumArt;
   String name;
   String albumArtist;
-  Album({required this.songs, required this.name, required this.albumArtist, this.albumArt});
+  String year;
+  Album({required this.songs, required this.name, required this.albumArtist, this.albumArt, required this.year});
 }

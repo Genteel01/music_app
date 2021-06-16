@@ -26,6 +26,7 @@ dependencies:
   file_picker:
   provider: any
   flutter_media_metadata: any
+  marquee:
 
 
   # The following adds the Cupertino Icons font to your application.
