@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'AlbumDetails.dart';
 import 'DataModel.dart';
 class AlbumList extends StatefulWidget {
   const AlbumList({Key? key}) : super(key: key);
@@ -40,7 +41,10 @@ class _AlbumListState extends State<AlbumList> {
                           leading: SizedBox(width: 50, height: 50, child: album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(album.albumArt!)),
                           //leading: SizedBox(width: 50, height: 50, child: dataModel.getAlbumArt(artist.songs[0]) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(artist.songs[0])!)),
                           onTap: () => {
-
+                            Navigator.push(context, MaterialPageRoute(
+                                builder: (context) {
+                                  return AlbumDetails(index: index);
+                                }))
                           },
                         ),
                       );
