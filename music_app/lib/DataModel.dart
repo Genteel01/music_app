@@ -90,7 +90,7 @@ class DataModel extends ChangeNotifier {
     sortByAlbumName(albums);
     sortByArtistName(artists);
     artists.forEach((element) {
-      sortByTrackName(element.songs);
+      sortByAlbumDiscAndTrackNumber(element.songs);
     });
     albums.forEach((element) {
       sortByNumber(element.songs);
@@ -102,6 +102,11 @@ class DataModel extends ChangeNotifier {
   void sortByNumber(List<Song> songList)
   {
     songList.sort((a, b) => a.discNumber.compareTo(b.discNumber) == 0 ? (a.trackNumber.compareTo(b.trackNumber)) : a.discNumber.compareTo(b.discNumber));
+  }
+  //Sorts a list of songs by album, then disc number, then track number
+  void sortByAlbumDiscAndTrackNumber(List<Song> songList)
+  {
+    songList.sort((a, b) => a.album.compareTo(b.album) == 0 ? (a.discNumber.compareTo(b.discNumber) == 0 ? (a.trackNumber.compareTo(b.trackNumber)) : a.discNumber.compareTo(b.discNumber)): a.album.compareTo(b.album));
   }
   //Sorts a list of songs by the track name
   void sortByTrackName(List<Song> songList)
