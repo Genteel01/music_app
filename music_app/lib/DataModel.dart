@@ -77,10 +77,15 @@ class DataModel extends ChangeNotifier {
               newAlbum.songs.add(newSong);
               albums.add(newAlbum);
             }
-
+          //TODO what if I save all the album arts to a file and just have the albums contain the path to that file. That way I would maybe use even less memory (might not be needed though)
         }
       });
     }
+    //TODO sort the song list by track name
+    //TODO sort the albums list by name
+    //TODO sort the artists list by name
+    //TODO sort the song list in each album by first discnumber then tracknumber
+    //TODO sort the song list in each artist by track name
     loading = false;
     notifyListeners();
   }

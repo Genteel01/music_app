@@ -15,7 +15,6 @@ class Song {
   int discNumber;
   int trackNumber;
   String year;
-  //File albumArt;
 
   /*Song({required this.file,
     required this.name,

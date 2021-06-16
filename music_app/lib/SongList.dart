@@ -35,7 +35,7 @@ class _SongListState extends State<SongList> {
                       var song = dataModel.songs[index];
 
                       return Container(height: 70, decoration: BoxDecoration(
-                          border: Border(top: BorderSide(width: 0.5, color: Colors.grey),)),
+                          border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                         child: ListTile(
                           title: Text(song.name),
                           subtitle: Text(song.artist),
