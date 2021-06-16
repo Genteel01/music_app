@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 
+import 'Album.dart';
+import 'Artist.dart';
 import 'Song.dart';
 //TODO https://pub.dev/packages/audio_service
 //TODO https://pub.dev/packages/just_audio
@@ -16,6 +18,8 @@ class DataModel extends ChangeNotifier {
   //added this
   bool loading = false;
   List<Song> songs = [];
+  List<Artist> artists = [];
+  List<Album> albums = [];
 
   //replaced this
   DataModel()
@@ -51,7 +55,7 @@ class DataModel extends ChangeNotifier {
             {
               albumArt = retriever.albumArt!;
             }
-          songs.add(Song(metaData, file, albumArt));
+          songs.add(Song(metaData, filePath.path, albumArt));
         }
       });
     }

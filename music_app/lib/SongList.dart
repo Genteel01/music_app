@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/Song.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
@@ -28,6 +29,8 @@ class _SongListState extends State<SongList> {
               child: Container(decoration: BoxDecoration(
                   border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
                 child: ListView.builder(
+                    addAutomaticKeepAlives: false,
+                    addRepaintBoundaries: false,
                     itemBuilder: (_, index) {
                       var song = dataModel.songs[index];
 
@@ -36,7 +39,7 @@ class _SongListState extends State<SongList> {
                         child: ListTile(
                           title: Text(song.name),
                           subtitle: Text(song.artist),
-                          trailing: Text(song.duration),
+                          trailing: Text(song.durationString()),
                           //leading: Image.file(song.albumArt),
                           leading: SizedBox(width: 50, height: 50,child: song.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(song.albumArt!)),
                           onTap: () => {

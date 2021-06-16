@@ -1,8 +1,10 @@
-import 'package:music_app/Album.dart';
+
+import 'Song.dart';
 
 
 class Artist{
-  List<Album> albums;
+  List<Song> songs;
+  String name;
 
-  Artist({required this.albums});
+  Artist({required this.songs, required this.name});
 }
