@@ -9,5 +9,6 @@ class Album{
   String name;
   String albumArtist;
   String year;
-  Album({required this.songs, required this.name, required this.albumArtist, this.albumArt, required this.year});
+  String docPath;
+  Album({required this.songs, required this.name, required this.albumArtist, this.albumArt, required this.year, this.docPath = ""});
 }
