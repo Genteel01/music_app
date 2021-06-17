@@ -44,49 +44,61 @@ class DataModel extends ChangeNotifier {
     loading = true;
     notifyListeners(); //tell children to redraw, and they will see that the loading indicator is on
 
-    String? directoryPath = await FilePicker.platform.getDirectoryPath();
+    List<String> directoryPaths = [];
+    //TODO IF FILE_CONTAINING_PATHS DOESN'T EXIST
+    String? newDirectoryPath = await FilePicker.platform.getDirectoryPath();
+    if(newDirectoryPath != null)
+      {
+        directoryPaths.add(newDirectoryPath);
+      }
+    //TODO ELSE directoryPaths = values from the file
     var retriever = new MetadataRetriever();
-    if(directoryPath != null)
-    {
+    await Future.forEach(directoryPaths, (String directoryPath) async {
       //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
       var directoryMap = Directory(directoryPath).listSync(recursive: true);
       await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
         if(filePath.path.endsWith("mp3") || filePath.path.endsWith("flac") || filePath.path.endsWith("m4a"))
         {
+          //TODO IF FILE_IN_DOCUMENTS_DIRECTORY EXISTS LOAD FROM THAT FILE
+          //TODO ELSE GENERATE NEW SONG (LIKE THIS)
           File file = File(filePath.path);
           await retriever.setFile(file);
           Metadata metaData = await retriever.metadata;
           Uint8List? albumArt;
           if(retriever.albumArt != null)
-            {
-              albumArt = retriever.albumArt!;
-            }
+          {
+            albumArt = retriever.albumArt!;
+          }
           Song newSong = Song(metaData, filePath.path);
+          //TODO END ELSE
           songs.add(newSong);
+          //TODO LOAD EVERY ARTIST AND ALBUM FROM THE DOCUMENTS DIRECTORY (NOT LOADING THEIR SONG LISTS)
           if(artists.any((element) => element.name == newSong.artist))
-            {
-                artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
-            }
+          {
+            artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
+          }
           else
-            {
-              Artist newArtist = Artist(songs: [], name: newSong.artist);
-              newArtist.songs.add(newSong);
-              artists.add(newArtist);
-            }
+          {
+            Artist newArtist = Artist(songs: [], name: newSong.artist);
+            newArtist.songs.add(newSong);
+            artists.add(newArtist);
+          }
           if(albums.any((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist))
           {
             albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist).songs.add(newSong);
           }
           else
-            {
-              Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: metaData.year == null ? "Unknown Year" : metaData.year.toString(),);
-              newAlbum.songs.add(newSong);
-              albums.add(newAlbum);
-            }
+          {
+            Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: metaData.year == null ? "Unknown Year" : metaData.year.toString(),);
+            newAlbum.songs.add(newSong);
+            albums.add(newAlbum);
+          }
+          //TODO REMOVE ALL THE ARTISTS AND ALBUMS WITH 0 SONGS
+          //TODO ALSO REMOVE THEIR LOCAL FILES
           //TODO what if I save all the album arts to a file and just have the albums contain the path to that file. That way I would maybe use even less memory (might be too slow and not needed though)
         }
       });
-    }
+    });
 
     sortByTrackName(songs);
     sortByAlbumName(albums);
