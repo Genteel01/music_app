@@ -53,6 +53,7 @@ class DataModel extends ChangeNotifier {
       }
     //TODO ELSE directoryPaths = values from the file
     var retriever = new MetadataRetriever();
+    //TODO LOAD EVERY ARTIST AND ALBUM FROM THE DOCUMENTS DIRECTORY (NOT LOADING THEIR SONG LISTS)
     await Future.forEach(directoryPaths, (String directoryPath) async {
       //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
       var directoryMap = Directory(directoryPath).listSync(recursive: true);
@@ -70,9 +71,9 @@ class DataModel extends ChangeNotifier {
             albumArt = retriever.albumArt!;
           }
           Song newSong = Song(metaData, filePath.path);
+          //TODO Make the new local file (can happen in the background, so doesn't need to await)
           //TODO END ELSE
           songs.add(newSong);
-          //TODO LOAD EVERY ARTIST AND ALBUM FROM THE DOCUMENTS DIRECTORY (NOT LOADING THEIR SONG LISTS)
           if(artists.any((element) => element.name == newSong.artist))
           {
             artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
@@ -94,7 +95,7 @@ class DataModel extends ChangeNotifier {
             albums.add(newAlbum);
           }
           //TODO REMOVE ALL THE ARTISTS AND ALBUMS WITH 0 SONGS
-          //TODO ALSO REMOVE THEIR LOCAL FILES
+          //TODO ALSO REMOVE THEIR LOCAL FILES (Don't await this part, it's fine if it happens in the background)
           //TODO what if I save all the album arts to a file and just have the albums contain the path to that file. That way I would maybe use even less memory (might be too slow and not needed though)
         }
       });
