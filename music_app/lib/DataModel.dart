@@ -93,7 +93,6 @@ class DataModel extends ChangeNotifier {
           String albumString = await File(filePath.path).readAsString();
           var jsonFile = jsonDecode(albumString);
           Album newAlbum = Album.fromJson(jsonFile);
-          print("Loaded Album:_____________\nName: " + newAlbum.name + ", Artist: " + newAlbum.albumArtist + ", Year: " + newAlbum.year + "\n");
           albums.add(newAlbum);
         });
       }
@@ -179,7 +178,7 @@ class DataModel extends ChangeNotifier {
             Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: albumYear,);
             newAlbum.songs.add(newSong);
             albums.add(newAlbum);
-            newAlbum.docPath = "/artists/" + newAlbum.name.replaceAll("/", "_") + newAlbum.albumArtist.replaceAll("/", "_") + newAlbum.year;
+            newAlbum.docPath = "/albums/" + newAlbum.name.replaceAll("/", "_") + newAlbum.albumArtist.replaceAll("/", "_") + newAlbum.year;
             String albumJson = jsonEncode(newAlbum.toJson());
             File(appDocumentsDirectory + newAlbum.docPath).writeAsString(albumJson);
           }

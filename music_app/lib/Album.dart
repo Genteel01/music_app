@@ -30,8 +30,12 @@ class Album{
         songs = [],
         albumArt = convertImage(json['albumArt']);
 
-  static Uint8List convertImage(List<dynamic> source)
+  static Uint8List? convertImage(List<dynamic>? source)
   {
+    if(source == null)
+      {
+        return null;
+      }
     List<int> list = source.cast();
     //List<int> list = utf8.encode(source[0].toString());
     Uint8List bytes = Uint8List.fromList(list);
