@@ -34,8 +34,8 @@ class DataModel extends ChangeNotifier {
   //replaced this
   DataModel()
   {
-    fetch();
-    //clearAllData();
+    //fetch();
+    clearAllData();
   }
 
   Future<String> getAppDocumentsDirectory() async
