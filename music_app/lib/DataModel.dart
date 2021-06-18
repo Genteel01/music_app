@@ -79,7 +79,35 @@ class DataModel extends ChangeNotifier {
         directoryPaths = jsonDecode(File(appDocumentsDirectory + "/music_locations.txt").readAsStringSync()).cast<String>();
       }
     var retriever = new MetadataRetriever();
-    //TODO LOAD EVERY ARTIST AND ALBUM FROM THE DOCUMENTS DIRECTORY (NOT LOADING THEIR SONG LISTS)
+    //If the albums directory exists load everything from it, else create it
+    if(Directory(appDocumentsDirectory + "/albums").existsSync())
+      {
+
+      }
+    else
+      {
+        Directory(appDocumentsDirectory + "/albums").createSync();
+      }
+    //If the artists directory exists load everything from it, else create it
+    if(Directory(appDocumentsDirectory + "/artists").existsSync())
+    {
+      var artistsDirectory = Directory(appDocumentsDirectory + "/artists").listSync();
+      await Future.forEach(artistsDirectory, (FileSystemEntity filePath) async {
+        String artistString = await File(filePath.path).readAsString();
+        var jsonFile = jsonDecode(artistString);
+        Artist newArtist = Artist.fromJson(jsonFile);
+        artists.add(newArtist);
+      });
+    }
+    else
+    {
+      Directory(appDocumentsDirectory + "/artists").createSync();
+    }
+    //If the songs directory doesn't exist create it
+    if(!Directory(appDocumentsDirectory + "/songs").existsSync())
+    {
+      Directory(appDocumentsDirectory + "/songs").createSync();
+    }
     await Future.forEach(directoryPaths, (String directoryPath) async {
       //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
       var directoryMap = Directory(directoryPath).listSync(recursive: true);
@@ -109,6 +137,9 @@ class DataModel extends ChangeNotifier {
             Artist newArtist = Artist(songs: [], name: newSong.artist);
             newArtist.songs.add(newSong);
             artists.add(newArtist);
+            newArtist.docPath = "/artists/" + newArtist.name.replaceAll("/", "_");
+            String artistJson = jsonEncode(newArtist.toJson());
+            File(appDocumentsDirectory + newArtist.docPath).writeAsString(artistJson);
           }
           if(albums.any((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist))
           {
@@ -119,6 +150,7 @@ class DataModel extends ChangeNotifier {
             Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: metaData.year == null ? "Unknown Year" : metaData.year.toString(),);
             newAlbum.songs.add(newSong);
             albums.add(newAlbum);
+            //TODO Save the album to a local file
           }
           //TODO REMOVE ALL THE ARTISTS AND ALBUMS WITH 0 SONGS
           //TODO ALSO REMOVE THEIR LOCAL FILES (Don't await this part, it's fine if it happens in the background)
