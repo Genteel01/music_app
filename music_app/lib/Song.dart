@@ -52,5 +52,28 @@ class Song {
     return duration == 0 ? "Unknown" :
     ((duration / 1000) / 60).floor().toString() + (((duration / 1000) % 60).floor() < 10 ? ":0" : ":") + ((duration / 1000) % 60).floor().toString();
   }
+  Song.fromJson(Map<String, dynamic> json)
+      :
+        name = json['name'],
+        artist = json['artist'],
+        album = json['album'],
+        duration = json['duration'],
+        albumArtist = json['albumArtist'],
+        discNumber = json['discNumber'],
+        trackNumber = json['trackNumber'],
+        filePath = json['filePath'];
+
+  Map<String, dynamic> toJson() =>
+      {
+        'name': name,
+        'artist': artist,
+        'album' : album,
+        'duration' : duration,
+        'albumArtist' : albumArtist,
+        'discNumber': discNumber,
+        'trackNumber' : trackNumber,
+        'filePath' : filePath,
+
+      };
 
 }

@@ -31,7 +31,10 @@ class _ArtistListState extends State<ArtistList> {
                     addRepaintBoundaries: false,
                     itemBuilder: (_, index) {
                       var artist = dataModel.artists[index];
-
+                      if(artist.songs.length == 0)
+                      {
+                        return Container(height: 0);
+                      }
                       return Container(height: 70, decoration: BoxDecoration(
                           border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                         child: Align(alignment: Alignment.center,

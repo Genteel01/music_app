@@ -31,7 +31,10 @@ class _AlbumListState extends State<AlbumList> {
                     addRepaintBoundaries: false,
                     itemBuilder: (_, index) {
                       var album = dataModel.albums[index];
-
+                      if(album.songs.length == 0)
+                        {
+                          return Container(height: 0);
+                        }
                       return Container(height: 70, decoration: BoxDecoration(
                           border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                         child: ListTile(

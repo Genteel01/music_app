@@ -32,6 +32,7 @@ class DataModel extends ChangeNotifier {
   DataModel()
   {
     fetch();
+    //clearAllData();
   }
 
   Future<String> getAppDocumentsDirectory() async
@@ -58,6 +59,10 @@ class DataModel extends ChangeNotifier {
   {
     print("BREAK________________________________________________________________");
     print("Start: " + DateTime.now().toString());
+    //indicate that we are loading
+    loading = true;
+    notifyListeners(); //tell children to redraw, and they will see that the loading indicator is on
+
     appDocumentsDirectory = await getAppDocumentsDirectory();
     //clear any existing data we have gotten previously, to avoid duplicate data
     songs.clear();
@@ -65,10 +70,6 @@ class DataModel extends ChangeNotifier {
     albums.clear();
     upNext.clear();
     currentlyPlaying = null;
-
-    //indicate that we are loading
-    loading = true;
-    notifyListeners(); //tell children to redraw, and they will see that the loading indicator is on
 
     //If you haven't already got locations to look for music
     if(!File(appDocumentsDirectory + "/music_locations.txt").existsSync())
@@ -84,7 +85,14 @@ class DataModel extends ChangeNotifier {
     //If the albums directory exists load everything from it, else create it
     if(Directory(appDocumentsDirectory + "/albums").existsSync())
       {
-
+        var albumsDirectory = Directory(appDocumentsDirectory + "/albums").listSync();
+        await Future.forEach(albumsDirectory, (FileSystemEntity filePath) async {
+          String albumString = await File(filePath.path).readAsString();
+          var jsonFile = jsonDecode(albumString);
+          Album newAlbum = Album.fromJson(jsonFile);
+          print("Loaded Album:_____________\nName: " + newAlbum.name + ", Artist: " + newAlbum.albumArtist + ", Year: " + newAlbum.year + "\n");
+          albums.add(newAlbum);
+        });
       }
     else
       {
@@ -116,19 +124,31 @@ class DataModel extends ChangeNotifier {
       await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
         if(filePath.path.endsWith("mp3") || filePath.path.endsWith("flac") || filePath.path.endsWith("m4a"))
         {
-          //TODO IF FILE_IN_DOCUMENTS_DIRECTORY EXISTS LOAD FROM THAT FILE
-          //TODO ELSE GENERATE NEW SONG (LIKE THIS)
-          File file = File(filePath.path);
-          await retriever.setFile(file);
-          Metadata metaData = await retriever.metadata;
+          Song newSong;
           Uint8List? albumArt;
-          if(retriever.albumArt != null)
-          {
-            albumArt = retriever.albumArt!;
+          String albumYear = "Unknown Year";
+          String sortedOutPath = appDocumentsDirectory + "/songs/" + filePath.path.replaceAll("/", "_").split(".").first + ".txt";
+          if(File(sortedOutPath).existsSync())
+            {
+              String songString = await File(sortedOutPath).readAsString();
+              var jsonFile = jsonDecode(songString);
+              newSong = Song.fromJson(jsonFile);
+            }
+          else {
+            File file = File(filePath.path);
+            await retriever.setFile(file);
+            Metadata metaData = await retriever.metadata;
+            if (retriever.albumArt != null) {
+              albumArt = retriever.albumArt!;
+            }
+            if(metaData.year != null)
+              {
+                albumYear = metaData.year.toString();
+              }
+            newSong = Song(metaData, filePath.path);
+            String songJson = jsonEncode(newSong.toJson());
+            File(appDocumentsDirectory + "/songs/" + filePath.path.replaceAll("/", "_").split(".").first + ".txt").writeAsString(songJson);
           }
-          Song newSong = Song(metaData, filePath.path);
-          //TODO Make the new local file (can happen in the background, so doesn't need to await)
-          //TODO END ELSE
           songs.add(newSong);
           if(artists.any((element) => element.name == newSong.artist))
           {
@@ -143,20 +163,21 @@ class DataModel extends ChangeNotifier {
             String artistJson = jsonEncode(newArtist.toJson());
             File(appDocumentsDirectory + newArtist.docPath).writeAsString(artistJson);
           }
+          //TODO if the album is unknown album and you are making a new album set the album artist to various artists, if you are adding to unknown album ignore the album artist
           if(albums.any((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist))
           {
             albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist).songs.add(newSong);
           }
           else
           {
-            Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: metaData.year == null ? "Unknown Year" : metaData.year.toString(),);
+            print("new album");
+            Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: albumYear,);
             newAlbum.songs.add(newSong);
             albums.add(newAlbum);
-            //TODO Save the album to a local file
+            newAlbum.docPath = "/artists/" + newAlbum.name.replaceAll("/", "_") + newAlbum.albumArtist.replaceAll("/", "_") + newAlbum.year;
+            String albumJson = jsonEncode(newAlbum.toJson());
+            File(appDocumentsDirectory + newAlbum.docPath).writeAsString(albumJson);
           }
-          //TODO REMOVE ALL THE ARTISTS AND ALBUMS WITH 0 SONGS
-          //TODO ALSO REMOVE THEIR LOCAL FILES (Don't await this part, it's fine if it happens in the background)
-          //TODO Go through each saved song and if it doesn't exist in a song file delete its local file (perfectly fine to not await this too)
           //TODO what if I save all the album arts to a file and just have the albums contain the path to that file. That way I would maybe use even less memory (might be too slow and not needed though)
         }
       });
@@ -173,6 +194,28 @@ class DataModel extends ChangeNotifier {
     });
     loading = false;
     notifyListeners();
+    //Remove all the artists and albums that have 0 songs in them
+    //TODO Test this part by changing the directory that is used to search songs.
+    for (int i = albums.length; i > 0; i--)
+      {
+        if(albums[i - 1].songs.length == 0)
+          {
+            File(appDocumentsDirectory + albums[i - 1].docPath).delete();
+            albums.removeAt(i - 1);
+            notifyListeners();
+          }
+      }
+    for (int i = artists.length; i > 0; i--)
+    {
+      if(artists[i - 1].songs.length == 0)
+      {
+        File(appDocumentsDirectory + artists[i - 1].docPath).delete();
+        artists.removeAt(i - 1);
+        notifyListeners();
+      }
+    }
+    notifyListeners();
+    //TODO Go through each saved song and if it doesn't exist in a song file delete its local file (perfectly fine to not await this too)
     print("End: " + DateTime.now().toString());
   }
   //Sorts a list of songs by the disc and track numbers
@@ -214,5 +257,24 @@ class DataModel extends ChangeNotifier {
     //TODO at this point upNext needs to move elements so currentlyPlaying is the first element in the list (Maybe only if shuffle == false?)
     upNext.remove(currentlyPlaying);
     notifyListeners();
+  }
+
+  Future<void> clearAllData() async
+  {
+    String documentStorage = await getAppDocumentsDirectory();
+    if(Directory(documentStorage + "/albums").existsSync())
+    {
+      Directory(documentStorage + "/albums").delete(recursive: true);
+    }
+    //If the artists directory exists load everything from it, else create it
+    if(Directory(documentStorage + "/artists").existsSync())
+    {
+      Directory(documentStorage + "/artists").delete(recursive: true);
+    }
+    //If the songs directory doesn't exist create it
+    if(Directory(documentStorage + "/songs").existsSync())
+    {
+      Directory(documentStorage + "/songs").delete(recursive: true);
+    }
   }
 }
