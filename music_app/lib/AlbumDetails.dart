@@ -49,7 +49,7 @@ class AlbumDetails extends StatelessWidget {
                         return Container(height: 70, decoration: BoxDecoration(
                             border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                           child: ListTile(
-                            title: Text(song.filePath),
+                            title: Text(song.name),
                             subtitle: Text(song.artist),
                             trailing: Text(song.durationString()),
                             leading: Text(song.trackNumber.toString()),

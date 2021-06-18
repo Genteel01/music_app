@@ -34,8 +34,8 @@ class DataModel extends ChangeNotifier {
   //replaced this
   DataModel()
   {
-    //fetch();
-    clearAllData();
+    fetch();
+    //clearAllData();
   }
 
   Future<String> getAppDocumentsDirectory() async
@@ -46,6 +46,8 @@ class DataModel extends ChangeNotifier {
 
   Future<void> getNewDirectory() async
   {
+    //TODO remove this line once I stop testing with a system reset button
+    appDocumentsDirectory = await getAppDocumentsDirectory();
     //Have the user pick a new location to look for music
     String? newDirectoryPath = await FilePicker.platform.getDirectoryPath();
     if(newDirectoryPath != null)
@@ -130,7 +132,7 @@ class DataModel extends ChangeNotifier {
           Song newSong;
           Uint8List? albumArt;
           String albumYear = "Unknown Year";
-          String sortedOutPath = appDocumentsDirectory + "/songs/" + filePath.path.replaceAll("/", "_").split(".").first + ".txt";
+          String sortedOutPath = appDocumentsDirectory + "/songs/" + filePath.path.replaceAll("/", "_");
           //If there is a local file for the song load it
           if(File(sortedOutPath).existsSync())
             {
@@ -151,7 +153,7 @@ class DataModel extends ChangeNotifier {
               }
             newSong = Song(metaData, filePath.path);
             String songJson = jsonEncode(newSong.toJson());
-            File(appDocumentsDirectory + "/songs/" + filePath.path.replaceAll("/", "_").split(".").first + ".txt").writeAsString(songJson);
+            File(appDocumentsDirectory + "/songs/" + filePath.path.replaceAll("/", "_")).writeAsString(songJson);
           }
           songs.add(newSong);
           if(artists.any((element) => element.name == newSong.artist))
