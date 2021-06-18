@@ -14,6 +14,9 @@ import 'Song.dart';
 //TODO https://pub.dev/packages/audio_service
 //TODO https://pub.dev/packages/just_audio
 //TODO https://pub.dev/packages/assets_audio_player
+
+
+//TODO Cut some of the list.contains if it's possible to
 class DataModel extends ChangeNotifier {
 
   //added this
@@ -118,6 +121,7 @@ class DataModel extends ChangeNotifier {
     {
       Directory(appDocumentsDirectory + "/songs").createSync();
     }
+    //TODO need to check if metadata has changed (maybe with some kind of last modified date? That might not be fast enough since it'd mean grabbing the audio file) If the metadata has changed make a new song file instead of loading it, and also update the album
     await Future.forEach(directoryPaths, (String directoryPath) async {
       //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
       var directoryMap = Directory(directoryPath).listSync(recursive: true);
@@ -128,6 +132,7 @@ class DataModel extends ChangeNotifier {
           Uint8List? albumArt;
           String albumYear = "Unknown Year";
           String sortedOutPath = appDocumentsDirectory + "/songs/" + filePath.path.replaceAll("/", "_").split(".").first + ".txt";
+          //If there is a local file for the song load it
           if(File(sortedOutPath).existsSync())
             {
               String songString = await File(sortedOutPath).readAsString();
