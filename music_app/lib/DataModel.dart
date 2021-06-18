@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -5,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'Album.dart';
 import 'Artist.dart';
@@ -23,16 +25,38 @@ class DataModel extends ChangeNotifier {
   List<Song> upNext = [];
   Song? currentlyPlaying;
 
+  List<String> directoryPaths = [];
+
+  String appDocumentsDirectory = "";
   //replaced this
   DataModel()
   {
     fetch();
   }
 
+  Future<String> getAppDocumentsDirectory() async
+  {
+    final savingDirectory = await getApplicationDocumentsDirectory();
+    return savingDirectory.path;
+  }
+
+  Future<void> getNewDirectory() async
+  {
+    //Have the user pick a new location to look for music
+    String? newDirectoryPath = await FilePicker.platform.getDirectoryPath();
+    if(newDirectoryPath != null)
+    {
+      directoryPaths.add(newDirectoryPath);
+    }
+    //Save this location to the file
+    String directoryPathsJson = jsonEncode(directoryPaths);
+    File(appDocumentsDirectory + "/music_locations.txt").writeAsString(directoryPathsJson);
+  }
   //TODO to check for changes on startup store the old file map and check if the new one is different. If it is, get all the songs at the different spots, then sort all the lists again
   //added this
   Future<void> fetch() async
   {
+    appDocumentsDirectory = await getAppDocumentsDirectory();
     //clear any existing data we have gotten previously, to avoid duplicate data
     songs.clear();
     artists.clear();
@@ -44,14 +68,16 @@ class DataModel extends ChangeNotifier {
     loading = true;
     notifyListeners(); //tell children to redraw, and they will see that the loading indicator is on
 
-    List<String> directoryPaths = [];
-    //TODO IF FILE_CONTAINING_PATHS DOESN'T EXIST
-    String? newDirectoryPath = await FilePicker.platform.getDirectoryPath();
-    if(newDirectoryPath != null)
+    //If you haven't already got locations to look for music
+    if(!File(appDocumentsDirectory + "/music_locations.txt").existsSync())
       {
-        directoryPaths.add(newDirectoryPath);
+          await getNewDirectory();
       }
-    //TODO ELSE directoryPaths = values from the file
+    //If you have already got locations then load them.
+    else
+      {
+        directoryPaths = jsonDecode(File(appDocumentsDirectory + "/music_locations.txt").readAsStringSync()).cast<String>();
+      }
     var retriever = new MetadataRetriever();
     //TODO LOAD EVERY ARTIST AND ALBUM FROM THE DOCUMENTS DIRECTORY (NOT LOADING THEIR SONG LISTS)
     await Future.forEach(directoryPaths, (String directoryPath) async {
