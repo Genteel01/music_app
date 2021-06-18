@@ -45,6 +45,8 @@ class MyTabBar extends StatelessWidget {
           child: Icon(Icons.library_music), onPressed: () async => {
             if(!Provider.of<DataModel>(context, listen: false).loading)
               {
+                Provider.of<DataModel>(context, listen: false).directoryPaths = [],
+                await Provider.of<DataModel>(context, listen: false).getNewDirectory(),
                 await Provider.of<DataModel>(context, listen: false).fetch()
               }
         },
