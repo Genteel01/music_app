@@ -96,6 +96,7 @@ class DataModel extends ChangeNotifier {
           }
           //TODO REMOVE ALL THE ARTISTS AND ALBUMS WITH 0 SONGS
           //TODO ALSO REMOVE THEIR LOCAL FILES (Don't await this part, it's fine if it happens in the background)
+          //TODO Go through each saved song and if it doesn't exist in a song file delete its local file (perfectly fine to not await this too)
           //TODO what if I save all the album arts to a file and just have the albums contain the path to that file. That way I would maybe use even less memory (might be too slow and not needed though)
         }
       });
