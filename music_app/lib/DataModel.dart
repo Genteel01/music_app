@@ -56,6 +56,8 @@ class DataModel extends ChangeNotifier {
   //added this
   Future<void> fetch() async
   {
+    print("BREAK________________________________________________________________");
+    print("Start: " + DateTime.now().toString());
     appDocumentsDirectory = await getAppDocumentsDirectory();
     //clear any existing data we have gotten previously, to avoid duplicate data
     songs.clear();
@@ -171,6 +173,7 @@ class DataModel extends ChangeNotifier {
     });
     loading = false;
     notifyListeners();
+    print("End: " + DateTime.now().toString());
   }
   //Sorts a list of songs by the disc and track numbers
   void sortByNumber(List<Song> songList)
