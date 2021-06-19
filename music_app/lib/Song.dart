@@ -39,6 +39,17 @@ class Song {
     lastModified = modified;
     //albumArt = songAlbumArt;
 
+  void updateSong(Metadata metadata, DateTime modified)
+  {
+    name = metadata.trackName == null ? filePath.split("/").last.split(".").first : metadata.trackName!;
+    artist = metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!);
+    album = metadata.albumName == null ? "Unknown Album" : metadata.albumName!;
+    albumArtist = metadata.albumArtistName == null ? (metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!)) : metadata.albumArtistName!;
+    discNumber = metadata.discNumber == null ? 1 : metadata.discNumber!;
+    trackNumber = metadata.trackNumber == null ? 1 : metadata.trackNumber!;
+    duration = metadata.trackDuration == null ? 0 : metadata.trackDuration!;
+    lastModified = modified;
+  }
   static String artistString(List<String?> originalList)
   {
     String artist = "";
@@ -86,18 +97,22 @@ class Song {
   static Future<List<Song>> loadSongFile(List<dynamic> data) async
   {
     List<Song> newSongs = List<Song>.empty(growable: true);
-    data.forEach((element) {
+    var retriever = new MetadataRetriever();
+    await Future.forEach(data, (dynamic element) async {
       Song newSong = Song.fromJson(element);
       //Check if the song still exists
       if(File(newSong.filePath).existsSync())
+      {
+        //Check for updated metadata
+        if(File(newSong.filePath).lastModifiedSync().isAfter(newSong.lastModified))
         {
-          //Check for updated metadata
-          if(File(newSong.filePath).lastModifiedSync().isAfter(newSong.lastModified))
-            {
-              //TODO Update the song file
-            }
-          newSongs.add(Song.fromJson(element));
+          File songFile = File(newSong.filePath);
+          await retriever.setFile(songFile);
+          Metadata metaData = await retriever.metadata;
+          newSong.updateSong(metaData, songFile.lastModifiedSync());
         }
+        newSongs.add(Song.fromJson(element));
+      }
     });
     return newSongs;
   }

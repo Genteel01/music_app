@@ -125,18 +125,14 @@ class DataModel extends ChangeNotifier {
     });
     loading = false;
     notifyListeners();
-    //Check for new songs and changed metadata within the directories you are looking at
+    //Check for new songs within the directories you are looking at
     await Future.forEach(directoryPaths, (String directoryPath) async {
       //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
       var directoryMap = Directory(directoryPath).listSync(recursive: true);
       await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
         if(filePath.path.endsWith("mp3") || filePath.path.endsWith("flac") || filePath.path.endsWith("m4a"))
         {
-          if(songs.any((element) => element.filePath == filePath.path))
-            {
-
-            }
-          else
+          if(!songs.any((element) => element.filePath == filePath.path))
             {
               Song newSong;
               Uint8List? albumArt;
@@ -168,6 +164,7 @@ class DataModel extends ChangeNotifier {
     albums.forEach((element) {
       sortByNumber(element.songs);
     });
+    //TODO somehow check for changes to album art and year (maybe by storing a last modified DateTime in the album too)
     //Remove all the artists and albums that have 0 songs in them
     //TODO Test this part by changing the directory that is used to search songs.
     for (int i = albums.length; i > 0; i--)
