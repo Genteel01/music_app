@@ -109,22 +109,6 @@ class DataModel extends ChangeNotifier {
     {
       Directory(appDocumentsDirectory + "/albumart").createSync();
     }
-    //Sort the songs into artists and albums
-    songs.forEach((element) {
-      addToArtistsAndAlbums(element, null, null);
-    });
-    //Sort the song and album lists
-    sortByTrackName(songs);
-    sortByAlbumName(albums);
-    sortByArtistName(artists);
-    artists.forEach((element) {
-      sortByAlbumDiscAndTrackNumber(element.songs);
-    });
-    albums.forEach((element) {
-      sortByNumber(element.songs);
-    });
-    loading = false;
-    notifyListeners();
     //Check for new songs within the directories you are looking at
     await Future.forEach(directoryPaths, (String directoryPath) async {
       //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
@@ -149,10 +133,13 @@ class DataModel extends ChangeNotifier {
               }
               newSong = Song(metaData, filePath.path, file.lastModifiedSync());
               songs.add(newSong);
-              addToArtistsAndAlbums(newSong, albumArt, albumYear);
             }
         }
       });
+    });
+    //Sort the songs into artists and albums
+    songs.forEach((element) {
+      addToArtistsAndAlbums(element, null, null);
     });
     //Sort the song and album lists
     sortByTrackName(songs);
@@ -164,6 +151,7 @@ class DataModel extends ChangeNotifier {
     albums.forEach((element) {
       sortByNumber(element.songs);
     });
+
     //TODO somehow check for changes to album art and year (maybe by storing a last modified DateTime in the album too)
     //Remove all the artists and albums that have 0 songs in them
     //TODO Test this part by changing the directory that is used to search songs.
@@ -183,6 +171,8 @@ class DataModel extends ChangeNotifier {
         notifyListeners();
       }
     }
+    loading = false;
+    notifyListeners();
     //Save the songs, albums and artist lists
     String albumsJson = jsonEncode(Album.saveAlbumFile(albums, appDocumentsDirectory));
     File(appDocumentsDirectory + "/albums.txt").writeAsString(albumsJson);
@@ -190,9 +180,9 @@ class DataModel extends ChangeNotifier {
     File(appDocumentsDirectory + "/artists.txt").writeAsString(artistsJson);
     String songsJson = jsonEncode(Song.saveSongFile(songs));
     File(appDocumentsDirectory + "/songs.txt").writeAsString(songsJson);
-    notifyListeners();
     print("End: " + DateTime.now().toString());
   }
+  
   //Sorts a list of songs by the disc and track numbers
   void sortByNumber(List<Song> songList)
   {
