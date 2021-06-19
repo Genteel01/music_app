@@ -86,9 +86,9 @@ class DataModel extends ChangeNotifier {
     //If the albums file exists load everything from it else create it
     if(File(appDocumentsDirectory + "/albums.txt").existsSync())
       {
-        String albumFile = "[" + await File(appDocumentsDirectory + "/albums.txt").readAsString() + "]";
+        String albumFile = await File(appDocumentsDirectory + "/albums.txt").readAsString();
         var jsonFile = jsonDecode(albumFile);
-        albums = Album.loadAlbumFile(jsonFile);
+        albums = Album.loadAlbumFile(jsonFile, appDocumentsDirectory);
       }
     else
       {
@@ -105,6 +105,11 @@ class DataModel extends ChangeNotifier {
     if(!Directory(appDocumentsDirectory + "/songs").existsSync())
     {
       Directory(appDocumentsDirectory + "/songs").createSync();
+    }
+    //If the album art directory doesn't exist create it
+    if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
+    {
+      Directory(appDocumentsDirectory + "/albumart").createSync();
     }
     //TODO would it be worth just loading all the songs from a single file, then going through and looking for new songs and changed metadata?
     //TODO need to check if metadata has changed (maybe with some kind of last modified date? That might not be fast enough since it'd mean grabbing the audio file) If the metadata has changed make a new song file instead of loading it, and also update the album
@@ -162,8 +167,6 @@ class DataModel extends ChangeNotifier {
             Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: albumYear,);
             newAlbum.songs.add(newSong);
             albums.add(newAlbum);
-            String albumJson = jsonEncode(newAlbum.toJson()) + ",";
-            File(appDocumentsDirectory + "/albums.txt").writeAsStringSync(albumJson, mode: FileMode.append);
           }
           //TODO what if I save all the album arts to a file and just have the albums contain the path to that file. That way I would maybe use even less memory (might be too slow and not needed though)
         }
@@ -200,8 +203,8 @@ class DataModel extends ChangeNotifier {
       }
     }
     //Save the albums and artist lists
-    //String albumsJson = jsonEncode(Album.saveAlbumFile(albums));
-    //File(appDocumentsDirectory + "/albums.txt").writeAsString(albumsJson);
+    String albumsJson = jsonEncode(Album.saveAlbumFile(albums, appDocumentsDirectory));
+    File(appDocumentsDirectory + "/albums.txt").writeAsString(albumsJson);
     String artistsJson = jsonEncode(Artist.saveArtistFile(artists));
     //print(jsonEncode(Artist.saveArtistFile([artists[0], artists[1], artists[2]])));
     //print("[" + jsonEncode(artists[0].toJson()) + "," + jsonEncode(artists[1].toJson()) + "," + jsonEncode(artists[2].toJson()) + "]");
@@ -276,10 +279,13 @@ class DataModel extends ChangeNotifier {
       {
         Directory(documentStorage + "/albums").delete(recursive: true);
       }
-    //If the artists directory exists load everything from it, else create it
     if(Directory(documentStorage + "/artists").existsSync())
       {
         Directory(documentStorage + "/artists").delete(recursive: true);
       }
+    if(Directory(documentStorage + "/albumart").existsSync())
+    {
+      Directory(documentStorage + "/artists").delete(recursive: true);
+    }
   }
 }

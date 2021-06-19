@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'Song.dart';
@@ -17,18 +18,18 @@ class Album{
         'name': name,
         'albumArtist': albumArtist,
         'year': year,
-        'albumArt': albumArt,
+        //'albumArt': albumArt,
       };
 
-  Album.fromJson(Map<String, dynamic> json)
+  Album.fromJson(Map<String, dynamic> json, String directoryPath)
       :
         name = json['name'],
         albumArtist = json['albumArtist'],
         year = json['year'],
         songs = [],
-        albumArt = convertImage(json['albumArt']);
+        albumArt = File(directoryPath + "/albumart" + json['name'].replaceAll("/", "_") + json['albumArtist'].replaceAll("/", "_") + json['year'].replaceAll("/", "_")).existsSync() ? File(directoryPath + "/albumart" + json['name'].replaceAll("/", "_") + json['albumArtist'].replaceAll("/", "_") + json['year'].replaceAll("/", "_")).readAsBytesSync() : null;
 
-  static Uint8List? convertImage(List<dynamic>? source)
+  /*static Uint8List? convertImage(List<dynamic>? source)
   {
     if(source == null)
       {
@@ -38,22 +39,26 @@ class Album{
     //List<int> list = utf8.encode(source[0].toString());
     Uint8List bytes = Uint8List.fromList(list);
     return bytes;
-  }
+  }*/
   //Function to turn a json file of several albums into a list of albums
-  static List<Album> loadAlbumFile(List<dynamic> data)
+  static List<Album> loadAlbumFile(List<dynamic> data, String directoryPath)
   {
       List<Album> newAlbums = List<Album>.empty(growable: true);
       data.forEach((element) {
-        newAlbums.add(Album.fromJson(element));
+        newAlbums.add(Album.fromJson(element, directoryPath));
       });
       return newAlbums;
   }
   //Function to turn a list of albums into a json file to be saved
-  static List<Map<String, dynamic>> saveAlbumFile(List<Album> albumList)
+  static List<Map<String, dynamic>> saveAlbumFile(List<Album> albumList, String directoryPath)
   {
     List<Map<String, dynamic>> newAlbums = List<Map<String, dynamic>>.empty(growable: true);
     albumList.forEach((element) {
       newAlbums.add(element.toJson());
+      if(element.albumArt != null)
+        {
+          File(directoryPath + "/albumart" + element.name.replaceAll("/", "_") + element.albumArtist.replaceAll("/", "_") + element.year.replaceAll("/", "_")).writeAsBytesSync(element.albumArt!);
+        }
     });
     return newAlbums;
   }
