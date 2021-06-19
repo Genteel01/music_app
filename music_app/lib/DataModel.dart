@@ -34,13 +34,13 @@ class DataModel extends ChangeNotifier {
     fetch();
     //clearAllData();
   }
-
+  //Returns the path to the app's documents directory
   Future<String> getAppDocumentsDirectory() async
   {
     final savingDirectory = await getApplicationDocumentsDirectory();
     return savingDirectory.path;
   }
-
+  //Adds a new directory to the places where you look for songs
   Future<void> getNewDirectory() async
   {
     //TODO remove this line once I stop testing with a system reset button
@@ -55,8 +55,7 @@ class DataModel extends ChangeNotifier {
     String directoryPathsJson = jsonEncode(directoryPaths);
     File(appDocumentsDirectory + "/music_locations.txt").writeAsString(directoryPathsJson);
   }
-  //TODO to check for changes on startup store the old file map and check if the new one is different. If it is, get all the songs at the different spots, then sort all the lists again
-  //added this
+
   Future<void> fetch() async
   {
     print("BREAK________________________________________________________________");
@@ -84,36 +83,23 @@ class DataModel extends ChangeNotifier {
         directoryPaths = jsonDecode(File(appDocumentsDirectory + "/music_locations.txt").readAsStringSync()).cast<String>();
       }
     var retriever = new MetadataRetriever();
-    //If the albums directory exists load everything from it, else create it
-    //TODO Store and load all albums/artists from a single file and see if it is faster
-    if(Directory(appDocumentsDirectory + "/albums").existsSync())
+    //If the albums file exists load everything from it else create it
+    if(File(appDocumentsDirectory + "/albums.txt").existsSync())
       {
-        var albumsDirectory = Directory(appDocumentsDirectory + "/albums").listSync();
-        await Future.forEach(albumsDirectory, (FileSystemEntity filePath) async {
-          String albumString = await File(filePath.path).readAsString();
-          var jsonFile = jsonDecode(albumString);
-          Album newAlbum = Album.fromJson(jsonFile);
-          albums.add(newAlbum);
-        });
+        String albumFile = "[" + await File(appDocumentsDirectory + "/albums.txt").readAsString() + "]";
+        var jsonFile = jsonDecode(albumFile);
+        albums = Album.loadAlbumFile(jsonFile);
       }
     else
       {
-        Directory(appDocumentsDirectory + "/albums").createSync();
+        await File(appDocumentsDirectory + "/albums.txt").writeAsString("");
       }
-    //If the artists directory exists load everything from it, else create it
-    if(Directory(appDocumentsDirectory + "/artists").existsSync())
+    //If the artists file exists load everything from it
+    if(File(appDocumentsDirectory + "/artists.txt").existsSync())
     {
-      var artistsDirectory = Directory(appDocumentsDirectory + "/artists").listSync();
-      await Future.forEach(artistsDirectory, (FileSystemEntity filePath) async {
-        String artistString = await File(filePath.path).readAsString();
-        var jsonFile = jsonDecode(artistString);
-        Artist newArtist = Artist.fromJson(jsonFile);
-        artists.add(newArtist);
-      });
-    }
-    else
-    {
-      Directory(appDocumentsDirectory + "/artists").createSync();
+      String artistsFile = await File(appDocumentsDirectory + "/artists.txt").readAsString();
+      var jsonFile = jsonDecode(artistsFile);
+      artists = Artist.loadArtistFile(jsonFile);
     }
     //If the songs directory doesn't exist create it
     if(!Directory(appDocumentsDirectory + "/songs").existsSync())
@@ -165,9 +151,6 @@ class DataModel extends ChangeNotifier {
             Artist newArtist = Artist(songs: [], name: newSong.artist);
             newArtist.songs.add(newSong);
             artists.add(newArtist);
-            newArtist.docPath = "/artists/" + newArtist.name.replaceAll("/", "_");
-            String artistJson = jsonEncode(newArtist.toJson());
-            File(appDocumentsDirectory + newArtist.docPath).writeAsString(artistJson);
           }
           //TODO if the album is unknown album and you are making a new album set the album artist to various artists, if you are adding to unknown album ignore the album artist
           if(albums.any((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist))
@@ -176,13 +159,11 @@ class DataModel extends ChangeNotifier {
           }
           else
           {
-            print("new album");
             Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: albumYear,);
             newAlbum.songs.add(newSong);
             albums.add(newAlbum);
-            newAlbum.docPath = "/albums/" + newAlbum.name.replaceAll("/", "_") + newAlbum.albumArtist.replaceAll("/", "_") + newAlbum.year;
-            String albumJson = jsonEncode(newAlbum.toJson());
-            File(appDocumentsDirectory + newAlbum.docPath).writeAsString(albumJson);
+            String albumJson = jsonEncode(newAlbum.toJson()) + ",";
+            File(appDocumentsDirectory + "/albums.txt").writeAsStringSync(albumJson, mode: FileMode.append);
           }
           //TODO what if I save all the album arts to a file and just have the albums contain the path to that file. That way I would maybe use even less memory (might be too slow and not needed though)
         }
@@ -206,7 +187,6 @@ class DataModel extends ChangeNotifier {
       {
         if(albums[i - 1].songs.length == 0)
           {
-            File(appDocumentsDirectory + albums[i - 1].docPath).delete();
             albums.removeAt(i - 1);
             notifyListeners();
           }
@@ -215,11 +195,17 @@ class DataModel extends ChangeNotifier {
     {
       if(artists[i - 1].songs.length == 0)
       {
-        File(appDocumentsDirectory + artists[i - 1].docPath).delete();
         artists.removeAt(i - 1);
         notifyListeners();
       }
     }
+    //Save the albums and artist lists
+    //String albumsJson = jsonEncode(Album.saveAlbumFile(albums));
+    //File(appDocumentsDirectory + "/albums.txt").writeAsString(albumsJson);
+    String artistsJson = jsonEncode(Artist.saveArtistFile(artists));
+    //print(jsonEncode(Artist.saveArtistFile([artists[0], artists[1], artists[2]])));
+    //print("[" + jsonEncode(artists[0].toJson()) + "," + jsonEncode(artists[1].toJson()) + "," + jsonEncode(artists[2].toJson()) + "]");
+    File(appDocumentsDirectory + "/artists.txt").writeAsString(artistsJson);
     notifyListeners();
     //TODO Go through each saved song and if it doesn't exist in a song file delete its local file (perfectly fine to not await this too)
     print("End: " + DateTime.now().toString());
@@ -268,19 +254,32 @@ class DataModel extends ChangeNotifier {
   Future<void> clearAllData() async
   {
     String documentStorage = await getAppDocumentsDirectory();
-    if(Directory(documentStorage + "/albums").existsSync())
+    if(File(documentStorage + "/albums.txt").existsSync())
     {
-      Directory(documentStorage + "/albums").delete(recursive: true);
+      File(documentStorage + "/albums.txt").delete();
     }
     //If the artists directory exists load everything from it, else create it
-    if(Directory(documentStorage + "/artists").existsSync())
+    if(File(documentStorage + "/artists").existsSync())
     {
-      Directory(documentStorage + "/artists").delete(recursive: true);
+      File(documentStorage + "/artists").delete();
     }
     //If the songs directory doesn't exist create it
+    if(File(documentStorage + "/songs").existsSync())
+    {
+      File(documentStorage + "/songs").delete();
+    }
     if(Directory(documentStorage + "/songs").existsSync())
     {
       Directory(documentStorage + "/songs").delete(recursive: true);
     }
+    if(Directory(documentStorage + "/albums").existsSync())
+      {
+        Directory(documentStorage + "/albums").delete(recursive: true);
+      }
+    //If the artists directory exists load everything from it, else create it
+    if(Directory(documentStorage + "/artists").existsSync())
+      {
+        Directory(documentStorage + "/artists").delete(recursive: true);
+      }
   }
 }
