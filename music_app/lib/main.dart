@@ -8,6 +8,10 @@ import 'SongList.dart';
 //Saving/loading from json
 //TODO https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
 //TODO https://pub.dev/packages/path_provider/example
+
+//TODO https://pub.dev/packages/audio_service
+//TODO https://pub.dev/packages/just_audio
+//TODO https://pub.dev/packages/assets_audio_player
 void main() {
   runApp(MyApp());
 }

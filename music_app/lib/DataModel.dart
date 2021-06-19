@@ -11,9 +11,6 @@ import 'package:path_provider/path_provider.dart';
 import 'Album.dart';
 import 'Artist.dart';
 import 'Song.dart';
-//TODO https://pub.dev/packages/audio_service
-//TODO https://pub.dev/packages/just_audio
-//TODO https://pub.dev/packages/assets_audio_player
 
 
 //TODO Cut some of the list.contains if it's possible to
@@ -88,6 +85,7 @@ class DataModel extends ChangeNotifier {
       }
     var retriever = new MetadataRetriever();
     //If the albums directory exists load everything from it, else create it
+    //TODO Store and load all albums/artists from a single file and see if it is faster
     if(Directory(appDocumentsDirectory + "/albums").existsSync())
       {
         var albumsDirectory = Directory(appDocumentsDirectory + "/albums").listSync();
@@ -122,6 +120,7 @@ class DataModel extends ChangeNotifier {
     {
       Directory(appDocumentsDirectory + "/songs").createSync();
     }
+    //TODO would it be worth just loading all the songs from a single file, then going through and looking for new songs and changed metadata?
     //TODO need to check if metadata has changed (maybe with some kind of last modified date? That might not be fast enough since it'd mean grabbing the audio file) If the metadata has changed make a new song file instead of loading it, and also update the album
     await Future.forEach(directoryPaths, (String directoryPath) async {
       //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
@@ -134,6 +133,7 @@ class DataModel extends ChangeNotifier {
           String albumYear = "Unknown Year";
           String sortedOutPath = appDocumentsDirectory + "/songs/" + filePath.path.replaceAll("/", "_");
           //If there is a local file for the song load it
+          //TODO instead of checking if the file exists just put the IF in a try block and the ELSE as a catch block. See if it works and also if it is faster
           if(File(sortedOutPath).existsSync())
             {
               String songString = await File(sortedOutPath).readAsString();
