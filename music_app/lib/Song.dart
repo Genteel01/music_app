@@ -9,6 +9,7 @@ class Song {
   String albumArtist;
   int discNumber;
   int trackNumber;
+  DateTime lastModified;
   //String year;
 
   /*Song({required this.file,
@@ -22,7 +23,7 @@ class Song {
     this.year = "Unknown Year",
     this.durationNumber = 1,
   });*/
-  Song(Metadata metadata, String songFilePath/*, Uint8List? songAlbumArt*/)
+  Song(Metadata metadata, String songFilePath, DateTime modified/*, Uint8List? songAlbumArt*/)
   :
     name = metadata.trackName == null ? songFilePath.split("/").last.split(".").first : metadata.trackName!,
     artist = metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!),
@@ -32,7 +33,8 @@ class Song {
     trackNumber = metadata.trackNumber == null ? 1 : metadata.trackNumber!,
     //year = metadata.year == null ? "Unknown Year" : metadata.year.toString(),
     duration = metadata.trackDuration == null ? 0 : metadata.trackDuration!,
-    filePath = songFilePath;
+    filePath = songFilePath,
+    lastModified = modified;
     //albumArt = songAlbumArt;
 
   static String artistString(List<String?> originalList)
@@ -61,7 +63,8 @@ class Song {
         albumArtist = json['albumArtist'],
         discNumber = json['discNumber'],
         trackNumber = json['trackNumber'],
-        filePath = json['filePath'];
+        filePath = json['filePath'],
+        lastModified = DateTime.fromMillisecondsSinceEpoch(json['lastModified']);
 
   Map<String, dynamic> toJson() =>
       {
@@ -73,6 +76,7 @@ class Song {
         'discNumber': discNumber,
         'trackNumber' : trackNumber,
         'filePath' : filePath,
+        'lastModified' : lastModified.millisecondsSinceEpoch,
 
       };
 

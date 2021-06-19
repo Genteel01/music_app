@@ -142,7 +142,7 @@ class DataModel extends ChangeNotifier {
               {
                 albumYear = metaData.year.toString();
               }
-            newSong = Song(metaData, filePath.path);
+            newSong = Song(metaData, filePath.path, file.lastModifiedSync());
             String songJson = jsonEncode(newSong.toJson());
             File(appDocumentsDirectory + "/songs/" + filePath.path.replaceAll("/", "_")).writeAsString(songJson);
           }
@@ -285,7 +285,7 @@ class DataModel extends ChangeNotifier {
       }
     if(Directory(documentStorage + "/albumart").existsSync())
     {
-      Directory(documentStorage + "/artists").delete(recursive: true);
+      Directory(documentStorage + "/albumart").delete(recursive: true);
     }
   }
 }
