@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 
 class Song {
@@ -80,4 +82,32 @@ class Song {
 
       };
 
+  //Function to turn a json file of several songs into a list of songs
+  static Future<List<Song>> loadSongFile(List<dynamic> data) async
+  {
+    List<Song> newSongs = List<Song>.empty(growable: true);
+    data.forEach((element) {
+      Song newSong = Song.fromJson(element);
+      //Check if the song still exists
+      if(File(newSong.filePath).existsSync())
+        {
+          //Check for updated metadata
+          if(File(newSong.filePath).lastModifiedSync().isAfter(newSong.lastModified))
+            {
+              //TODO Update the song file
+            }
+          newSongs.add(Song.fromJson(element));
+        }
+    });
+    return newSongs;
+  }
+  //Function to turn a list of songs into a json file to be saved
+  static List<Map<String, dynamic>> saveSongFile(List<Song> songList)
+  {
+    List<Map<String, dynamic>> newSongs = List<Map<String, dynamic>>.empty(growable: true);
+    songList.forEach((element) {
+      newSongs.add(element.toJson());
+    });
+    return newSongs;
+  }
 }
