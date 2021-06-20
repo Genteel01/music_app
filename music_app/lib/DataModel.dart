@@ -412,7 +412,7 @@ class DataModel extends ChangeNotifier {
         playingIndex %= upNext.length;
         currentlyPlaying = upNext[playingIndex];
         await audioPlayer.setFilePath(currentlyPlaying!.filePath);
-        if((playingIndex == startingIndex && loop == LoopType.none) || !audioPlayer.playing)
+        if((playingIndex == startingIndex && loop == LoopType.none && shuffle) || (playingIndex == 0 && loop == LoopType.none && !shuffle) || !audioPlayer.playing)
         {
           audioPlayer.pause();
         }
