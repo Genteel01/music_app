@@ -24,6 +24,7 @@ class DataModel extends ChangeNotifier {
 
   List<Song> upNext = [];
   Song? currentlyPlaying;
+  bool shuffle = false;
 
   List<String> directoryPaths = [];
 
@@ -326,7 +327,7 @@ class DataModel extends ChangeNotifier {
       newArtist.songs.add(newSong);
       artists.add(newArtist);
     }
-    //TODO if the album is unknown album and you are making a new album set the album artist to various artists, if you are adding to unknown album ignore the album artist
+    //If the album is unknown album and you are making a new album set the album artist to various artists, if you are adding to unknown album ignore the album artist from the song and use various artists
     try
     {
       if(newSong.album == "Unknown Album")
