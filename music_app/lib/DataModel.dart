@@ -20,6 +20,9 @@ enum LoopType {
   singleSong,
 }
 //TODO Cut some of the list.contains if it's possible to
+
+//TODO for faster loading try storing songs in the album and artist files too, and loading them into the song list too, then do a songs.reduce() to get rid of duplicates after loading
+//This might not actually be faster, and might not be worth the effort (also it would use a lot more memory and more storage space)
 class DataModel extends ChangeNotifier {
 
   //added this
@@ -33,6 +36,7 @@ class DataModel extends ChangeNotifier {
   bool shuffle = false;
   LoopType loop = LoopType.none;
   int playingIndex = 0;
+  int startingIndex = 0;
 
   List<String> directoryPaths = [];
 
@@ -155,7 +159,9 @@ class DataModel extends ChangeNotifier {
       });
     });
     //Sort the song and album lists
-    sortByTrackName(songs);
+   // sortByTrackName(songs);
+    //TODO go back to sorting by track name when I don't need to sort by duration for debugging anymore
+    sortByDuration(songs);
     sortByAlbumName(albums);
     sortByArtistName(artists);
     artists.forEach((element) {
@@ -202,6 +208,21 @@ class DataModel extends ChangeNotifier {
         notifyListeners();
       }
     }
+    //Set up the listener to detect when songs finish
+    audioPlayer.playerStateStream.listen((state) {
+      print(state.processingState);
+      if(state.processingState == ProcessingState.completed)
+        {
+          playNextSong();
+        }
+      /*switch (state.processingState) {
+      case ProcessingState.idle: ...
+      case ProcessingState.loading: ...
+      case ProcessingState.buffering: ...
+      case ProcessingState.ready: ...
+      case ProcessingState.completed: ...
+      }*/
+    });
     //Check for changed album metadata
     /*await Future.forEach(albums, (Album album) async {
       if(album.lastModified.isBefore(album.songs[0].lastModified))
@@ -258,6 +279,11 @@ class DataModel extends ChangeNotifier {
   void sortByArtistName (List<Artist> artistList)
   {
     artistList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
+  }
+  //Sorts a list of songs for duration
+  void sortByDuration(List<Song> songList)
+  {
+    songList.sort((a, b) => a.duration.compareTo(b.duration));
   }
 
   Uint8List? getAlbumArt(Song song)
@@ -362,12 +388,57 @@ class DataModel extends ChangeNotifier {
   void setCurrentlyPlaying(Song song, List<Song> futureSongs) async
   {
     currentlyPlaying = song;
-    notifyListeners();
     upNext.clear();
     upNext.addAll(futureSongs);
+    if(shuffle)
+      {
+        upNext.shuffle();
+      }
     playingIndex = upNext.indexOf(song);
+    startingIndex = playingIndex;
     await audioPlayer.setFilePath(song.filePath);
     audioPlayer.play();
+    notifyListeners();
+  }
+  //Plays the next song in the playlist
+  void playNextSong() async
+  {
+    if(loop == LoopType.singleSong)
+      {
+        audioPlayer.seek(Duration());
+      }
+    else
+      {
+        playingIndex++;
+        playingIndex %= upNext.length;
+        currentlyPlaying = upNext[playingIndex];
+        await audioPlayer.setFilePath(currentlyPlaying!.filePath);
+        if((playingIndex == startingIndex && loop == LoopType.none) || !audioPlayer.playing)
+        {
+          audioPlayer.pause();
+        }
+        else
+        {
+          audioPlayer.play();
+        }
+      }
+    notifyListeners();
+  }
+  //Plays the previous song in the playlist
+  void playPreviousSong() async
+  {
+    playingIndex--;
+    playingIndex %= upNext.length;
+    currentlyPlaying = upNext[playingIndex];
+    await audioPlayer.setFilePath(currentlyPlaying!.filePath);
+    if(audioPlayer.playing)
+      {
+        audioPlayer.play();
+      }
+    else
+      {
+        audioPlayer.pause();
+      }
     notifyListeners();
   }
   void playButton()
@@ -378,7 +449,8 @@ class DataModel extends ChangeNotifier {
 
   void nextButton()
   {
-    audioPlayer.seekToNext();
+    //audioPlayer.seekToNext();
+    playNextSong();
   }
 
   void previousButton()
@@ -389,7 +461,7 @@ class DataModel extends ChangeNotifier {
       }
     else
       {
-        audioPlayer.seekToPrevious();
+        playPreviousSong();
       }
   }
 }

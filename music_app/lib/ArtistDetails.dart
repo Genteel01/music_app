@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:music_app/main.dart';
 import 'package:provider/provider.dart';
 
-import 'Album.dart';
-import 'AlbumArtView.dart';
+
 import 'Artist.dart';
 import 'DataModel.dart';
 
@@ -44,7 +43,7 @@ class ArtistDetails extends StatelessWidget {
                             trailing: Text(song.durationString()),
                             leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
                             onTap: () async => {
-                              dataModel.setCurrentlyPlaying(song, dataModel.songs),
+                              dataModel.setCurrentlyPlaying(song, artist.songs),
                             },
                           ),
                         );
