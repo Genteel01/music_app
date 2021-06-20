@@ -53,8 +53,8 @@ class AlbumDetails extends StatelessWidget {
                             subtitle: Text(song.artist),
                             trailing: Text(song.durationString()),
                             leading: Text(song.trackNumber.toString()),
-                            onTap: () => {
-                              dataModel.setCurrentlyPlaying(song, album.songs),
+                            onTap: () async => {
+                              dataModel.setCurrentlyPlaying(song, dataModel.songs),
                             },
                           ),
                         );

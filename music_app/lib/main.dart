@@ -104,10 +104,42 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
               ],),
             ),
           ),
-          Text("Controls Placeholder"),
+          AudioControls(),
         ],
         ),
     );
   }
 }
 
+class AudioControls extends StatefulWidget {
+  const AudioControls({Key? key}) : super(key: key);
+
+  @override
+  _AudioControlsState createState() => _AudioControlsState();
+}
+
+class _AudioControlsState extends State<AudioControls> {
+  Widget build(BuildContext context) {
+    return Consumer<DataModel>(
+        builder:buildWidget
+    );
+  }
+  Widget buildWidget(BuildContext context, DataModel dataModel, _){
+    return Row(
+      children: [
+        SizedBox(width: 35, height: 35, child: FloatingActionButton(child: Icon(Icons.skip_previous, color: Colors.grey[50],), heroTag: null, onPressed: () => {
+
+        },)),
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+          child: SizedBox(width: 35, height: 35, child: FloatingActionButton(child: Icon(dataModel.audioPlayer.playing ? Icons.pause : Icons.play_arrow, color: Colors.grey[50],), heroTag: null, onPressed: () async => {
+            dataModel.playButton(),
+          },)),
+        ),
+        SizedBox(width: 35, height: 35, child: FloatingActionButton(child: Icon(Icons.skip_next, color: Colors.grey[50],), heroTag: null, onPressed: () => {
+
+        },)),
+      ],
+    );
+  }
+}

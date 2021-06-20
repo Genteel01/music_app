@@ -43,8 +43,8 @@ class ArtistDetails extends StatelessWidget {
                             subtitle: Text(song.album),
                             trailing: Text(song.durationString()),
                             leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
-                            onTap: () => {
-                              dataModel.setCurrentlyPlaying(song, artist.songs),
+                            onTap: () async => {
+                              dataModel.setCurrentlyPlaying(song, dataModel.songs),
                             },
                           ),
                         );

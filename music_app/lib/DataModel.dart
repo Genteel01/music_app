@@ -271,18 +271,6 @@ class DataModel extends ChangeNotifier {
       return null;
     }
   }
-  //Function that sets the currently playing song
-  Future<void> setCurrentlyPlaying(Song song, List<Song> futureSongs) async
-  {
-    currentlyPlaying = song;
-    upNext.clear();
-    upNext.addAll(futureSongs);
-    //TODO at this point upNext needs to move elements so currentlyPlaying is the first element in the list (Maybe only if shuffle == false?)
-    playingIndex = upNext.indexOf(song);
-    await audioPlayer.setFilePath(song.filePath);
-    await audioPlayer.play();
-    notifyListeners();
-  }
   //Function to clear out all the local files I am creating for this app
   Future<void> clearAllData() async
   {
@@ -369,5 +357,22 @@ class DataModel extends ChangeNotifier {
       newAlbum.songs.add(newSong);
       albums.add(newAlbum);
     }*/
+  }
+  //Function that sets the currently playing song
+  void setCurrentlyPlaying(Song song, List<Song> futureSongs) async
+  {
+    currentlyPlaying = song;
+    notifyListeners();
+    upNext.clear();
+    upNext.addAll(futureSongs);
+    playingIndex = upNext.indexOf(song);
+    await audioPlayer.setFilePath(song.filePath);
+    audioPlayer.play();
+    notifyListeners();
+  }
+  void playButton() async
+  {
+    audioPlayer.playing ? audioPlayer.pause() : audioPlayer.play();
+    notifyListeners();
   }
 }

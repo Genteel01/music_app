@@ -40,7 +40,7 @@ class _SongListState extends State<SongList> {
                           trailing: Text(song.durationString()),
                           leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
                           onTap: () async => {
-                            await dataModel.setCurrentlyPlaying(song, dataModel.songs),
+                            dataModel.setCurrentlyPlaying(song, dataModel.songs),
                           },
                         ),
                       );
