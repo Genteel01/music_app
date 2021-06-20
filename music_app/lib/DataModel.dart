@@ -133,6 +133,7 @@ class DataModel extends ChangeNotifier {
               }
               newSong = Song(metaData, filePath.path, file.lastModifiedSync());
               songs.add(newSong);
+              addToArtistsAndAlbums(newSong, albumArt, albumYear);
             }
         }
       });
@@ -151,8 +152,6 @@ class DataModel extends ChangeNotifier {
     albums.forEach((element) {
       sortByNumber(element.songs);
     });
-
-    //TODO somehow check for changes to album art and year (maybe by storing a last modified DateTime in the album too)
     //Remove all the artists and albums that have 0 songs in them
     //TODO Test this part by changing the directory that is used to search songs.
     for (int i = albums.length; i > 0; i--)
@@ -171,6 +170,25 @@ class DataModel extends ChangeNotifier {
         notifyListeners();
       }
     }
+    //Check for changed album metadata
+    await Future.forEach(albums, (Album album) async {
+      if(album.lastModified.isBefore(album.songs[0].lastModified))
+        {
+          Uint8List? albumArt;
+          String albumYear = "Unknown Year";
+          File file = File(album.songs[0].filePath);
+          await retriever.setFile(file);
+          Metadata metaData = await retriever.metadata;
+          if (retriever.albumArt != null) {
+            albumArt = retriever.albumArt!;
+          }
+          if(metaData.year != null)
+          {
+            albumYear = metaData.year.toString();
+          }
+          
+        }
+    });
     loading = false;
     notifyListeners();
     //Save the songs, albums and artist lists
@@ -261,6 +279,7 @@ class DataModel extends ChangeNotifier {
 
   void addToArtistsAndAlbums(Song newSong, Uint8List? albumArt, String? albumYear)
   {
+    //TODO see if a try catch block here works and is faster
     if(artists.any((element) => element.name == newSong.artist))
     {
       artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
@@ -278,7 +297,7 @@ class DataModel extends ChangeNotifier {
     }
     else
     {
-      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: albumYear == null ? "Unknown Year" : albumYear,);
+      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: albumYear == null ? "Unknown Year" : albumYear, lastModified: newSong.lastModified);
       newAlbum.songs.add(newSong);
       albums.add(newAlbum);
     }

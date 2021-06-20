@@ -11,13 +11,21 @@ class Album{
   String name;
   String albumArtist;
   String year;
-  Album({required this.songs, required this.name, required this.albumArtist, this.albumArt, required this.year});
+  DateTime lastModified;
+  Album({required this.songs, required this.name, required this.albumArtist, this.albumArt, required this.year, required this.lastModified});
 
+  void updateAlbum(String newYear, Uint8List? newAlbumArt, DateTime newLastModified)
+  {
+    year = newYear;
+    albumArt = newAlbumArt;
+    lastModified = newLastModified;
+  }
   Map<String, dynamic> toJson() =>
       {
         'name': name,
         'albumArtist': albumArtist,
         'year': year,
+        'lastModified' : lastModified.millisecondsSinceEpoch,
         //'albumArt': albumArt,
       };
 
@@ -27,7 +35,8 @@ class Album{
         albumArtist = json['albumArtist'],
         year = json['year'],
         songs = [],
-        albumArt = File(directoryPath + "/albumart" + json['name'].replaceAll("/", "_") + json['albumArtist'].replaceAll("/", "_") + json['year'].replaceAll("/", "_")).existsSync() ? File(directoryPath + "/albumart" + json['name'].replaceAll("/", "_") + json['albumArtist'].replaceAll("/", "_") + json['year'].replaceAll("/", "_")).readAsBytesSync() : null;
+        albumArt = File(directoryPath + "/albumart" + json['name'].replaceAll("/", "_") + json['albumArtist'].replaceAll("/", "_") + json['year'].replaceAll("/", "_")).existsSync() ? File(directoryPath + "/albumart" + json['name'].replaceAll("/", "_") + json['albumArtist'].replaceAll("/", "_") + json['year'].replaceAll("/", "_")).readAsBytesSync() : null,
+        lastModified = DateTime.fromMillisecondsSinceEpoch(json['lastModified']);
 
   /*static Uint8List? convertImage(List<dynamic>? source)
   {
