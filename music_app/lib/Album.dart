@@ -23,10 +23,6 @@ class Album{
     year = newYear;
     albumArt = newAlbumArt;
     lastModified = newLastModified;
-    if(newAlbumArt != null)
-    {
-      File(directoryPath + "/albumart" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).writeAsBytes(newAlbumArt);
-    }
   }
   Map<String, dynamic> toJson() =>
       {

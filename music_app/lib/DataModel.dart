@@ -260,7 +260,7 @@ class DataModel extends ChangeNotifier {
     upNext.remove(currentlyPlaying);
     notifyListeners();
   }
-
+  //Function to clear out all the local files I am creating for this app
   Future<void> clearAllData() async
   {
     String documentStorage = await getAppDocumentsDirectory();
