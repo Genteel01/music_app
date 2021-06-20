@@ -83,6 +83,11 @@ class DataModel extends ChangeNotifier {
         directoryPaths = jsonDecode(File(appDocumentsDirectory + "/music_locations.txt").readAsStringSync()).cast<String>();
       }
     var retriever = new MetadataRetriever();
+    //If the album art directory doesn't exist create it
+    if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
+    {
+      Directory(appDocumentsDirectory + "/albumart").createSync();
+    }
     //If the albums file exists load everything from it
     if(File(appDocumentsDirectory + "/albums.txt").existsSync())
       {
@@ -104,11 +109,10 @@ class DataModel extends ChangeNotifier {
       var jsonFile = jsonDecode(songsFile);
       songs = await Song.loadSongFile(jsonFile);
     }
-    //If the album art directory doesn't exist create it
-    if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
-    {
-      Directory(appDocumentsDirectory + "/albumart").createSync();
-    }
+    //Sort the songs into artists and albums
+    songs.forEach((element) {
+      addToArtistsAndAlbums(element, null, null);
+    });
     //Check for new songs within the directories you are looking at
     await Future.forEach(directoryPaths, (String directoryPath) async {
       //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
@@ -138,10 +142,6 @@ class DataModel extends ChangeNotifier {
         }
       });
     });
-    //Sort the songs into artists and albums
-    songs.forEach((element) {
-      addToArtistsAndAlbums(element, null, null);
-    });
     //Sort the song and album lists
     sortByTrackName(songs);
     sortByAlbumName(albums);
@@ -161,6 +161,25 @@ class DataModel extends ChangeNotifier {
             albums.removeAt(i - 1);
             notifyListeners();
           }
+        else
+          {
+            if(albums[i - 1].lastModified.isBefore(albums[i - 1].songs[0].lastModified))
+            {
+              Uint8List? albumArt;
+              String albumYear = "Unknown Year";
+              File file = File(albums[i - 1].songs[0].filePath);
+              await retriever.setFile(file);
+              Metadata metaData = await retriever.metadata;
+              if (retriever.albumArt != null) {
+                albumArt = retriever.albumArt!;
+              }
+              if(metaData.year != null)
+              {
+                albumYear = metaData.year.toString();
+              }
+              albums[i - 1].updateAlbum(albumYear, albumArt, albums[i - 1].songs[0].lastModified, appDocumentsDirectory);
+            }
+          }
       }
     for (int i = artists.length; i > 0; i--)
     {
@@ -171,7 +190,7 @@ class DataModel extends ChangeNotifier {
       }
     }
     //Check for changed album metadata
-    await Future.forEach(albums, (Album album) async {
+    /*await Future.forEach(albums, (Album album) async {
       if(album.lastModified.isBefore(album.songs[0].lastModified))
         {
           Uint8List? albumArt;
@@ -186,9 +205,9 @@ class DataModel extends ChangeNotifier {
           {
             albumYear = metaData.year.toString();
           }
-          
+
         }
-    });
+    });*/
     loading = false;
     notifyListeners();
     //Save the songs, albums and artist lists

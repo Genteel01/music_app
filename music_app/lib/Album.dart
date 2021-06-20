@@ -14,11 +14,19 @@ class Album{
   DateTime lastModified;
   Album({required this.songs, required this.name, required this.albumArtist, this.albumArt, required this.year, required this.lastModified});
 
-  void updateAlbum(String newYear, Uint8List? newAlbumArt, DateTime newLastModified)
+  void updateAlbum(String newYear, Uint8List? newAlbumArt, DateTime newLastModified, String directoryPath)
   {
+    if(File(directoryPath + "/albumart" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).existsSync())
+      {
+        File(directoryPath + "/albumart" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).delete();
+      }
     year = newYear;
     albumArt = newAlbumArt;
     lastModified = newLastModified;
+    if(newAlbumArt != null)
+    {
+      File(directoryPath + "/albumart" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).writeAsBytes(newAlbumArt);
+    }
   }
   Map<String, dynamic> toJson() =>
       {
@@ -66,7 +74,7 @@ class Album{
       newAlbums.add(element.toJson());
       if(element.albumArt != null)
         {
-          File(directoryPath + "/albumart" + element.name.replaceAll("/", "_") + element.albumArtist.replaceAll("/", "_") + element.year.replaceAll("/", "_")).writeAsBytesSync(element.albumArt!);
+          File(directoryPath + "/albumart" + element.name.replaceAll("/", "_") + element.albumArtist.replaceAll("/", "_") + element.year.replaceAll("/", "_")).writeAsBytes(element.albumArt!);
         }
     });
     return newAlbums;
