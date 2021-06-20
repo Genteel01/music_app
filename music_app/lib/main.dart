@@ -108,7 +108,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
             AudioControls(buttonSizes: 35,),
           ],
           ),
-      ),onTap: () => {
+      ),onTap: dataModel.loading || dataModel.currentlyPlaying == null ? () => {} : () => {
         showModalBottomSheet<void>(
           isScrollControlled: true,
           context: context,
