@@ -128,7 +128,7 @@ class _AudioControlsState extends State<AudioControls> {
     return Row(
       children: [
         SizedBox(width: 35, height: 35, child: FloatingActionButton(child: Icon(Icons.skip_previous, color: Colors.grey[50],), heroTag: null, onPressed: () => {
-
+          dataModel.previousButton(),
         },)),
         Padding(
           padding: const EdgeInsets.only(left: 8.0, right: 8.0),
@@ -137,7 +137,7 @@ class _AudioControlsState extends State<AudioControls> {
           },)),
         ),
         SizedBox(width: 35, height: 35, child: FloatingActionButton(child: Icon(Icons.skip_next, color: Colors.grey[50],), heroTag: null, onPressed: () => {
-
+          dataModel.nextButton()
         },)),
       ],
     );

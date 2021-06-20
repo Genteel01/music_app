@@ -370,9 +370,26 @@ class DataModel extends ChangeNotifier {
     audioPlayer.play();
     notifyListeners();
   }
-  void playButton() async
+  void playButton()
   {
     audioPlayer.playing ? audioPlayer.pause() : audioPlayer.play();
     notifyListeners();
+  }
+
+  void nextButton()
+  {
+    audioPlayer.seekToNext();
+  }
+
+  void previousButton()
+  {
+    if(audioPlayer.position.inSeconds > audioPlayer.duration!.inSeconds / 20)
+      {
+        audioPlayer.seek(Duration());
+      }
+    else
+      {
+        audioPlayer.seekToPrevious();
+      }
   }
 }
