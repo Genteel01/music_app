@@ -298,8 +298,7 @@ class DataModel extends ChangeNotifier {
 
   void addToArtistsAndAlbums(Song newSong, Uint8List? albumArt, String? albumYear)
   {
-    //TODO see if a try catch block here works and is faster
-    if(artists.any((element) => element.name == newSong.artist))
+    /*if(artists.any((element) => element.name == newSong.artist))
     {
       artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
     }
@@ -308,9 +307,29 @@ class DataModel extends ChangeNotifier {
       Artist newArtist = Artist(songs: [], name: newSong.artist);
       newArtist.songs.add(newSong);
       artists.add(newArtist);
+    }*/
+    try
+    {
+      artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
+    }
+    catch(error)
+    {
+      Artist newArtist = Artist(songs: [], name: newSong.artist);
+      newArtist.songs.add(newSong);
+      artists.add(newArtist);
     }
     //TODO if the album is unknown album and you are making a new album set the album artist to various artists, if you are adding to unknown album ignore the album artist
-    if(albums.any((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist))
+    try
+    {
+      albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist).songs.add(newSong);
+    }
+    catch(error)
+    {
+      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: albumYear == null ? "Unknown Year" : albumYear, lastModified: newSong.lastModified);
+      newAlbum.songs.add(newSong);
+      albums.add(newAlbum);
+    }
+    /*if(albums.any((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist))
     {
       albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist).songs.add(newSong);
     }
@@ -319,6 +338,6 @@ class DataModel extends ChangeNotifier {
       Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: albumYear == null ? "Unknown Year" : albumYear, lastModified: newSong.lastModified);
       newAlbum.songs.add(newSong);
       albums.add(newAlbum);
-    }
+    }*/
   }
 }
