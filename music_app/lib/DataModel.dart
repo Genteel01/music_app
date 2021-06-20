@@ -159,9 +159,8 @@ class DataModel extends ChangeNotifier {
       });
     });
     //Sort the song and album lists
-   // sortByTrackName(songs);
-    //TODO go back to sorting by track name when I don't need to sort by duration for debugging anymore
-    sortByDuration(songs);
+    sortByTrackName(songs);
+    //sortByDuration(songs);
     sortByAlbumName(albums);
     sortByArtistName(artists);
     artists.forEach((element) {
