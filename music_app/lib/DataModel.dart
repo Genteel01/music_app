@@ -161,6 +161,7 @@ class DataModel extends ChangeNotifier {
             albums.removeAt(i - 1);
             notifyListeners();
           }
+        //If you aren't removing it check if the album's metadata needs to be updated
         else
           {
             if(albums[i - 1].lastModified.isBefore(albums[i - 1].songs[0].lastModified))
@@ -248,7 +249,14 @@ class DataModel extends ChangeNotifier {
 
   Uint8List? getAlbumArt(Song song)
   {
-    return albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.album == element.name).albumArt;
+    try
+    {
+      return albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.album == element.name).albumArt;
+    }
+    catch(error)
+    {
+      return null;
+    }
   }
   //Function that sets the currently playing song
   void setCurrentlyPlaying(Song song, List<Song> futureSongs)
@@ -321,11 +329,18 @@ class DataModel extends ChangeNotifier {
     //TODO if the album is unknown album and you are making a new album set the album artist to various artists, if you are adding to unknown album ignore the album artist
     try
     {
-      albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist).songs.add(newSong);
+      if(newSong.album == "Unknown Album")
+        {
+          albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == "Various Artists").songs.add(newSong);
+        }
+      else
+        {
+          albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist).songs.add(newSong);
+        }
     }
     catch(error)
     {
-      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: albumYear == null ? "Unknown Year" : albumYear, lastModified: newSong.lastModified);
+      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.album == "Unknown Album" ? "Various Artists" : newSong.albumArtist, albumArt: albumArt, year: albumYear == null ? "Unknown Year" : albumYear, lastModified: newSong.lastModified);
       newAlbum.songs.add(newSong);
       albums.add(newAlbum);
     }
