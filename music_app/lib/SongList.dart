@@ -39,8 +39,8 @@ class _SongListState extends State<SongList> {
                           subtitle: Text(song.artist),
                           trailing: Text(song.durationString()),
                           leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
-                          onTap: () => {
-                            dataModel.setCurrentlyPlaying(song, dataModel.songs),
+                          onTap: () async => {
+                            await dataModel.setCurrentlyPlaying(song, dataModel.songs),
                           },
                         ),
                       );

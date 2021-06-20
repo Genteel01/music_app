@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'Album.dart';
@@ -13,6 +14,11 @@ import 'Artist.dart';
 import 'Song.dart';
 
 
+enum LoopType {
+  none,
+  loop,
+  singleSong,
+}
 //TODO Cut some of the list.contains if it's possible to
 class DataModel extends ChangeNotifier {
 
@@ -25,10 +31,14 @@ class DataModel extends ChangeNotifier {
   List<Song> upNext = [];
   Song? currentlyPlaying;
   bool shuffle = false;
+  LoopType loop = LoopType.none;
+  int playingIndex = 0;
 
   List<String> directoryPaths = [];
 
   String appDocumentsDirectory = "";
+
+  final audioPlayer = AudioPlayer();
   //replaced this
   DataModel()
   {
@@ -70,6 +80,7 @@ class DataModel extends ChangeNotifier {
     songs.clear();
     artists.clear();
     albums.clear();
+
     upNext.clear();
     currentlyPlaying = null;
 
@@ -210,6 +221,7 @@ class DataModel extends ChangeNotifier {
 
         }
     });*/
+
     loading = false;
     notifyListeners();
     //Save the songs, albums and artist lists
@@ -260,13 +272,15 @@ class DataModel extends ChangeNotifier {
     }
   }
   //Function that sets the currently playing song
-  void setCurrentlyPlaying(Song song, List<Song> futureSongs)
+  Future<void> setCurrentlyPlaying(Song song, List<Song> futureSongs) async
   {
     currentlyPlaying = song;
     upNext.clear();
     upNext.addAll(futureSongs);
     //TODO at this point upNext needs to move elements so currentlyPlaying is the first element in the list (Maybe only if shuffle == false?)
-    upNext.remove(currentlyPlaying);
+    playingIndex = upNext.indexOf(song);
+    await audioPlayer.setFilePath(song.filePath);
+    await audioPlayer.play();
     notifyListeners();
   }
   //Function to clear out all the local files I am creating for this app
