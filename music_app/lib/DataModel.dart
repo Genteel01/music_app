@@ -238,7 +238,7 @@ class DataModel extends ChangeNotifier {
     songs.clear();
     artists.clear();
     albums.clear();
-    playlists.clear;
+    playlists.clear();
 
 
     /*//If you haven't already got locations to look for music
