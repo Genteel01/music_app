@@ -90,24 +90,107 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
     );
   }
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
-    return Container(height: 65, decoration: BoxDecoration(
-        border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
-        child: dataModel.loading || dataModel.currentlyPlaying == null ? Row(children: [
-          SizedBox(width: 65, height: 65,child: Image.asset("assets/images/music_note.jpg")), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
-        ],) : Row(children: [
-          SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.currentlyPlaying!)!)),
-          Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-            child: Container(width: 125,
-              child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Container(height: 30, child: Text(dataModel.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis,)),
-                Container(height: 30, child: Text(dataModel.currentlyPlaying!.artist, maxLines: 2, overflow: TextOverflow.ellipsis,)),
-              ],),
+    return InkWell(
+      child: Container(height: 65, decoration: BoxDecoration(
+          border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
+          child: dataModel.loading || dataModel.currentlyPlaying == null ? Row(children: [
+            SizedBox(width: 65, height: 65,child: Image.asset("assets/images/music_note.jpg")), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
+          ],) : Row(children: [
+            SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.currentlyPlaying!)!)),
+            Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+              child: Container(width: 125,
+                child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Container(height: 30, child: Text(dataModel.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis,)),
+                  Container(height: 30, child: Text(dataModel.currentlyPlaying!.artist, maxLines: 2, overflow: TextOverflow.ellipsis,)),
+                ],),
+              ),
             ),
+            AudioControls(buttonSizes: 35,),
+          ],
           ),
-          Text("Controls Placeholder"),
-        ],
-        ),
+      ),onTap: dataModel.loading || dataModel.currentlyPlaying == null ? () => {} : () => {
+        showModalBottomSheet<void>(
+          isScrollControlled: true,
+          context: context,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(
+              top: Radius.circular(30))),
+          builder: (BuildContext context) {
+            return Padding(
+              padding: MediaQuery
+                  .of(context)
+                  .viewInsets,
+              child: Container(
+                height: 400,
+                //color: Colors.amber,
+                child: PlayingSongDetails(),
+              ),
+            );
+          },
+        )
+    },
     );
   }
 }
 
+class AudioControls extends StatefulWidget {
+  const AudioControls({Key? key, required this.buttonSizes}) : super(key: key);
+  final double buttonSizes;
+  @override
+  _AudioControlsState createState() => _AudioControlsState();
+}
+
+class _AudioControlsState extends State<AudioControls> {
+  Widget build(BuildContext context) {
+    return Consumer<DataModel>(
+        builder:buildWidget
+    );
+  }
+  Widget buildWidget(BuildContext context, DataModel dataModel, _){
+    return Row(mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(Icons.skip_previous, color: Colors.grey[50],), heroTag: null, onPressed: () => {
+          dataModel.previousButton(),
+        },)),
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+          child: SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(dataModel.audioPlayer.playing ? Icons.pause : Icons.play_arrow, color: Colors.grey[50],), heroTag: null, onPressed: () async => {
+            dataModel.playButton(),
+          },)),
+        ),
+        SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(Icons.skip_next, color: Colors.grey[50],), heroTag: null, onPressed: () => {
+          dataModel.nextButton()
+        },)),
+      ],
+    );
+  }
+}
+
+class PlayingSongDetails extends StatefulWidget {
+  const PlayingSongDetails({Key? key}) : super(key: key);
+
+  @override
+  _PlayingSongDetailsState createState() => _PlayingSongDetailsState();
+}
+
+class _PlayingSongDetailsState extends State<PlayingSongDetails> {
+  Widget build(BuildContext context) {
+    return Consumer<DataModel>(
+        builder:buildWidget
+    );
+  }
+
+  Widget buildWidget(BuildContext context, DataModel dataModel, _){
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          SizedBox(height: 200, width: 200, child: dataModel.getAlbumArt(dataModel.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.currentlyPlaying!)!)),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: AudioControls(buttonSizes: 60),
+          ),
+        ],
+      ),
+    );
+  }
+}

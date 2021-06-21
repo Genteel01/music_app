@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'Album.dart';
@@ -13,7 +14,15 @@ import 'Artist.dart';
 import 'Song.dart';
 
 
+enum LoopType {
+  none,
+  loop,
+  singleSong,
+}
 //TODO Cut some of the list.contains if it's possible to
+
+//TODO for faster loading try storing songs in the album and artist files too, and loading them into the song list too, then do a songs.reduce() to get rid of duplicates after loading
+//This might not actually be faster, and might not be worth the effort (also it would use a lot more memory and more storage space)
 class DataModel extends ChangeNotifier {
 
   //added this
@@ -25,10 +34,15 @@ class DataModel extends ChangeNotifier {
   List<Song> upNext = [];
   Song? currentlyPlaying;
   bool shuffle = false;
+  LoopType loop = LoopType.none;
+  int playingIndex = 0;
+  int startingIndex = 0;
 
   List<String> directoryPaths = [];
 
   String appDocumentsDirectory = "";
+
+  final audioPlayer = AudioPlayer();
   //replaced this
   DataModel()
   {
@@ -70,6 +84,7 @@ class DataModel extends ChangeNotifier {
     songs.clear();
     artists.clear();
     albums.clear();
+
     upNext.clear();
     currentlyPlaying = null;
 
@@ -145,6 +160,7 @@ class DataModel extends ChangeNotifier {
     });
     //Sort the song and album lists
     sortByTrackName(songs);
+    //sortByDuration(songs);
     sortByAlbumName(albums);
     sortByArtistName(artists);
     artists.forEach((element) {
@@ -191,6 +207,21 @@ class DataModel extends ChangeNotifier {
         notifyListeners();
       }
     }
+    //Set up the listener to detect when songs finish
+    audioPlayer.playerStateStream.listen((state) {
+      print(state.processingState);
+      if(state.processingState == ProcessingState.completed)
+        {
+          playNextSong();
+        }
+      /*switch (state.processingState) {
+      case ProcessingState.idle: ...
+      case ProcessingState.loading: ...
+      case ProcessingState.buffering: ...
+      case ProcessingState.ready: ...
+      case ProcessingState.completed: ...
+      }*/
+    });
     //Check for changed album metadata
     /*await Future.forEach(albums, (Album album) async {
       if(album.lastModified.isBefore(album.songs[0].lastModified))
@@ -210,6 +241,7 @@ class DataModel extends ChangeNotifier {
 
         }
     });*/
+
     loading = false;
     notifyListeners();
     //Save the songs, albums and artist lists
@@ -247,6 +279,11 @@ class DataModel extends ChangeNotifier {
   {
     artistList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
   }
+  //Sorts a list of songs for duration
+  void sortByDuration(List<Song> songList)
+  {
+    songList.sort((a, b) => a.duration.compareTo(b.duration));
+  }
 
   Uint8List? getAlbumArt(Song song)
   {
@@ -258,16 +295,6 @@ class DataModel extends ChangeNotifier {
     {
       return null;
     }
-  }
-  //Function that sets the currently playing song
-  void setCurrentlyPlaying(Song song, List<Song> futureSongs)
-  {
-    currentlyPlaying = song;
-    upNext.clear();
-    upNext.addAll(futureSongs);
-    //TODO at this point upNext needs to move elements so currentlyPlaying is the first element in the list (Maybe only if shuffle == false?)
-    upNext.remove(currentlyPlaying);
-    notifyListeners();
   }
   //Function to clear out all the local files I am creating for this app
   Future<void> clearAllData() async
@@ -355,5 +382,85 @@ class DataModel extends ChangeNotifier {
       newAlbum.songs.add(newSong);
       albums.add(newAlbum);
     }*/
+  }
+  //Function that sets the currently playing song
+  void setCurrentlyPlaying(Song song, List<Song> futureSongs) async
+  {
+    currentlyPlaying = song;
+    upNext.clear();
+    upNext.addAll(futureSongs);
+    if(shuffle)
+      {
+        upNext.shuffle();
+      }
+    playingIndex = upNext.indexOf(song);
+    startingIndex = playingIndex;
+    await audioPlayer.setFilePath(song.filePath);
+    audioPlayer.play();
+    notifyListeners();
+  }
+  //Plays the next song in the playlist
+  void playNextSong() async
+  {
+    if(loop == LoopType.singleSong)
+      {
+        audioPlayer.seek(Duration());
+      }
+    else
+      {
+        playingIndex++;
+        playingIndex %= upNext.length;
+        currentlyPlaying = upNext[playingIndex];
+        await audioPlayer.setFilePath(currentlyPlaying!.filePath);
+        if((playingIndex == startingIndex && loop == LoopType.none && shuffle) || (playingIndex == 0 && loop == LoopType.none && !shuffle) || !audioPlayer.playing)
+        {
+          audioPlayer.pause();
+        }
+        else
+        {
+          audioPlayer.play();
+        }
+      }
+    notifyListeners();
+  }
+  //Plays the previous song in the playlist
+  void playPreviousSong() async
+  {
+    playingIndex--;
+    playingIndex %= upNext.length;
+    currentlyPlaying = upNext[playingIndex];
+    await audioPlayer.setFilePath(currentlyPlaying!.filePath);
+    if(audioPlayer.playing)
+      {
+        audioPlayer.play();
+      }
+    else
+      {
+        audioPlayer.pause();
+      }
+    notifyListeners();
+  }
+  void playButton()
+  {
+    audioPlayer.playing ? audioPlayer.pause() : audioPlayer.play();
+    notifyListeners();
+  }
+
+  void nextButton()
+  {
+    //audioPlayer.seekToNext();
+    playNextSong();
+  }
+
+  void previousButton()
+  {
+    if(audioPlayer.position.inSeconds > audioPlayer.duration!.inSeconds / 20)
+      {
+        audioPlayer.seek(Duration());
+      }
+    else
+      {
+        playPreviousSong();
+      }
   }
 }
