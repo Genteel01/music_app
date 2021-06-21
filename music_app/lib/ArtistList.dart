@@ -39,15 +39,48 @@ class _ArtistListState extends State<ArtistList> {
                           border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                         child: Align(alignment: Alignment.center,
                           child: ListTile(
+                            selected: dataModel.selectedIndices.contains(index),
                             title: Text(artist.name),
                             trailing: Text(artist.songs.length.toString() + " tracks"),
                             leading: SizedBox(width: 50, height: 50, child: !artist.songs.any((element) => dataModel.getAlbumArt(element) != null) ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != null))!)),
                             //leading: SizedBox(width: 50, height: 50, child: dataModel.getAlbumArt(artist.songs[0]) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(artist.songs[0])!)),
-                            onTap: () => {
-                              Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) {
-                                    return ArtistDetails(index: index);
-                                  }))
+                            onTap: () async => {
+                              if(!dataModel.selecting)
+                                {
+                                  Navigator.push(context, MaterialPageRoute(
+                                      builder: (context) {
+                                        return ArtistDetails(index: index);
+                                      }))
+                                }
+                              else
+                                {
+                                  if(dataModel.selectedIndices.contains(index))
+                                    {
+                                      dataModel.selectedArtists.remove(artist),
+                                      dataModel.selectedIndices.remove(index),
+                                      dataModel.setSelecting(),
+                                    }
+                                  else
+                                    {
+                                      dataModel.selectedArtists.add(artist),
+                                      dataModel.selectedIndices.add(index),
+                                      dataModel.setSelecting(),
+                                    }
+                                }
+                            },
+                            onLongPress: () => {
+                              if(dataModel.selectedIndices.contains(index))
+                                {
+                                  dataModel.selectedArtists.remove(artist),
+                                  dataModel.selectedIndices.remove(index),
+                                  dataModel.setSelecting(),
+                                }
+                              else
+                                {
+                                  dataModel.selectedArtists.add(artist),
+                                  dataModel.selectedIndices.add(index),
+                                  dataModel.setSelecting(),
+                                }
                             },
                           ),
                         ),

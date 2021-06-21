@@ -42,6 +42,26 @@ class DataModel extends ChangeNotifier {
   String appDocumentsDirectory = "";
 
   final audioPlayer = AudioPlayer();
+
+  bool selecting = false;
+  List<Song> selectedSongs = [];
+  List<Album> selectedAlbums = [];
+  List<Artist> selectedArtists = [];
+  List<Playlist> selectedPlaylists = [];
+  List<int> selectedIndices = [];
+
+  setSelecting()
+  {
+    if(selectedSongs.length == 0 && selectedAlbums.length == 0 && selectedArtists.length == 0 && selectedPlaylists.length == 0)
+      {
+        selecting = false;
+      }
+    else
+      {
+        selecting = true;
+      }
+    notifyListeners();
+  }
   //replaced this
   DataModel()
   {
@@ -445,6 +465,7 @@ class DataModel extends ChangeNotifier {
         }
       }
     notifyListeners();
+    saveSettings();
   }
   //Plays the previous song in the playlist
   void playPreviousSong() async
@@ -462,6 +483,7 @@ class DataModel extends ChangeNotifier {
         audioPlayer.pause();
       }
     notifyListeners();
+    saveSettings();
   }
   void playButton()
   {

@@ -37,6 +37,7 @@ class _PlaylistListState extends State<PlaylistList> {
                           border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                         child: Center(
                           child: ListTile(
+                            selected: dataModel.selectedIndices.contains(index),
                             title: Text(playlist.name),
                             trailing: Text(playlist.songs.length.toString() + " Tracks"),
                             onTap: () async => {

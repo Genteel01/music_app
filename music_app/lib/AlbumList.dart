@@ -38,16 +38,49 @@ class _AlbumListState extends State<AlbumList> {
                       return Container(height: 70, decoration: BoxDecoration(
                           border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                         child: ListTile(
+                          selected: dataModel.selectedIndices.contains(index),
                           title: Text(album.name),
                           trailing: Text(album.songs.length.toString() + " tracks"),
                           subtitle: Text(album.albumArtist),
                           leading: SizedBox(width: 50, height: 50, child: album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(album.albumArt!)),
                           //leading: SizedBox(width: 50, height: 50, child: dataModel.getAlbumArt(artist.songs[0]) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(artist.songs[0])!)),
-                          onTap: () => {
-                            Navigator.push(context, MaterialPageRoute(
-                                builder: (context) {
-                                  return AlbumDetails(index: index);
-                                }))
+                          onTap: () async => {
+                            if(!dataModel.selecting)
+                              {
+                                Navigator.push(context, MaterialPageRoute(
+                                    builder: (context) {
+                                      return AlbumDetails(index: index);
+                                    }))
+                              }
+                            else
+                              {
+                                if(dataModel.selectedIndices.contains(index))
+                                  {
+                                    dataModel.selectedAlbums.remove(album),
+                                    dataModel.selectedIndices.remove(index),
+                                    dataModel.setSelecting(),
+                                  }
+                                else
+                                  {
+                                    dataModel.selectedAlbums.add(album),
+                                    dataModel.selectedIndices.add(index),
+                                    dataModel.setSelecting(),
+                                  }
+                              }
+                          },
+                          onLongPress: () => {
+                            if(dataModel.selectedIndices.contains(index))
+                              {
+                                dataModel.selectedAlbums.remove(album),
+                                dataModel.selectedIndices.remove(index),
+                                dataModel.setSelecting(),
+                              }
+                            else
+                              {
+                                dataModel.selectedAlbums.add(album),
+                                dataModel.selectedIndices.add(index),
+                                dataModel.setSelecting(),
+                              }
                           },
                         ),
                       );

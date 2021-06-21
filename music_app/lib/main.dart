@@ -44,21 +44,29 @@ class MyTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<DataModel>(
+        builder:buildWidget
+    );
+  }
+  Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return DefaultTabController(
       length: myTabs.length,
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.library_music), onPressed: () async => {
-            if(!Provider.of<DataModel>(context, listen: false).loading)
-              {
-                Provider.of<DataModel>(context, listen: false).directoryPaths = [],
-                await Provider.of<DataModel>(context, listen: false).getNewDirectory(),
-                await Provider.of<DataModel>(context, listen: false).fetch()
-              }
+          if(!dataModel.loading)
+            {
+              dataModel.directoryPaths = [],
+              await dataModel.getNewDirectory(),
+              await dataModel.fetch()
+            }
         },
         ),
         bottomNavigationBar: CurrentlyPlayingBar(),
-        appBar: AppBar(
+        appBar: dataModel.selecting ? AppBar(
+          title: Text("Placeholder number of selected"),
+          bottom: AppBar(),
+        ) : AppBar(
           title: Text("Music App"),
           bottom: TabBar(
             isScrollable: true,
@@ -66,6 +74,7 @@ class MyTabBar extends StatelessWidget {
           ),
         ),
         body: TabBarView(
+          physics: dataModel.selecting ? NeverScrollableScrollPhysics() : null,
           children: [
             PlaylistList(),
             SongList(),
@@ -86,7 +95,6 @@ class CurrentlyPlayingBar extends StatefulWidget {
 }
 
 class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
-  @override
   @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(
