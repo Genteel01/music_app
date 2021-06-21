@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:music_app/ArtistList.dart';
 import 'package:provider/provider.dart';
 
+import 'Album.dart';
 import 'AlbumList.dart';
+import 'Artist.dart';
 import 'DataModel.dart';
+import 'PlaylistList.dart';
 import 'SongList.dart';
 //Saving/loading from json
 //TODO https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
@@ -35,6 +38,7 @@ class MyTabBar extends StatelessWidget {
   MyTabBar({Key? key}) : super(key: key);
 //TODO work out how to retain the list positions when you change tabs
   final List<Tab> myTabs = [
+    Tab(child: Row(children: [Icon(Icons.library_music), Text(" Playlists")],mainAxisAlignment: MainAxisAlignment.center,),),
     Tab(child: Row(children: [Icon(Icons.music_note), Text(" Tracks")],mainAxisAlignment: MainAxisAlignment.center,),),
     Tab(child: Row(children: [Icon(Icons.person), Text(" Artists")],mainAxisAlignment: MainAxisAlignment.center,),),
     Tab(child: Row(children: [Icon(Icons.album), Text(" Albums")],mainAxisAlignment: MainAxisAlignment.center,),),
@@ -42,28 +46,39 @@ class MyTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<DataModel>(
+        builder:buildWidget
+    );
+  }
+  Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return DefaultTabController(
       length: myTabs.length,
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.library_music), onPressed: () async => {
-            if(!Provider.of<DataModel>(context, listen: false).loading)
-              {
-                Provider.of<DataModel>(context, listen: false).directoryPaths = [],
-                await Provider.of<DataModel>(context, listen: false).getNewDirectory(),
-                await Provider.of<DataModel>(context, listen: false).fetch()
-              }
+          if(!dataModel.loading)
+            {
+              dataModel.directoryPaths = [],
+              await dataModel.getNewDirectory(),
+              await dataModel.fetch()
+            }
         },
         ),
         bottomNavigationBar: CurrentlyPlayingBar(),
-        appBar: AppBar(
+        appBar: dataModel.selecting ? AppBar(
+            title: SelectingAppBarTitle(),
+            bottom: NonTappableTabBar(tabBar: TabBar(tabs: myTabs, isScrollable: true,),)
+        ) : AppBar(
           title: Text("Music App"),
           bottom: TabBar(
+            isScrollable: true,
             tabs: myTabs,
           ),
         ),
         body: TabBarView(
+          physics: dataModel.selecting ? NeverScrollableScrollPhysics() : null,
           children: [
+            PlaylistList(),
             SongList(),
             ArtistList(),
             AlbumList(),
@@ -72,6 +87,73 @@ class MyTabBar extends StatelessWidget {
       ),
     );
   }
+}
+class SelectingAppBarTitle extends StatefulWidget {
+  const SelectingAppBarTitle({Key? key, this.album, this.artist}) : super(key: key);
+  final Album? album;
+  final Artist? artist;
+  @override
+  _SelectingAppBarTitleState createState() => _SelectingAppBarTitleState();
+}
+
+class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<DataModel>(
+        builder:buildWidget
+    );
+  }
+  Widget buildWidget(BuildContext context, DataModel dataModel, _){
+    return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            ElevatedButton(child: Text(dataModel.returnAllSelected(widget.album, widget.artist) ? "Clear" : "All"), onPressed: () => {
+                dataModel.returnAllSelected(widget.album, widget.artist) ? dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist)
+            },),
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+              child: Text(dataModel.selectedIndices.length.toString() + " Selected"),
+            ),
+          ],
+        ),
+        ElevatedButton(child: Text(dataModel.isSelectingPlaylists() ? "Remove" : "Add To"), onPressed: () => {
+          dataModel.isSelectingPlaylists() ? dataModel.deletePlaylists() : showModalBottomSheet<void>(
+            isScrollControlled: true,
+            context: context,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(
+                top: Radius.circular(30))),
+            builder: (BuildContext context) {
+              return Padding(
+                padding: MediaQuery
+                    .of(context)
+                    .viewInsets,
+                child: Container(
+                  height: 400,
+                  //color: Colors.amber,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: PlaylistListBuilder(addingToPlaylist: true,),
+                  ),
+                ),
+              );
+            },
+          )
+        },),
+      ],
+    );
+  }
+}
+
+class NonTappableTabBar extends StatelessWidget implements PreferredSizeWidget {
+  const NonTappableTabBar({Key? key, required this.tabBar}) : super(key: key);
+  final TabBar tabBar;
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(child: tabBar);
+  }
+
+  @override Size get preferredSize => this.tabBar.preferredSize;
 }
 
 class CurrentlyPlayingBar extends StatefulWidget {
@@ -83,7 +165,6 @@ class CurrentlyPlayingBar extends StatefulWidget {
 
 class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
   @override
-  @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(
         builder:buildWidget
@@ -93,22 +174,22 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
     return InkWell(
       child: Container(height: 65, decoration: BoxDecoration(
           border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
-          child: dataModel.loading || dataModel.currentlyPlaying == null ? Row(children: [
+          child: dataModel.loading || dataModel.settings.currentlyPlaying == null ? Row(children: [
             SizedBox(width: 65, height: 65,child: Image.asset("assets/images/music_note.jpg")), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
           ],) : Row(children: [
-            SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.currentlyPlaying!)!)),
+            SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
             Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0),
               child: Container(width: 125,
                 child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Container(height: 30, child: Text(dataModel.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis,)),
-                  Container(height: 30, child: Text(dataModel.currentlyPlaying!.artist, maxLines: 2, overflow: TextOverflow.ellipsis,)),
+                  Container(height: 30, child: Text(dataModel.settings.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis,)),
+                  Container(height: 30, child: Text(dataModel.settings.currentlyPlaying!.artist, maxLines: 2, overflow: TextOverflow.ellipsis,)),
                 ],),
               ),
             ),
             AudioControls(buttonSizes: 35,),
           ],
           ),
-      ),onTap: dataModel.loading || dataModel.currentlyPlaying == null ? () => {} : () => {
+      ),onTap: dataModel.loading || dataModel.settings.currentlyPlaying == null ? () => {} : () => {
         showModalBottomSheet<void>(
           isScrollControlled: true,
           context: context,
@@ -184,7 +265,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          SizedBox(height: 200, width: 200, child: dataModel.getAlbumArt(dataModel.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.currentlyPlaying!)!)),
+          SizedBox(height: 200, width: 200, child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: AudioControls(buttonSizes: 60),

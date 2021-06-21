@@ -9,8 +9,12 @@ import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
+
+
 import 'Album.dart';
 import 'Artist.dart';
+import 'Playlist.dart';
+import 'Settings.dart';
 import 'Song.dart';
 
 
@@ -25,24 +29,136 @@ enum LoopType {
 //This might not actually be faster, and might not be worth the effort (also it would use a lot more memory and more storage space)
 class DataModel extends ChangeNotifier {
 
-  //added this
   bool loading = false;
   List<Song> songs = [];
   List<Artist> artists = [];
   List<Album> albums = [];
+  List<Playlist> playlists = [];
 
-  List<Song> upNext = [];
-  Song? currentlyPlaying;
-  bool shuffle = false;
-  LoopType loop = LoopType.none;
-  int playingIndex = 0;
-  int startingIndex = 0;
+  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, startingIndex: 0, songPaths: []);
 
   List<String> directoryPaths = [];
 
   String appDocumentsDirectory = "";
 
   final audioPlayer = AudioPlayer();
+
+  bool selecting = false;
+  List<Song> selectedSongs = [];
+  List<Album> selectedAlbums = [];
+  List<Artist> selectedArtists = [];
+  List<Playlist> selectedPlaylists = [];
+  List<int> selectedIndices = [];
+
+  setSelecting()
+  {
+    if(selectedSongs.length == 0 && selectedAlbums.length == 0 && selectedArtists.length == 0 && selectedPlaylists.length == 0)
+      {
+        selecting = false;
+      }
+    else
+      {
+        selecting = true;
+      }
+    notifyListeners();
+  }
+
+  clearSelections()
+  {
+    selectedSongs.clear();
+    selectedAlbums.clear();
+    selectedArtists.clear();
+    selectedIndices.clear();
+    selectedPlaylists.clear();
+    selecting = false;
+    notifyListeners();
+  }
+  //Returns true if all the values in the selection type you are working with are selected, false otherwise
+  bool returnAllSelected(Album? album, Artist? artist)
+  {
+    if(selectedSongs.length > 0)
+      {
+        if(album != null)
+          {
+            return selectedSongs.length == album.songs.length;
+          }
+        else if (artist != null)
+          {
+            return selectedSongs.length == artist.songs.length;
+          }
+        else
+          {
+            return selectedSongs.length == songs.length;
+          }
+      }
+    if(selectedAlbums.length > 0)
+    {
+      return selectedAlbums.length == albums.length;
+    }
+    if(selectedArtists.length > 0)
+    {
+      return selectedArtists.length == artists.length;
+    }
+    if(selectedPlaylists.length > 0)
+    {
+      return selectedPlaylists.length == playlists.length;
+    }
+    return false;
+  }
+  
+  //Selects all the values for the selection type you are currently working with
+  void selectAll(Album? album, Artist? artist)
+  {
+    //Int to say whether you are working with albums (0), artists(1), songs(2), or playlists(3)
+    int typeOfSelection = 2;
+    if(selectedSongs.length > 0)
+    {
+      typeOfSelection = 2;
+    }
+    if(selectedAlbums.length > 0)
+    {
+      typeOfSelection = 0;
+    }
+    if(selectedArtists.length > 0)
+    {
+      typeOfSelection = 1;
+    }
+    if(selectedPlaylists.length > 0)
+    {
+      typeOfSelection = 3;
+    }
+    clearSelections();
+    selecting = true;
+    switch (typeOfSelection)
+    {
+      case 0: selectedAlbums.addAll(albums);
+              selectedIndices.addAll(List<int>.generate(selectedAlbums.length, (i) => i));
+              break;
+      case 1: selectedArtists.addAll(artists);
+              selectedIndices.addAll(List<int>.generate(selectedArtists.length, (i) => i));
+              break;
+      case 2: if(album != null)
+                {
+                  selectedSongs.addAll(album.songs);
+                  selectedIndices.addAll(List<int>.generate(selectedSongs.length, (i) => i));
+                }
+              else if(artist != null)
+                {
+                  selectedSongs.addAll(artist.songs);
+                  selectedIndices.addAll(List<int>.generate(selectedSongs.length, (i) => i));
+                }
+              else
+                {
+                  selectedSongs.addAll(songs);
+                  selectedIndices.addAll(List<int>.generate(selectedSongs.length, (i) => i));
+                }
+                break;
+      case 3: selectedPlaylists.addAll(playlists);
+              selectedIndices.addAll(List<int>.generate(selectedPlaylists.length, (i) => i));
+              break;
+    }
+    notifyListeners();
+  }
   //replaced this
   DataModel()
   {
@@ -71,6 +187,44 @@ class DataModel extends ChangeNotifier {
     File(appDocumentsDirectory + "/music_locations.txt").writeAsString(directoryPathsJson);
   }
 
+  void createPlaylist(String playlistName)
+  {
+    String finalName = playlistName == "" ? "Playlist " + (playlists.length + 1).toString() : playlistName;
+    Playlist newPlaylist = Playlist(songs: [], name: finalName, songPaths: []);
+    playlists.add(newPlaylist);
+    sortPlaylists(playlists);
+    savePlaylists();
+    notifyListeners();
+  }
+
+  //Returns true if you are selecting playlists, false otherwise
+  bool isSelectingPlaylists()
+  {
+    return selectedPlaylists.length > 0;
+  }
+  void addToPlaylist(Playlist playlist)
+  {
+      List<Song> newSongs = [];
+      newSongs.addAll(selectedSongs);
+      selectedArtists.forEach((element) {
+        newSongs.addAll(element.songs);
+      });
+      selectedAlbums.forEach((element) {
+        newSongs.addAll(element.songs);
+      });
+      playlist.addToPlaylist(newSongs);
+      savePlaylists();
+      clearSelections();
+  }
+
+  void deletePlaylists()
+  {
+    selectedPlaylists.forEach((element) {
+      playlists.remove(element);
+    });
+    savePlaylists();
+    clearSelections();
+  }
   Future<void> fetch() async
   {
     print("BREAK________________________________________________________________");
@@ -84,20 +238,23 @@ class DataModel extends ChangeNotifier {
     songs.clear();
     artists.clear();
     albums.clear();
+    playlists.clear;
 
-    upNext.clear();
-    currentlyPlaying = null;
 
-    //If you haven't already got locations to look for music
+    /*//If you haven't already got locations to look for music
     if(!File(appDocumentsDirectory + "/music_locations.txt").existsSync())
       {
           await getNewDirectory();
-      }
+      }*/
     //If you have already got locations then load them.
-    else
+    try
       {
         directoryPaths = jsonDecode(File(appDocumentsDirectory + "/music_locations.txt").readAsStringSync()).cast<String>();
       }
+    catch (error)
+    {
+      await getNewDirectory();
+    }
     var retriever = new MetadataRetriever();
     //If the album art directory doesn't exist create it
     if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
@@ -158,6 +315,27 @@ class DataModel extends ChangeNotifier {
         }
       });
     });
+    //If the playlists file exists load everything from it
+    if(File(appDocumentsDirectory + "/playlists.txt").existsSync())
+    {
+      String playlistsFile = await File(appDocumentsDirectory + "/playlists.txt").readAsString();
+      var jsonFile = jsonDecode(playlistsFile);
+      playlists = Playlist.loadPlaylistFile(jsonFile, songs);
+    }
+    //Load your settings file
+    try
+    {
+      String settingsFile = await File(appDocumentsDirectory + "/settings.txt").readAsString();
+      var jsonFile = jsonDecode(settingsFile);
+      settings = Settings.fromJson(jsonFile);
+      settings.loadSongs(songs);
+      if(settings.currentlyPlaying != null)
+        {
+          await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
+          audioPlayer.pause();
+        }
+    }
+    catch(error){}
     //Sort the song and album lists
     sortByTrackName(songs);
     //sortByDuration(songs);
@@ -214,13 +392,6 @@ class DataModel extends ChangeNotifier {
         {
           playNextSong();
         }
-      /*switch (state.processingState) {
-      case ProcessingState.idle: ...
-      case ProcessingState.loading: ...
-      case ProcessingState.buffering: ...
-      case ProcessingState.ready: ...
-      case ProcessingState.completed: ...
-      }*/
     });
     //Check for changed album metadata
     /*await Future.forEach(albums, (Album album) async {
@@ -242,15 +413,20 @@ class DataModel extends ChangeNotifier {
         }
     });*/
 
+
     loading = false;
     notifyListeners();
-    //Save the songs, albums and artist lists
+    //Save the songs, playlists, albums, and artist lists
     String albumsJson = jsonEncode(Album.saveAlbumFile(albums, appDocumentsDirectory));
     File(appDocumentsDirectory + "/albums.txt").writeAsString(albumsJson);
     String artistsJson = jsonEncode(Artist.saveArtistFile(artists));
     File(appDocumentsDirectory + "/artists.txt").writeAsString(artistsJson);
     String songsJson = jsonEncode(Song.saveSongFile(songs));
     File(appDocumentsDirectory + "/songs.txt").writeAsString(songsJson);
+    String playlistsJson = jsonEncode(Playlist.savePlaylistFile(playlists));
+    File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
+    //Save your settings
+    saveSettings();
     print("End: " + DateTime.now().toString());
   }
   
@@ -284,6 +460,11 @@ class DataModel extends ChangeNotifier {
   {
     songList.sort((a, b) => a.duration.compareTo(b.duration));
   }
+  void sortPlaylists(List<Playlist> playlistList)
+  {
+    playlistList.sort((a, b) => a.name.compareTo(b.name));
+  }
+
 
   Uint8List? getAlbumArt(Song song)
   {
@@ -386,33 +567,35 @@ class DataModel extends ChangeNotifier {
   //Function that sets the currently playing song
   void setCurrentlyPlaying(Song song, List<Song> futureSongs) async
   {
-    currentlyPlaying = song;
-    upNext.clear();
-    upNext.addAll(futureSongs);
-    if(shuffle)
+    settings.currentlyPlaying = song;
+    settings.upNext.clear();
+    settings.upNext.addAll(futureSongs);
+    if(settings.shuffle)
       {
-        upNext.shuffle();
+        settings.upNext.shuffle();
       }
-    playingIndex = upNext.indexOf(song);
-    startingIndex = playingIndex;
+    settings.setSongPath();
+    settings.playingIndex = settings.upNext.indexOf(song);
+    settings.startingIndex = settings.playingIndex;
     await audioPlayer.setFilePath(song.filePath);
     audioPlayer.play();
     notifyListeners();
+    saveSettings();
   }
   //Plays the next song in the playlist
   void playNextSong() async
   {
-    if(loop == LoopType.singleSong)
+    if(settings.loop == LoopType.singleSong)
       {
         audioPlayer.seek(Duration());
       }
     else
       {
-        playingIndex++;
-        playingIndex %= upNext.length;
-        currentlyPlaying = upNext[playingIndex];
-        await audioPlayer.setFilePath(currentlyPlaying!.filePath);
-        if((playingIndex == startingIndex && loop == LoopType.none && shuffle) || (playingIndex == 0 && loop == LoopType.none && !shuffle) || !audioPlayer.playing)
+        settings.playingIndex++;
+        settings.playingIndex %= settings.upNext.length;
+        settings.currentlyPlaying = settings.upNext[settings.playingIndex];
+        await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
+        if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !audioPlayer.playing)
         {
           audioPlayer.pause();
         }
@@ -422,14 +605,15 @@ class DataModel extends ChangeNotifier {
         }
       }
     notifyListeners();
+    saveSettings();
   }
   //Plays the previous song in the playlist
   void playPreviousSong() async
   {
-    playingIndex--;
-    playingIndex %= upNext.length;
-    currentlyPlaying = upNext[playingIndex];
-    await audioPlayer.setFilePath(currentlyPlaying!.filePath);
+    settings.playingIndex--;
+    settings.playingIndex %= settings.upNext.length;
+    settings.currentlyPlaying = settings.upNext[settings.playingIndex];
+    await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
     if(audioPlayer.playing)
       {
         audioPlayer.play();
@@ -439,6 +623,7 @@ class DataModel extends ChangeNotifier {
         audioPlayer.pause();
       }
     notifyListeners();
+    saveSettings();
   }
   void playButton()
   {
@@ -463,4 +648,16 @@ class DataModel extends ChangeNotifier {
         playPreviousSong();
       }
   }
+
+  void saveSettings()
+  {
+    File(appDocumentsDirectory + "/settings.txt").writeAsString(jsonEncode(settings.toJson()));
+  }
+
+  void savePlaylists()
+  {
+    String playlistsJson = jsonEncode(Playlist.savePlaylistFile(playlists));
+    File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
+  }
+
 }
