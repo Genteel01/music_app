@@ -73,6 +73,92 @@ class DataModel extends ChangeNotifier {
     selecting = false;
     notifyListeners();
   }
+  //Returns true if all the values in the selection type you are working with are selected, false otherwise
+  bool returnAllSelected(Album? album, Artist? artist)
+  {
+    if(selectedSongs.length > 0)
+      {
+        if(album != null)
+          {
+            return selectedSongs.length == album.songs.length;
+          }
+        else if (artist != null)
+          {
+            return selectedSongs.length == artist.songs.length;
+          }
+        else
+          {
+            return selectedSongs.length == songs.length;
+          }
+      }
+    if(selectedAlbums.length > 0)
+    {
+      return selectedAlbums.length == albums.length;
+    }
+    if(selectedArtists.length > 0)
+    {
+      return selectedArtists.length == artists.length;
+    }
+    if(selectedPlaylists.length > 0)
+    {
+      return selectedPlaylists.length == playlists.length;
+    }
+    return false;
+  }
+  
+  //Selects all the values for the selection type you are currently working with
+  void selectAll(Album? album, Artist? artist)
+  {
+    //Int to say whether you are working with albums (0), artists(1), songs(2), or playlists(3)
+    int typeOfSelection = 2;
+    if(selectedSongs.length > 0)
+    {
+      typeOfSelection = 2;
+    }
+    if(selectedAlbums.length > 0)
+    {
+      typeOfSelection = 0;
+    }
+    if(selectedArtists.length > 0)
+    {
+      typeOfSelection = 1;
+    }
+    if(selectedPlaylists.length > 0)
+    {
+      typeOfSelection = 3;
+    }
+    clearSelections();
+    selecting = true;
+    switch (typeOfSelection)
+    {
+      case 0: selectedAlbums.addAll(albums);
+              selectedIndices.addAll(List<int>.generate(selectedAlbums.length, (i) => i));
+              break;
+      case 1: selectedArtists.addAll(artists);
+              selectedIndices.addAll(List<int>.generate(selectedArtists.length, (i) => i));
+              break;
+      case 2: if(album != null)
+                {
+                  selectedSongs.addAll(album.songs);
+                  selectedIndices.addAll(List<int>.generate(selectedSongs.length, (i) => i));
+                }
+              else if(artist != null)
+                {
+                  selectedSongs.addAll(artist.songs);
+                  selectedIndices.addAll(List<int>.generate(selectedSongs.length, (i) => i));
+                }
+              else
+                {
+                  selectedSongs.addAll(songs);
+                  selectedIndices.addAll(List<int>.generate(selectedSongs.length, (i) => i));
+                }
+                break;
+      case 3: selectedPlaylists.addAll(playlists);
+              selectedIndices.addAll(List<int>.generate(selectedPlaylists.length, (i) => i));
+              break;
+    }
+    notifyListeners();
+  }
   //replaced this
   DataModel()
   {

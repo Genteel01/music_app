@@ -22,7 +22,7 @@ class AlbumDetails extends StatelessWidget {
     Album album = dataModel.albums[index];
     return Scaffold(
         appBar: dataModel.selecting ? AppBar(automaticallyImplyLeading: false,
-          title: Text("Placeholder number of selected"),
+          title: SelectingAppBarTitle(album: album,),
         ) : AppBar(
           title: Text(album.name),
         ),

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:music_app/ArtistList.dart';
 import 'package:provider/provider.dart';
 
+import 'Album.dart';
 import 'AlbumList.dart';
+import 'Artist.dart';
 import 'DataModel.dart';
 import 'PlaylistList.dart';
 import 'SongList.dart';
@@ -64,8 +66,8 @@ class MyTabBar extends StatelessWidget {
         ),
         bottomNavigationBar: CurrentlyPlayingBar(),
         appBar: dataModel.selecting ? AppBar(
-          title: Text("Placeholder number of selected"),
-          bottom: NonTappableTabBar(tabBar: TabBar(tabs: myTabs, isScrollable: true,),)
+            title: SelectingAppBarTitle(),
+            bottom: NonTappableTabBar(tabBar: TabBar(tabs: myTabs, isScrollable: true,),)
         ) : AppBar(
           title: Text("Music App"),
           bottom: TabBar(
@@ -83,6 +85,35 @@ class MyTabBar extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+class SelectingAppBarTitle extends StatefulWidget {
+  const SelectingAppBarTitle({Key? key, this.album, this.artist}) : super(key: key);
+  final Album? album;
+  final Artist? artist;
+  @override
+  _SelectingAppBarTitleState createState() => _SelectingAppBarTitleState();
+}
+
+class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<DataModel>(
+        builder:buildWidget
+    );
+  }
+  Widget buildWidget(BuildContext context, DataModel dataModel, _){
+    return Row(
+      children: [
+        ElevatedButton(child: Text(dataModel.returnAllSelected(widget.album, widget.artist) ? "Clear" : "All"), onPressed: () => {
+            dataModel.returnAllSelected(widget.album, widget.artist) ? dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist)
+        },),
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Text(dataModel.selectedIndices.length.toString() + " Selected"),
+        ),
+      ],
     );
   }
 }

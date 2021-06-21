@@ -22,7 +22,7 @@ class ArtistDetails extends StatelessWidget {
     Artist artist = dataModel.artists[index];
     return Scaffold(
         appBar: dataModel.selecting ? AppBar(automaticallyImplyLeading: false,
-          title: Text("Placeholder number of selected"),
+          title: SelectingAppBarTitle(artist: artist,),
         ) : AppBar(
           title: Text(artist.name),
         ),
