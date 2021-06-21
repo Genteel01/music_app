@@ -101,6 +101,15 @@ class DataModel extends ChangeNotifier {
     File(appDocumentsDirectory + "/music_locations.txt").writeAsString(directoryPathsJson);
   }
 
+  void createPlaylist(String playlistName)
+  {
+    String finalName = playlistName == "" ? "Playlist " + (playlists.length + 1).toString() : playlistName;
+    Playlist newPlaylist = Playlist(songs: [], name: finalName, songPaths: []);
+    playlists.add(newPlaylist);
+    sortPlaylists(playlists);
+    savePlaylists();
+    notifyListeners();
+  }
   Future<void> fetch() async
   {
     print("BREAK________________________________________________________________");
@@ -336,6 +345,11 @@ class DataModel extends ChangeNotifier {
   {
     songList.sort((a, b) => a.duration.compareTo(b.duration));
   }
+  void sortPlaylists(List<Playlist> playlistList)
+  {
+    playlistList.sort((a, b) => a.name.compareTo(b.name));
+  }
+
 
   Uint8List? getAlbumArt(Song song)
   {
@@ -523,6 +537,12 @@ class DataModel extends ChangeNotifier {
   void saveSettings()
   {
     File(appDocumentsDirectory + "/settings.txt").writeAsString(jsonEncode(settings.toJson()));
+  }
+
+  void savePlaylists()
+  {
+    String playlistsJson = jsonEncode(Playlist.savePlaylistFile(playlists));
+    File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
   }
 
 }
