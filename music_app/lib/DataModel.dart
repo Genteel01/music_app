@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'Album.dart';
 import 'Artist.dart';
+import 'Playlist.dart';
 import 'Song.dart';
 
 
@@ -30,6 +31,7 @@ class DataModel extends ChangeNotifier {
   List<Song> songs = [];
   List<Artist> artists = [];
   List<Album> albums = [];
+  List<Playlist> playlists = [];
 
   List<Song> upNext = [];
   Song? currentlyPlaying;
@@ -158,6 +160,13 @@ class DataModel extends ChangeNotifier {
         }
       });
     });
+    //If the playlists file exists load everything from it
+    if(File(appDocumentsDirectory + "/playlists.txt").existsSync())
+    {
+      String playlistsFile = await File(appDocumentsDirectory + "/playlists.txt").readAsString();
+      var jsonFile = jsonDecode(playlistsFile);
+      playlists = await Playlist.loadPlaylistFile(jsonFile, songs);
+    }
     //Sort the song and album lists
     sortByTrackName(songs);
     //sortByDuration(songs);
@@ -244,13 +253,15 @@ class DataModel extends ChangeNotifier {
 
     loading = false;
     notifyListeners();
-    //Save the songs, albums and artist lists
+    //Save the songs, playlists, albums, and artist lists
     String albumsJson = jsonEncode(Album.saveAlbumFile(albums, appDocumentsDirectory));
     File(appDocumentsDirectory + "/albums.txt").writeAsString(albumsJson);
     String artistsJson = jsonEncode(Artist.saveArtistFile(artists));
     File(appDocumentsDirectory + "/artists.txt").writeAsString(artistsJson);
     String songsJson = jsonEncode(Song.saveSongFile(songs));
     File(appDocumentsDirectory + "/songs.txt").writeAsString(songsJson);
+    String playlistsJson = jsonEncode(Playlist.savePlaylistFile(playlists));
+    File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
     print("End: " + DateTime.now().toString());
   }
   

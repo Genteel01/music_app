@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'AlbumList.dart';
 import 'DataModel.dart';
+import 'PlaylistList.dart';
 import 'SongList.dart';
 //Saving/loading from json
 //TODO https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
@@ -35,6 +36,7 @@ class MyTabBar extends StatelessWidget {
   MyTabBar({Key? key}) : super(key: key);
 //TODO work out how to retain the list positions when you change tabs
   final List<Tab> myTabs = [
+    Tab(child: Row(children: [Icon(Icons.library_music), Text(" Playlists")],mainAxisAlignment: MainAxisAlignment.center,),),
     Tab(child: Row(children: [Icon(Icons.music_note), Text(" Tracks")],mainAxisAlignment: MainAxisAlignment.center,),),
     Tab(child: Row(children: [Icon(Icons.person), Text(" Artists")],mainAxisAlignment: MainAxisAlignment.center,),),
     Tab(child: Row(children: [Icon(Icons.album), Text(" Albums")],mainAxisAlignment: MainAxisAlignment.center,),),
@@ -64,6 +66,7 @@ class MyTabBar extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
+            PlaylistList(),
             SongList(),
             ArtistList(),
             AlbumList(),
