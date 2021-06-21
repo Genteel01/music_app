@@ -165,7 +165,7 @@ class DataModel extends ChangeNotifier {
     {
       String playlistsFile = await File(appDocumentsDirectory + "/playlists.txt").readAsString();
       var jsonFile = jsonDecode(playlistsFile);
-      playlists = await Playlist.loadPlaylistFile(jsonFile, songs);
+      playlists = Playlist.loadPlaylistFile(jsonFile, songs);
     }
     //Sort the song and album lists
     sortByTrackName(songs);

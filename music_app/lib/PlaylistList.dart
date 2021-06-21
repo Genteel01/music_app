@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/PlaylistDetails.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
@@ -39,7 +40,10 @@ class _PlaylistListState extends State<PlaylistList> {
                             title: Text(playlist.name),
                             trailing: Text(playlist.songs.length.toString() + " Tracks"),
                             onTap: () async => {
-
+                              Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) {
+                                    return PlaylistDetails(index: index);
+                                  }))
                             },
                           ),
                         ),
