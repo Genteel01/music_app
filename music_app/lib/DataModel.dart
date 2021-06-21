@@ -9,9 +9,12 @@ import 'package:flutter_media_metadata/flutter_media_metadata.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
+
+
 import 'Album.dart';
 import 'Artist.dart';
 import 'Playlist.dart';
+import 'Settings.dart';
 import 'Song.dart';
 
 
@@ -26,19 +29,13 @@ enum LoopType {
 //This might not actually be faster, and might not be worth the effort (also it would use a lot more memory and more storage space)
 class DataModel extends ChangeNotifier {
 
-  //added this
   bool loading = false;
   List<Song> songs = [];
   List<Artist> artists = [];
   List<Album> albums = [];
   List<Playlist> playlists = [];
 
-  List<Song> upNext = [];
-  Song? currentlyPlaying;
-  bool shuffle = false;
-  LoopType loop = LoopType.none;
-  int playingIndex = 0;
-  int startingIndex = 0;
+  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, startingIndex: 0, songPaths: []);
 
   List<String> directoryPaths = [];
 
@@ -86,20 +83,23 @@ class DataModel extends ChangeNotifier {
     songs.clear();
     artists.clear();
     albums.clear();
+    playlists.clear;
 
-    upNext.clear();
-    currentlyPlaying = null;
 
-    //If you haven't already got locations to look for music
+    /*//If you haven't already got locations to look for music
     if(!File(appDocumentsDirectory + "/music_locations.txt").existsSync())
       {
           await getNewDirectory();
-      }
+      }*/
     //If you have already got locations then load them.
-    else
+    try
       {
         directoryPaths = jsonDecode(File(appDocumentsDirectory + "/music_locations.txt").readAsStringSync()).cast<String>();
       }
+    catch (error)
+    {
+      await getNewDirectory();
+    }
     var retriever = new MetadataRetriever();
     //If the album art directory doesn't exist create it
     if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
@@ -167,6 +167,20 @@ class DataModel extends ChangeNotifier {
       var jsonFile = jsonDecode(playlistsFile);
       playlists = Playlist.loadPlaylistFile(jsonFile, songs);
     }
+    //Load your settings file
+    try
+    {
+      String settingsFile = await File(appDocumentsDirectory + "/settings.txt").readAsString();
+      var jsonFile = jsonDecode(settingsFile);
+      settings = Settings.fromJson(jsonFile);
+      settings.loadSongs(songs);
+      if(settings.currentlyPlaying != null)
+        {
+          await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
+          audioPlayer.pause();
+        }
+    }
+    catch(error){}
     //Sort the song and album lists
     sortByTrackName(songs);
     //sortByDuration(songs);
@@ -223,13 +237,6 @@ class DataModel extends ChangeNotifier {
         {
           playNextSong();
         }
-      /*switch (state.processingState) {
-      case ProcessingState.idle: ...
-      case ProcessingState.loading: ...
-      case ProcessingState.buffering: ...
-      case ProcessingState.ready: ...
-      case ProcessingState.completed: ...
-      }*/
     });
     //Check for changed album metadata
     /*await Future.forEach(albums, (Album album) async {
@@ -251,6 +258,7 @@ class DataModel extends ChangeNotifier {
         }
     });*/
 
+
     loading = false;
     notifyListeners();
     //Save the songs, playlists, albums, and artist lists
@@ -262,6 +270,8 @@ class DataModel extends ChangeNotifier {
     File(appDocumentsDirectory + "/songs.txt").writeAsString(songsJson);
     String playlistsJson = jsonEncode(Playlist.savePlaylistFile(playlists));
     File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
+    //Save your settings
+    saveSettings();
     print("End: " + DateTime.now().toString());
   }
   
@@ -397,33 +407,35 @@ class DataModel extends ChangeNotifier {
   //Function that sets the currently playing song
   void setCurrentlyPlaying(Song song, List<Song> futureSongs) async
   {
-    currentlyPlaying = song;
-    upNext.clear();
-    upNext.addAll(futureSongs);
-    if(shuffle)
+    settings.currentlyPlaying = song;
+    settings.upNext.clear();
+    settings.upNext.addAll(futureSongs);
+    if(settings.shuffle)
       {
-        upNext.shuffle();
+        settings.upNext.shuffle();
       }
-    playingIndex = upNext.indexOf(song);
-    startingIndex = playingIndex;
+    settings.setSongPath();
+    settings.playingIndex = settings.upNext.indexOf(song);
+    settings.startingIndex = settings.playingIndex;
     await audioPlayer.setFilePath(song.filePath);
     audioPlayer.play();
     notifyListeners();
+    saveSettings();
   }
   //Plays the next song in the playlist
   void playNextSong() async
   {
-    if(loop == LoopType.singleSong)
+    if(settings.loop == LoopType.singleSong)
       {
         audioPlayer.seek(Duration());
       }
     else
       {
-        playingIndex++;
-        playingIndex %= upNext.length;
-        currentlyPlaying = upNext[playingIndex];
-        await audioPlayer.setFilePath(currentlyPlaying!.filePath);
-        if((playingIndex == startingIndex && loop == LoopType.none && shuffle) || (playingIndex == 0 && loop == LoopType.none && !shuffle) || !audioPlayer.playing)
+        settings.playingIndex++;
+        settings.playingIndex %= settings.upNext.length;
+        settings.currentlyPlaying = settings.upNext[settings.playingIndex];
+        await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
+        if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !audioPlayer.playing)
         {
           audioPlayer.pause();
         }
@@ -437,10 +449,10 @@ class DataModel extends ChangeNotifier {
   //Plays the previous song in the playlist
   void playPreviousSong() async
   {
-    playingIndex--;
-    playingIndex %= upNext.length;
-    currentlyPlaying = upNext[playingIndex];
-    await audioPlayer.setFilePath(currentlyPlaying!.filePath);
+    settings.playingIndex--;
+    settings.playingIndex %= settings.upNext.length;
+    settings.currentlyPlaying = settings.upNext[settings.playingIndex];
+    await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
     if(audioPlayer.playing)
       {
         audioPlayer.play();
@@ -474,4 +486,10 @@ class DataModel extends ChangeNotifier {
         playPreviousSong();
       }
   }
+
+  void saveSettings()
+  {
+    File(appDocumentsDirectory + "/settings.txt").writeAsString(jsonEncode(settings.toJson()));
+  }
+
 }

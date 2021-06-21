@@ -96,22 +96,22 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
     return InkWell(
       child: Container(height: 65, decoration: BoxDecoration(
           border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
-          child: dataModel.loading || dataModel.currentlyPlaying == null ? Row(children: [
+          child: dataModel.loading || dataModel.settings.currentlyPlaying == null ? Row(children: [
             SizedBox(width: 65, height: 65,child: Image.asset("assets/images/music_note.jpg")), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
           ],) : Row(children: [
-            SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.currentlyPlaying!)!)),
+            SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
             Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0),
               child: Container(width: 125,
                 child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Container(height: 30, child: Text(dataModel.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis,)),
-                  Container(height: 30, child: Text(dataModel.currentlyPlaying!.artist, maxLines: 2, overflow: TextOverflow.ellipsis,)),
+                  Container(height: 30, child: Text(dataModel.settings.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis,)),
+                  Container(height: 30, child: Text(dataModel.settings.currentlyPlaying!.artist, maxLines: 2, overflow: TextOverflow.ellipsis,)),
                 ],),
               ),
             ),
             AudioControls(buttonSizes: 35,),
           ],
           ),
-      ),onTap: dataModel.loading || dataModel.currentlyPlaying == null ? () => {} : () => {
+      ),onTap: dataModel.loading || dataModel.settings.currentlyPlaying == null ? () => {} : () => {
         showModalBottomSheet<void>(
           isScrollControlled: true,
           context: context,
@@ -187,7 +187,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          SizedBox(height: 200, width: 200, child: dataModel.getAlbumArt(dataModel.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.currentlyPlaying!)!)),
+          SizedBox(height: 200, width: 200, child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: AudioControls(buttonSizes: 60),

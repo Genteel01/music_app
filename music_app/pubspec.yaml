@@ -28,6 +28,7 @@ dependencies:
   flutter_media_metadata: any
   path_provider:
   just_audio:
+  enum_to_string:
 
 
   # The following adds the Cupertino Icons font to your application.

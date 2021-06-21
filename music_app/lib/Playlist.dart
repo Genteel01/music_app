@@ -18,7 +18,7 @@ class Playlist{
   Playlist.fromJson(Map<String, dynamic> json)
       :
         name = json['name'],
-        songPaths = json['songs'],
+        songPaths = json['songs'].cast<String>(),
         songs = [];
 
   //Function to turn a json file of several playlists into a list of playlists
@@ -27,7 +27,7 @@ class Playlist{
     List<Playlist> newPlaylists = List<Playlist>.empty(growable: true);
     data.forEach((element) {
       Playlist newPlaylist = Playlist.fromJson(element);
-
+      newPlaylist.loadSongs(allSongs);
       newPlaylists.add(newPlaylist);
     });
     return newPlaylists;
@@ -44,7 +44,6 @@ class Playlist{
 
       }
     });
-    songPaths.clear();
   }
   //Function to turn a list of playlists into a json file to be saved
   static List<Map<String, dynamic>> savePlaylistFile(List<Playlist> playlistList)
@@ -54,6 +53,14 @@ class Playlist{
       newPlaylists.add(element.toJson());
     });
     return newPlaylists;
+  }
+
+  addToPlaylist(List<Song> newSongs)
+  {
+    songs.addAll(newSongs);
+    newSongs.forEach((element) {
+      songPaths.add(element.filePath);
+    });
   }
 }
 
