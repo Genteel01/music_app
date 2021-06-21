@@ -62,6 +62,17 @@ class DataModel extends ChangeNotifier {
       }
     notifyListeners();
   }
+
+  clearSelections()
+  {
+    selectedSongs.clear();
+    selectedAlbums.clear();
+    selectedArtists.clear();
+    selectedIndices.clear();
+    selectedPlaylists.clear();
+    selecting = false;
+    notifyListeners();
+  }
   //replaced this
   DataModel()
   {

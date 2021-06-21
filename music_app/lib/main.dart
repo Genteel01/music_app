@@ -65,7 +65,7 @@ class MyTabBar extends StatelessWidget {
         bottomNavigationBar: CurrentlyPlayingBar(),
         appBar: dataModel.selecting ? AppBar(
           title: Text("Placeholder number of selected"),
-          bottom: AppBar(),
+          bottom: NonTappableTabBar(tabBar: TabBar(tabs: myTabs, isScrollable: true,),)
         ) : AppBar(
           title: Text("Music App"),
           bottom: TabBar(
@@ -85,6 +85,17 @@ class MyTabBar extends StatelessWidget {
       ),
     );
   }
+}
+
+class NonTappableTabBar extends StatelessWidget implements PreferredSizeWidget {
+  const NonTappableTabBar({Key? key, required this.tabBar}) : super(key: key);
+  final TabBar tabBar;
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(child: tabBar);
+  }
+
+  @override Size get preferredSize => this.tabBar.preferredSize;
 }
 
 class CurrentlyPlayingBar extends StatefulWidget {

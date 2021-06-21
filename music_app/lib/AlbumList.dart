@@ -50,7 +50,9 @@ class _AlbumListState extends State<AlbumList> {
                                 Navigator.push(context, MaterialPageRoute(
                                     builder: (context) {
                                       return AlbumDetails(index: index);
-                                    }))
+                                    })).then((value) {
+                                        dataModel.clearSelections();
+                                })
                               }
                             else
                               {

@@ -21,7 +21,9 @@ class AlbumDetails extends StatelessWidget {
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
     Album album = dataModel.albums[index];
     return Scaffold(
-        appBar: AppBar(
+        appBar: dataModel.selecting ? AppBar(automaticallyImplyLeading: false,
+          title: Text("Placeholder number of selected"),
+        ) : AppBar(
           title: Text(album.name),
         ),
         bottomNavigationBar: CurrentlyPlayingBar(),
@@ -49,12 +51,45 @@ class AlbumDetails extends StatelessWidget {
                         return Container(height: 70, decoration: BoxDecoration(
                             border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                           child: ListTile(
+                            selected: dataModel.selectedIndices.contains(index),
                             title: Text(song.name),
                             subtitle: Text(song.artist),
                             trailing: Text(song.durationString()),
                             leading: Text(song.trackNumber.toString()),
                             onTap: () async => {
-                              dataModel.setCurrentlyPlaying(song, album.songs),
+                              if(!dataModel.selecting)
+                                {
+                                  dataModel.setCurrentlyPlaying(song, album.songs),
+                                }
+                              else
+                                {
+                                  if(dataModel.selectedIndices.contains(index))
+                                    {
+                                      dataModel.selectedSongs.remove(song),
+                                      dataModel.selectedIndices.remove(index),
+                                      dataModel.setSelecting(),
+                                    }
+                                  else
+                                    {
+                                      dataModel.selectedSongs.add(song),
+                                      dataModel.selectedIndices.add(index),
+                                      dataModel.setSelecting(),
+                                    }
+                                }
+                            },
+                            onLongPress: () => {
+                              if(dataModel.selectedSongs.contains(song))
+                                {
+                                  dataModel.selectedSongs.remove(song),
+                                  dataModel.selectedIndices.remove(index),
+                                  dataModel.setSelecting(),
+                                }
+                              else
+                                {
+                                  dataModel.selectedSongs.add(song),
+                                  dataModel.selectedIndices.add(index),
+                                  dataModel.setSelecting(),
+                                }
                             },
                           ),
                         );

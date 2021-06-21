@@ -50,7 +50,9 @@ class _ArtistListState extends State<ArtistList> {
                                   Navigator.push(context, MaterialPageRoute(
                                       builder: (context) {
                                         return ArtistDetails(index: index);
-                                      }))
+                                      })).then((value) {
+                                          dataModel.clearSelections();
+                                        })
                                 }
                               else
                                 {
