@@ -196,6 +196,35 @@ class DataModel extends ChangeNotifier {
     savePlaylists();
     notifyListeners();
   }
+
+  //Returns true if you are selecting playlists, false otherwise
+  bool isSelectingPlaylists()
+  {
+    return selectedPlaylists.length > 0;
+  }
+  void addToPlaylist(Playlist playlist)
+  {
+      List<Song> newSongs = [];
+      newSongs.addAll(selectedSongs);
+      selectedArtists.forEach((element) {
+        newSongs.addAll(element.songs);
+      });
+      selectedAlbums.forEach((element) {
+        newSongs.addAll(element.songs);
+      });
+      playlist.addToPlaylist(newSongs);
+      savePlaylists();
+      clearSelections();
+  }
+
+  void deletePlaylists()
+  {
+    selectedPlaylists.forEach((element) {
+      playlists.remove(element);
+    });
+    savePlaylists();
+    clearSelections();
+  }
   Future<void> fetch() async
   {
     print("BREAK________________________________________________________________");

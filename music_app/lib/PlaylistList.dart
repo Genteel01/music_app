@@ -23,7 +23,7 @@ class _PlaylistListState extends State<PlaylistList> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[if(dataModel.loading) CircularProgressIndicator() else
-            PlaylistListBuilder()
+            PlaylistListBuilder(addingToPlaylist: false,)
           ],
         ),
       ),
@@ -32,8 +32,9 @@ class _PlaylistListState extends State<PlaylistList> {
 }
 
 class PlaylistListBuilder extends StatelessWidget {
+  final bool addingToPlaylist;
   const PlaylistListBuilder({
-    Key? key,
+    Key? key, required this.addingToPlaylist
   }) : super(key: key);
 
   @override
@@ -66,7 +67,7 @@ class PlaylistListBuilder extends StatelessWidget {
                               builder: (BuildContext context) =>
                                   AlertDialog(
                                     title: const Text("New Playlist"),
-                                    content: TextField(controller: playlistNameController, decoration: InputDecoration(hintText: "Playlist " + (dataModel.playlists.length + 1).toString()),),
+                                    content: TextField(controller: playlistNameController, textCapitalization: TextCapitalization.sentences, decoration: InputDecoration(hintText: "Playlist " + (dataModel.playlists.length + 1).toString()),),
                                     actions: <Widget>[
                                       TextButton(
                                         onPressed: () =>
@@ -98,14 +99,57 @@ class PlaylistListBuilder extends StatelessWidget {
                   border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                 child: Center(
                   child: ListTile(
-                    selected: dataModel.selectedIndices.contains(index - 1),
+                    selected: !addingToPlaylist && dataModel.selectedIndices.contains(index),
                     title: Text(playlist.name),
                     trailing: Text(playlist.songs.length.toString() + " Tracks"),
-                    onTap: () async => {
-                      Navigator.push(context, MaterialPageRoute(
-                          builder: (context) {
-                            return PlaylistDetails(index: index - 1);
-                          }))
+                    onTap: () => {
+                      if(addingToPlaylist)
+                        {
+                          dataModel.addToPlaylist(playlist),
+                          Navigator.pop(context)
+                        }
+                      else
+                        {
+                          if(!dataModel.selecting)
+                            {
+                              Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) {
+                                    return PlaylistDetails(index: index - 1);
+                                }))
+                            }
+                          else
+                            {
+                              if(dataModel.selectedIndices.contains(index))
+                                {
+                                  dataModel.selectedPlaylists.remove(playlist),
+                                  dataModel.selectedIndices.remove(index),
+                                  dataModel.setSelecting(),
+                                }
+                              else
+                                {
+                                  dataModel.selectedPlaylists.add(playlist),
+                                  dataModel.selectedIndices.add(index),
+                                  dataModel.setSelecting(),
+                                }
+                            }
+                        }
+                    },
+                    onLongPress: () => {
+                      if(!addingToPlaylist)
+                        {
+                          if(dataModel.selectedPlaylists.contains(playlist))
+                            {
+                              dataModel.selectedPlaylists.remove(playlist),
+                              dataModel.selectedIndices.remove(index),
+                              dataModel.setSelecting(),
+                            }
+                          else
+                            {
+                              dataModel.selectedPlaylists.add(playlist),
+                              dataModel.selectedIndices.add(index),
+                              dataModel.setSelecting(),
+                            }
+                        }
                     },
                   ),
                 ),
