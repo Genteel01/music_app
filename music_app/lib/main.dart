@@ -61,6 +61,7 @@ class MyTabBar extends StatelessWidget {
         appBar: AppBar(
           title: Text("Music App"),
           bottom: TabBar(
+            isScrollable: true,
             tabs: myTabs,
           ),
         ),
