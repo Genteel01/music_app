@@ -640,7 +640,43 @@ class DataModel extends ChangeNotifier {
     audioPlayer.playing ? audioPlayer.pause() : audioPlayer.play();
     notifyListeners();
   }
+  //Toggles shuffle behaviour when the shuffle button is pressed
+  void toggleShuffle()
+  {
+    print("Up Next Pre Toggle: " + settings.upNext[0].name + ", " + settings.upNext[1].name + ", " + settings.upNext[2].name);
+    //Toggle the tracking variable
+    settings.shuffle = !settings.shuffle;
+    //If you are now shuffling, shuffle the upNext playlist
+    if(settings.shuffle)
+      {
+        settings.upNext.shuffle();
+        settings.setSongPath();
+      }
+    //If you are not shuffling set the upNext playlist to the original unshuffled one
+    else
+      {
+        print("Turning it off");
+        List<Song> newUpNext = [];
+        newUpNext.addAll(settings.originalUpNext);
+        settings.upNext = newUpNext;
+        settings.setSongPath();
+      }
+    //Set the currently playing index to the index of the currently playing song
+    if(settings.currentlyPlaying != null)
+      {
+        settings.playingIndex = settings.upNext.indexOf(settings.currentlyPlaying!);
+        //Set the starting index to this position
+        settings.startingIndex = settings.playingIndex;
+      }
+    print("Up Next Post Toggle: " + settings.upNext[0].name + ", " + settings.upNext[1].name + ", " + settings.upNext[2].name);
+    notifyListeners();
+    saveSettings();
+  }
 
+  void toggleLoop()
+  {
+
+  }
   void nextButton()
   {
     //audioPlayer.seekToNext();

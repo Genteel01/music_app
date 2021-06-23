@@ -144,7 +144,7 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
     );
   }
 }
-
+//Used top make the tab bar non tappable when you are selecting items in a list
 class NonTappableTabBar extends StatelessWidget implements PreferredSizeWidget {
   const NonTappableTabBar({Key? key, required this.tabBar}) : super(key: key);
   final TabBar tabBar;
@@ -155,7 +155,7 @@ class NonTappableTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override Size get preferredSize => this.tabBar.preferredSize;
 }
-
+//The bar that appears at the bottom of the screen giving basic details about the currently playing song and playback controls.
 class CurrentlyPlayingBar extends StatefulWidget {
   const CurrentlyPlayingBar({Key? key}) : super(key: key);
 
@@ -212,7 +212,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
     );
   }
 }
-
+//Controls to play, pause, go back, and go forwards. Is passed in a size for the buttons so it can be used in several places.
 class AudioControls extends StatefulWidget {
   const AudioControls({Key? key, required this.buttonSizes}) : super(key: key);
   final double buttonSizes;
@@ -245,7 +245,7 @@ class _AudioControlsState extends State<AudioControls> {
     );
   }
 }
-
+//Shows the details of the currently playing song. Appears in the bottom modal that appears when tapping the currently playing bar.
 class PlayingSongDetails extends StatefulWidget {
   const PlayingSongDetails({Key? key}) : super(key: key);
 
@@ -266,6 +266,14 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
       child: Column(
         children: [
           SizedBox(height: 200, width: 200, child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+            SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.shuffle, color: Colors.grey[50],), heroTag: null, onPressed: () => {
+              dataModel.toggleShuffle(),
+            }, backgroundColor: dataModel.settings.shuffle ? Theme.of(context).primaryColor : Colors.grey,)),
+            SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.loop, color: Colors.grey[50],), heroTag: null, onPressed: () => {
+              dataModel.toggleLoop(),
+            },)),
+          ],),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: AudioControls(buttonSizes: 60),
