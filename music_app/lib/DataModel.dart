@@ -643,7 +643,6 @@ class DataModel extends ChangeNotifier {
   //Toggles shuffle behaviour when the shuffle button is pressed
   void toggleShuffle()
   {
-    print("Up Next Pre Toggle: " + settings.upNext[0].name + ", " + settings.upNext[1].name + ", " + settings.upNext[2].name);
     //Toggle the tracking variable
     settings.shuffle = !settings.shuffle;
     //If you are now shuffling, shuffle the upNext playlist
@@ -655,7 +654,6 @@ class DataModel extends ChangeNotifier {
     //If you are not shuffling set the upNext playlist to the original unshuffled one
     else
       {
-        print("Turning it off");
         List<Song> newUpNext = [];
         newUpNext.addAll(settings.originalUpNext);
         settings.upNext = newUpNext;
@@ -668,7 +666,6 @@ class DataModel extends ChangeNotifier {
         //Set the starting index to this position
         settings.startingIndex = settings.playingIndex;
       }
-    print("Up Next Post Toggle: " + settings.upNext[0].name + ", " + settings.upNext[1].name + ", " + settings.upNext[2].name);
     notifyListeners();
     saveSettings();
   }

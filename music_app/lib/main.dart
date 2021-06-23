@@ -265,15 +265,67 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
+          //Album art image
           SizedBox(height: 200, width: 200, child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.shuffle, color: Colors.grey[50],), heroTag: null, onPressed: () => {
-              dataModel.toggleShuffle(),
-            }, backgroundColor: dataModel.settings.shuffle ? Theme.of(context).primaryColor : Colors.grey,)),
+          //Song name
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
+            child: Text(dataModel.settings.currentlyPlaying!.name),
+          ),
+          //Song artist
+          Text(dataModel.settings.currentlyPlaying!.artist),
+          //Song album
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
+            child: Text(dataModel.settings.currentlyPlaying!.album),
+          ),
+          //Seekbar, shuffle, and loop row
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              //Shuffle button
+              SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.shuffle, color: Colors.grey[50],), heroTag: null, onPressed: () => {
+                dataModel.toggleShuffle(),
+              }, backgroundColor: dataModel.settings.shuffle ? Theme.of(context).primaryColor : Colors.grey,)),
+              //Seekbar
+              StreamBuilder<Duration> (
+                stream: dataModel.audioPlayer.positionStream,
+                  builder: (context, snapshot) {
+                  if(snapshot.hasData)
+                    {
+                      final position = snapshot.data;
+                      return Row(
+                        children: [
+                          //Current position
+                          (position!.inSeconds % 60) < 10 ? Text(position.inMinutes.toString() + ":0" + (position.inSeconds % 60).toStringAsFixed(0)) :
+                          Text(position.inMinutes.toString() + ":" + (position.inSeconds % 60).toStringAsFixed(0)),
+                          //Position Slider
+                          Slider(value: position.inSeconds.toDouble(), max: dataModel.audioPlayer.duration!.inSeconds.toDouble(), onChanged: (value) => {
+                            dataModel.audioPlayer.seek(Duration(seconds: value.toInt()))
+                          },),
+                          //Duration
+                          (dataModel.audioPlayer.duration!.inSeconds % 60) < 10 ? Text(dataModel.audioPlayer.duration!.inMinutes.toString() + ":0" + (dataModel.audioPlayer.duration!.inSeconds % 60).toStringAsFixed(0)) :
+                          Text(dataModel.audioPlayer.duration!.inMinutes.toString() + ":" + (dataModel.audioPlayer.duration!.inSeconds % 60).toStringAsFixed(0)),
+                        ],
+                      );
+                    }
+                  return Row(
+                    children: [
+                      //Current position
+                      Text("0:00"),
+                      //Position Slider
+                      Slider(value: 0, max: dataModel.audioPlayer.duration!.inSeconds.toDouble(), onChanged: (value) => {},),
+                      //Duration
+                      Text("0:00"),
+                    ],
+                  );
+                  }
+              ),
+            //Loop button
             SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.loop, color: Colors.grey[50],), heroTag: null, onPressed: () => {
               dataModel.toggleLoop(),
             },)),
-          ],),
+            ],
+          ),
+          //Audio Controls
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: AudioControls(buttonSizes: 60),
