@@ -20,6 +20,10 @@ import 'SongList.dart';
 //TODO Searching
 //TODO Marquee on overflowing text
 //TODO adding to playlists from the playlist details screen
+//TODO Scrollbars
+//TODO reordering playlists
+//TODO removing from playlists
+//TODO lock screen and notifications pulldown controls
 void main() {
   runApp(MyApp());
 }
@@ -287,9 +291,9 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
           //Seekbar, shuffle, and loop row
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               //Shuffle button
-              SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.shuffle, color: Colors.grey[50],), heroTag: null, onPressed: () => {
+              SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon( dataModel.settings.shuffle ? Icons.shuffle : Icons.arrow_right_alt, color: Colors.grey[50],), heroTag: null, onPressed: () => {
                 dataModel.toggleShuffle(),
-              }, backgroundColor: dataModel.settings.shuffle ? Theme.of(context).primaryColor : Colors.grey,)),
+              },)),
               //Seekbar
               StreamBuilder<Duration> (
                 stream: dataModel.audioPlayer.positionStream,
