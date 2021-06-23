@@ -390,7 +390,14 @@ class DataModel extends ChangeNotifier {
       print(state.processingState);
       if(state.processingState == ProcessingState.completed)
         {
-          playNextSong();
+          if(settings.loop == LoopType.singleSong)
+          {
+            audioPlayer.seek(Duration());
+          }
+          else
+            {
+              playNextSong();
+            }
         }
     });
     //Check for changed album metadata
@@ -595,25 +602,18 @@ class DataModel extends ChangeNotifier {
   //Plays the next song in the playlist
   void playNextSong() async
   {
-    if(settings.loop == LoopType.singleSong)
-      {
-        audioPlayer.seek(Duration());
-      }
+    settings.playingIndex++;
+    settings.playingIndex %= settings.upNext.length;
+    settings.currentlyPlaying = settings.upNext[settings.playingIndex];
+    await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
+    if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !audioPlayer.playing)
+    {
+      audioPlayer.pause();
+    }
     else
-      {
-        settings.playingIndex++;
-        settings.playingIndex %= settings.upNext.length;
-        settings.currentlyPlaying = settings.upNext[settings.playingIndex];
-        await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
-        if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !audioPlayer.playing)
-        {
-          audioPlayer.pause();
-        }
-        else
-        {
-          audioPlayer.play();
-        }
-      }
+    {
+      audioPlayer.play();
+    }
     notifyListeners();
     saveSettings();
   }
@@ -672,7 +672,20 @@ class DataModel extends ChangeNotifier {
 
   void toggleLoop()
   {
-
+    switch(settings.loop)
+    {
+      case LoopType.singleSong:
+        settings.loop = LoopType.none;
+        break;
+      case LoopType.loop:
+        settings.loop = LoopType.singleSong;
+        break;
+      case LoopType.none:
+        settings.loop = LoopType.loop;
+        break;
+    }
+      notifyListeners();
+      saveSettings();
   }
   void nextButton()
   {

@@ -15,6 +15,11 @@ import 'SongList.dart';
 //TODO https://pub.dev/packages/audio_service
 //TODO https://pub.dev/packages/just_audio
 //TODO https://pub.dev/packages/assets_audio_player
+
+
+//TODO Searching
+//TODO Marquee on overflowing text
+//TODO adding to playlists from the playlist details screen
 void main() {
   runApp(MyApp());
 }
@@ -270,14 +275,14 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
           //Song name
           Padding(
             padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
-            child: Text(dataModel.settings.currentlyPlaying!.name),
+            child: Text(dataModel.settings.currentlyPlaying!.name, overflow: TextOverflow.ellipsis,),
           ),
           //Song artist
-          Text(dataModel.settings.currentlyPlaying!.artist),
+          Text(dataModel.settings.currentlyPlaying!.artist, overflow: TextOverflow.ellipsis,),
           //Song album
           Padding(
             padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
-            child: Text(dataModel.settings.currentlyPlaying!.album),
+            child: Text(dataModel.settings.currentlyPlaying!.album, overflow: TextOverflow.ellipsis,),
           ),
           //Seekbar, shuffle, and loop row
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -320,7 +325,8 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                   }
               ),
             //Loop button
-            SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.loop, color: Colors.grey[50],), heroTag: null, onPressed: () => {
+            SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(dataModel.settings.loop == LoopType.singleSong ? Icons.repeat_one : (dataModel.settings.loop == LoopType.loop ? Icons.repeat : Icons.arrow_right_alt)
+              , color: Colors.grey[50],), heroTag: null, onPressed: () => {
               dataModel.toggleLoop(),
             },)),
             ],
@@ -328,7 +334,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
           //Audio Controls
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: AudioControls(buttonSizes: 60),
+            child: AudioControls(buttonSizes: 55),
           ),
         ],
       ),
