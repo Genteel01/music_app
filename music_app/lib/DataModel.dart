@@ -35,7 +35,7 @@ class DataModel extends ChangeNotifier {
   List<Album> albums = [];
   List<Playlist> playlists = [];
 
-  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, startingIndex: 0, songPaths: []);
+  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, startingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: []);
 
   List<String> directoryPaths = [];
 
@@ -511,6 +511,14 @@ class DataModel extends ChangeNotifier {
     {
       Directory(documentStorage + "/albumart").delete(recursive: true);
     }
+    if(File(documentStorage + "/playlists.txt").existsSync())
+    {
+      File(documentStorage + "/playlists.txt").delete();
+    }
+    if(File(documentStorage + "/settings.txt").existsSync())
+    {
+      File(documentStorage + "/settings.txt").delete();
+    }
   }
 
   void addToArtistsAndAlbums(Song newSong, Uint8List? albumArt, String? albumYear)
@@ -570,6 +578,8 @@ class DataModel extends ChangeNotifier {
     settings.currentlyPlaying = song;
     settings.upNext.clear();
     settings.upNext.addAll(futureSongs);
+    settings.originalUpNext.clear();
+    settings.originalUpNext.addAll(futureSongs);
     if(settings.shuffle)
       {
         settings.upNext.shuffle();
