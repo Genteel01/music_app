@@ -24,6 +24,7 @@ import 'SongList.dart';
 //TODO reordering playlists
 //TODO removing from playlists
 //TODO lock screen and notifications pulldown controls
+//TODO settings page with adding adn removing locations to look for music
 void main() {
   runApp(MyApp());
 }
