@@ -10,7 +10,6 @@ class AlbumDetails extends StatelessWidget {
   final int index;
 
   AlbumDetails({required this.index}) : super();
-  final filterController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(

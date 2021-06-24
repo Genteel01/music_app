@@ -35,7 +35,7 @@ class DataModel extends ChangeNotifier {
   List<Album> albums = [];
   List<Playlist> playlists = [];
 
-  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, startingIndex: 0, songPaths: []);
+  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, startingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: []);
 
   List<String> directoryPaths = [];
 
@@ -238,7 +238,7 @@ class DataModel extends ChangeNotifier {
     songs.clear();
     artists.clear();
     albums.clear();
-    playlists.clear;
+    playlists.clear();
 
 
     /*//If you haven't already got locations to look for music
@@ -390,7 +390,14 @@ class DataModel extends ChangeNotifier {
       print(state.processingState);
       if(state.processingState == ProcessingState.completed)
         {
-          playNextSong();
+          if(settings.loop == LoopType.singleSong)
+          {
+            audioPlayer.seek(Duration());
+          }
+          else
+            {
+              playNextSong();
+            }
         }
     });
     //Check for changed album metadata
@@ -511,6 +518,14 @@ class DataModel extends ChangeNotifier {
     {
       Directory(documentStorage + "/albumart").delete(recursive: true);
     }
+    if(File(documentStorage + "/playlists.txt").existsSync())
+    {
+      File(documentStorage + "/playlists.txt").delete();
+    }
+    if(File(documentStorage + "/settings.txt").existsSync())
+    {
+      File(documentStorage + "/settings.txt").delete();
+    }
   }
 
   void addToArtistsAndAlbums(Song newSong, Uint8List? albumArt, String? albumYear)
@@ -570,6 +585,8 @@ class DataModel extends ChangeNotifier {
     settings.currentlyPlaying = song;
     settings.upNext.clear();
     settings.upNext.addAll(futureSongs);
+    settings.originalUpNext.clear();
+    settings.originalUpNext.addAll(futureSongs);
     if(settings.shuffle)
       {
         settings.upNext.shuffle();
@@ -585,25 +602,18 @@ class DataModel extends ChangeNotifier {
   //Plays the next song in the playlist
   void playNextSong() async
   {
-    if(settings.loop == LoopType.singleSong)
-      {
-        audioPlayer.seek(Duration());
-      }
+    settings.playingIndex++;
+    settings.playingIndex %= settings.upNext.length;
+    settings.currentlyPlaying = settings.upNext[settings.playingIndex];
+    await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
+    if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !audioPlayer.playing)
+    {
+      audioPlayer.pause();
+    }
     else
-      {
-        settings.playingIndex++;
-        settings.playingIndex %= settings.upNext.length;
-        settings.currentlyPlaying = settings.upNext[settings.playingIndex];
-        await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
-        if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !audioPlayer.playing)
-        {
-          audioPlayer.pause();
-        }
-        else
-        {
-          audioPlayer.play();
-        }
-      }
+    {
+      audioPlayer.play();
+    }
     notifyListeners();
     saveSettings();
   }
@@ -630,7 +640,53 @@ class DataModel extends ChangeNotifier {
     audioPlayer.playing ? audioPlayer.pause() : audioPlayer.play();
     notifyListeners();
   }
+  //Toggles shuffle behaviour when the shuffle button is pressed
+  void toggleShuffle()
+  {
+    //Toggle the tracking variable
+    settings.shuffle = !settings.shuffle;
+    //If you are now shuffling, shuffle the upNext playlist
+    if(settings.shuffle)
+      {
+        settings.upNext.shuffle();
+        settings.setSongPath();
+      }
+    //If you are not shuffling set the upNext playlist to the original unshuffled one
+    else
+      {
+        List<Song> newUpNext = [];
+        newUpNext.addAll(settings.originalUpNext);
+        settings.upNext = newUpNext;
+        settings.setSongPath();
+      }
+    //Set the currently playing index to the index of the currently playing song
+    if(settings.currentlyPlaying != null)
+      {
+        settings.playingIndex = settings.upNext.indexOf(settings.currentlyPlaying!);
+        //Set the starting index to this position
+        settings.startingIndex = settings.playingIndex;
+      }
+    notifyListeners();
+    saveSettings();
+  }
 
+  void toggleLoop()
+  {
+    switch(settings.loop)
+    {
+      case LoopType.singleSong:
+        settings.loop = LoopType.none;
+        break;
+      case LoopType.loop:
+        settings.loop = LoopType.singleSong;
+        break;
+      case LoopType.none:
+        settings.loop = LoopType.loop;
+        break;
+    }
+      notifyListeners();
+      saveSettings();
+  }
   void nextButton()
   {
     //audioPlayer.seekToNext();
