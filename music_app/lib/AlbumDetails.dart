@@ -28,12 +28,12 @@ class AlbumDetails extends StatelessWidget {
         bottomNavigationBar: CurrentlyPlayingBar(),
         body: Column(
             children: <Widget>[
-              //TODO split the list by disc number
               Expanded(
                 child: Container(decoration: BoxDecoration(
                     border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
                   child: ListView.builder(
                       itemBuilder: (_, index) {
+                        //At the top of the list display the album art
                         if(index == 0)
                           {
                             return Column(children: [
@@ -46,7 +46,65 @@ class AlbumDetails extends StatelessWidget {
                             ],);
                           }
                         var song = album.songs[index - 1];
-
+                        //print the discnumber as a heading if you are at the start of the new disc
+                        if(index == 1 || song.discNumber != album.songs[index - 2].discNumber)
+                          {
+                            return Column(
+                              children: [
+                                //Disc number
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2.0, bottom: 2),
+                                  child: Text("Disc " + song.discNumber.toString()),
+                                ),
+                                //Song list tile
+                                Container(height: 70, decoration: BoxDecoration(
+                                    border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+                                  child: ListTile(
+                                    selected: dataModel.selectedIndices.contains(index),
+                                    title: Text(song.name),
+                                    subtitle: Text(song.artist),
+                                    trailing: Text(song.durationString()),
+                                    leading: Text(song.trackNumber.toString()),
+                                    onTap: () => {
+                                      if(!dataModel.selecting)
+                                        {
+                                          dataModel.setCurrentlyPlaying(song, album.songs),
+                                        }
+                                      else
+                                        {
+                                          if(dataModel.selectedIndices.contains(index))
+                                            {
+                                              dataModel.selectedSongs.remove(song),
+                                              dataModel.selectedIndices.remove(index),
+                                              dataModel.setSelecting(),
+                                            }
+                                          else
+                                            {
+                                              dataModel.selectedSongs.add(song),
+                                              dataModel.selectedIndices.add(index),
+                                              dataModel.setSelecting(),
+                                            }
+                                        }
+                                    },
+                                    onLongPress: () => {
+                                      if(dataModel.selectedSongs.contains(song))
+                                        {
+                                          dataModel.selectedSongs.remove(song),
+                                          dataModel.selectedIndices.remove(index),
+                                          dataModel.setSelecting(),
+                                        }
+                                      else
+                                        {
+                                          dataModel.selectedSongs.add(song),
+                                          dataModel.selectedIndices.add(index),
+                                          dataModel.setSelecting(),
+                                        }
+                                    },
+                                  ),
+                                )
+                              ],
+                            );
+                          }
                         return Container(height: 70, decoration: BoxDecoration(
                             border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                           child: ListTile(
@@ -55,7 +113,7 @@ class AlbumDetails extends StatelessWidget {
                             subtitle: Text(song.artist),
                             trailing: Text(song.durationString()),
                             leading: Text(song.trackNumber.toString()),
-                            onTap: () async => {
+                            onTap: () => {
                               if(!dataModel.selecting)
                                 {
                                   dataModel.setCurrentlyPlaying(song, album.songs),

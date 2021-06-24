@@ -35,10 +35,104 @@ class SearchResults extends StatelessWidget {
     return Expanded(
       child: Container(decoration: BoxDecoration(
           border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
-        //TODO split the list by item type
         child: ListView.builder(
             itemBuilder: (_, index) {
               var item = dataModel.searchResults[index];
+              //If you're at a new category of results print the result type as a heading
+              if(index == 0 || item.runtimeType != dataModel.searchResults[index - 1].runtimeType)
+                {
+                  //If the item is a song display a song list tile
+                  if(item.runtimeType == Song)
+                  {
+                    Song song = item as Song;
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2.0, bottom: 2),
+                          child: Text("Songs"),
+                        ),
+                        Container(height: 70, decoration: BoxDecoration(
+                            border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+                          child: ListTile(
+                            selected: dataModel.selectedIndices.contains(index),
+                            title: Text(song.name),
+                            subtitle: Text(song.album),
+                            trailing: Text(song.durationString()),
+                            leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
+                            onTap: () => {
+                              dataModel.setCurrentlyPlaying(song, buildUpNext(dataModel.searchResults)),
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                  //If the item is an album display an album list tile
+                  else if(item.runtimeType == Album)
+                  {
+                    Album album = item as Album;
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2.0, bottom: 2),
+                          child: Text("Albums"),
+                        ),
+                        Container(height: 70, decoration: BoxDecoration(
+                            border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+                          child: ListTile(
+                            selected: dataModel.selectedIndices.contains(index),
+                            title: Text(album.name),
+                            trailing: Text(album.songs.length.toString() + " tracks"),
+                            subtitle: Text(album.albumArtist),
+                            leading: SizedBox(width: 50, height: 50, child: album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(album.albumArt!)),
+                            onTap: () => {
+                              WidgetsBinding.instance?.focusManager.primaryFocus?.unfocus(),
+                              Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) {
+                                    return AlbumDetails(index: dataModel.albums.indexOf(album));
+                                  })).then((value) {
+                                dataModel.clearSelections();
+                              })
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                  //If it is neither display an artist list tile
+                  else
+                  {
+                    Artist artist = item as Artist;
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2.0, bottom: 2),
+                          child: Text("Artists"),
+                        ),
+                        Container(height: 70, decoration: BoxDecoration(
+                            border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+                          child: Align(alignment: Alignment.center,
+                            child: ListTile(
+                              selected: dataModel.selectedIndices.contains(index),
+                              title: Text(artist.name),
+                              trailing: Text(artist.songs.length.toString() + " tracks"),
+                              leading: SizedBox(width: 50, height: 50, child: !artist.songs.any((element) => dataModel.getAlbumArt(element) != null) ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != null))!)),
+                              onTap: () => {
+                                WidgetsBinding.instance?.focusManager.primaryFocus?.unfocus(),
+                                Navigator.push(context, MaterialPageRoute(
+                                    builder: (context) {
+                                      return ArtistDetails(index: dataModel.artists.indexOf(artist));
+                                    })).then((value) {
+                                  dataModel.clearSelections();
+                                })
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                }
               //If the item is a song display a song list tile
               if(item.runtimeType == Song)
                 {

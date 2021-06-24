@@ -18,14 +18,19 @@ import 'SongList.dart';
 //TODO https://pub.dev/packages/assets_audio_player
 
 
-//TODO Searching
 //TODO Marquee on overflowing text
 //TODO adding to playlists from the playlist details screen
 //TODO Scrollbars
+//Both of these two are part of the selection behaviour for playlist details screen
 //TODO reordering playlists
 //TODO removing from playlists
+//Both of these two can be in a hamburger menu
+//TODO renaming playlists
+//TODO deleting playlists from the playlist details screen
+
 //TODO lock screen and notifications pulldown controls
-//TODO settings page with adding adn removing locations to look for music
+//TODO settings page with adding and removing locations to look for music
+//TODO shuffle buttons and item counts at the top of each list
 void main() {
   runApp(MyApp());
 }
