@@ -50,6 +50,37 @@ class DataModel extends ChangeNotifier {
   List<Playlist> selectedPlaylists = [];
   List<int> selectedIndices = [];
 
+  List<Object> searchResults = [];
+
+  getSearchResults(String searchText)
+  {
+    searchResults.clear();
+    if(searchText != "") {
+      artists.forEach((element) {
+        if (element.name.toUpperCase().contains(searchText.toUpperCase())) {
+          searchResults.add(element);
+        }
+      });
+      albums.forEach((element) {
+        if (element.name.toUpperCase().contains(searchText.toUpperCase()) ||
+            element.albumArtist.toUpperCase().contains(
+                searchText.toUpperCase())) {
+          searchResults.add(element);
+        }
+      });
+      songs.forEach((element) {
+        if (element.name.toUpperCase().contains(searchText.toUpperCase()) ||
+            element.artist.toUpperCase().contains(searchText.toUpperCase()) ||
+            element.album.toUpperCase().contains(searchText.toUpperCase()) ||
+            element.albumArtist.toUpperCase().contains(
+                searchText.toUpperCase())) {
+          searchResults.add(element);
+        }
+      });
+    }
+    notifyListeners();
+  }
+
   setSelecting()
   {
     if(selectedSongs.length == 0 && selectedAlbums.length == 0 && selectedArtists.length == 0 && selectedPlaylists.length == 0)

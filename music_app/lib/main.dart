@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:music_app/ArtistList.dart';
+import 'package:music_app/Search.dart';
 import 'package:provider/provider.dart';
 
 import 'Album.dart';
@@ -54,6 +55,7 @@ class MyTabBar extends StatelessWidget {
     Tab(child: Row(children: [Icon(Icons.album), Text(" Albums")],mainAxisAlignment: MainAxisAlignment.center,),),
   ];
 
+  TextEditingController searchController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(
@@ -79,7 +81,45 @@ class MyTabBar extends StatelessWidget {
             title: SelectingAppBarTitle(),
             bottom: NonTappableTabBar(tabBar: TabBar(tabs: myTabs, isScrollable: true,),)
         ) : AppBar(
-          title: Text("Music App"),
+          title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              //Title
+              Text("Music"),
+              //Search Button
+              ElevatedButton.icon(onPressed: () => {
+                showModalBottomSheet<void>(
+                  isScrollControlled: true,
+                  context: context,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(30))),
+                  builder: (BuildContext context) {
+                    return Padding(
+                      padding: MediaQuery
+                          .of(context)
+                          .viewInsets,
+                      child: Container(
+                        height: 500,
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextField(controller: searchController, decoration: InputDecoration(hintText: "Search"), onChanged: (s) => {
+                                dataModel.getSearchResults(s)
+                              },)
+                            ),
+                            SearchResults(),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ).then((value) => {
+                  searchController.text = "",
+                  dataModel.searchResults.clear()
+                })
+              }, icon: Icon(Icons.search), label: Text("Search"))
+            ],
+          ),
           bottom: TabBar(
             isScrollable: true,
             tabs: myTabs,
