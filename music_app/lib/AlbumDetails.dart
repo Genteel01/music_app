@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'Album.dart';
 import 'AlbumArtView.dart';
 import 'DataModel.dart';
+import 'Song.dart';
 
 class AlbumDetails extends StatelessWidget {
   final int index;
@@ -59,96 +60,14 @@ class AlbumDetails extends StatelessWidget {
                                 //Song list tile
                                 Container(height: 70, decoration: BoxDecoration(
                                     border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
-                                  child: ListTile(
-                                    selected: dataModel.selectedIndices.contains(index),
-                                    title: Text(song.name),
-                                    subtitle: Text(song.artist),
-                                    trailing: Text(song.durationString()),
-                                    leading: Text(song.trackNumber.toString()),
-                                    onTap: () => {
-                                      if(!dataModel.selecting)
-                                        {
-                                          dataModel.setCurrentlyPlaying(song, album.songs),
-                                        }
-                                      else
-                                        {
-                                          if(dataModel.selectedIndices.contains(index))
-                                            {
-                                              dataModel.selectedSongs.remove(song),
-                                              dataModel.selectedIndices.remove(index),
-                                              dataModel.setSelecting(),
-                                            }
-                                          else
-                                            {
-                                              dataModel.selectedSongs.add(song),
-                                              dataModel.selectedIndices.add(index),
-                                              dataModel.setSelecting(),
-                                            }
-                                        }
-                                    },
-                                    onLongPress: () => {
-                                      if(dataModel.selectedSongs.contains(song))
-                                        {
-                                          dataModel.selectedSongs.remove(song),
-                                          dataModel.selectedIndices.remove(index),
-                                          dataModel.setSelecting(),
-                                        }
-                                      else
-                                        {
-                                          dataModel.selectedSongs.add(song),
-                                          dataModel.selectedIndices.add(index),
-                                          dataModel.setSelecting(),
-                                        }
-                                    },
-                                  ),
+                                  child: AlbumDetailsListItem(song: song, index: index, album: album,),
                                 )
                               ],
                             );
                           }
                         return Container(height: 70, decoration: BoxDecoration(
                             border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
-                          child: ListTile(
-                            selected: dataModel.selectedIndices.contains(index),
-                            title: Text(song.name),
-                            subtitle: Text(song.artist),
-                            trailing: Text(song.durationString()),
-                            leading: Text(song.trackNumber.toString()),
-                            onTap: () => {
-                              if(!dataModel.selecting)
-                                {
-                                  dataModel.setCurrentlyPlaying(song, album.songs),
-                                }
-                              else
-                                {
-                                  if(dataModel.selectedIndices.contains(index))
-                                    {
-                                      dataModel.selectedSongs.remove(song),
-                                      dataModel.selectedIndices.remove(index),
-                                      dataModel.setSelecting(),
-                                    }
-                                  else
-                                    {
-                                      dataModel.selectedSongs.add(song),
-                                      dataModel.selectedIndices.add(index),
-                                      dataModel.setSelecting(),
-                                    }
-                                }
-                            },
-                            onLongPress: () => {
-                              if(dataModel.selectedSongs.contains(song))
-                                {
-                                  dataModel.selectedSongs.remove(song),
-                                  dataModel.selectedIndices.remove(index),
-                                  dataModel.setSelecting(),
-                                }
-                              else
-                                {
-                                  dataModel.selectedSongs.add(song),
-                                  dataModel.selectedIndices.add(index),
-                                  dataModel.setSelecting(),
-                                }
-                            },
-                          ),
+                          child: AlbumDetailsListItem(song: song, index: index, album: album,),
                         );
                       },
                       itemCount: album.songs.length + 1
@@ -157,6 +76,69 @@ class AlbumDetails extends StatelessWidget {
               )
             ]
         )
+    );
+  }
+}
+
+class AlbumDetailsListItem extends StatefulWidget {
+  const AlbumDetailsListItem({Key? key, required this.song, required this.index, required this.album}) : super(key: key);
+  final Song song;
+  final int index;
+  final Album album;
+
+  @override
+  _AlbumDetailsListItemState createState() => _AlbumDetailsListItemState();
+}
+
+class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<DataModel>(
+        builder:buildWidget
+    );
+  }
+  Widget buildWidget(BuildContext context, DataModel dataModel, _){
+    return ListTile(
+      selected: dataModel.selectedIndices.contains(widget.index),
+      title: Text(widget.song.name),
+      subtitle: Text(widget.song.artist),
+      trailing: Text(widget.song.durationString()),
+      leading: Text(widget.song.trackNumber.toString()),
+      onTap: () => {
+        if(!dataModel.selecting)
+          {
+            dataModel.setCurrentlyPlaying(widget.song, widget.album.songs),
+          }
+        else
+          {
+            if(dataModel.selectedIndices.contains(widget.index))
+              {
+                dataModel.selectedSongs.remove(widget.song),
+                dataModel.selectedIndices.remove(widget.index),
+                dataModel.setSelecting(),
+              }
+            else
+              {
+                dataModel.selectedSongs.add(widget.song),
+                dataModel.selectedIndices.add(widget.index),
+                dataModel.setSelecting(),
+              }
+          }
+      },
+      onLongPress: () => {
+        if(dataModel.selectedSongs.contains(widget.song))
+          {
+            dataModel.selectedSongs.remove(widget.song),
+            dataModel.selectedIndices.remove(widget.index),
+            dataModel.setSelecting(),
+          }
+        else
+          {
+            dataModel.selectedSongs.add(widget.song),
+            dataModel.selectedIndices.add(widget.index),
+            dataModel.setSelecting(),
+          }
+      },
     );
   }
 }

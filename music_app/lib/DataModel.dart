@@ -81,6 +81,18 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  List<Song> buildUpNext()
+  {
+    List<Song> newList = [];
+    searchResults.forEach((element) {
+      if(element.runtimeType == Song)
+      {
+        newList.add(element as Song);
+      }
+    });
+    return newList;
+  }
+
   setSelecting()
   {
     if(selectedSongs.length == 0 && selectedAlbums.length == 0 && selectedArtists.length == 0 && selectedPlaylists.length == 0)

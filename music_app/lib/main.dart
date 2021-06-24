@@ -187,8 +187,8 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
                   height: 400,
                   //color: Colors.amber,
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PlaylistListBuilder(addingToPlaylist: true,),
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Flex(direction: Axis.vertical, children: [PlaylistListBuilder(addingToPlaylist: true,)]),
                   ),
                 ),
               );
