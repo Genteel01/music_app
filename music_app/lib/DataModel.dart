@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -52,6 +53,7 @@ class DataModel extends ChangeNotifier {
 
   List<Object> searchResults = [];
 
+  Random randomNumbers = new Random();
   getSearchResults(String searchText)
   {
     searchResults.clear();
@@ -712,6 +714,15 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
     saveSettings();
   }
+  
+  //Plays a random song and sets shuffle to true
+  playRandomSong(List<Song> futureSongs)
+  {
+    settings.shuffle = true;
+    setCurrentlyPlaying(futureSongs[randomNumbers.nextInt(futureSongs.length)], futureSongs);
+    saveSettings();
+  }
+  
 
   void toggleLoop()
   {

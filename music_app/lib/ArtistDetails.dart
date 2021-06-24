@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/SongList.dart';
 import 'package:music_app/main.dart';
 import 'package:provider/provider.dart';
 
@@ -34,9 +35,13 @@ class ArtistDetails extends StatelessWidget {
                     border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
                   child: ListView.builder(
                       itemBuilder: (_, index) {
-                        var song = artist.songs[index];
+                        if(index == 0)
+                        {
+                          return ShuffleButton(dataModel: dataModel, futureSongs: artist.songs);
+                        }
+                        var song = artist.songs[index - 1];
                         //If you're at a new album print an album heading
-                        if(index == 0 || song.album != artist.songs[index - 1].album)
+                        if(index == 1 || song.album != artist.songs[index - 1].album)
                         {
                           return Column(
                             children: [
@@ -56,7 +61,7 @@ class ArtistDetails extends StatelessWidget {
                           child: ArtistDetailsListItem(song: song, index: index, artist: artist,),
                         );
                       },
-                      itemCount: artist.songs.length
+                      itemCount: artist.songs.length + 1
                   ),
                 ),
               )

@@ -53,6 +53,13 @@ class PlaylistListBuilder extends StatelessWidget {
             addRepaintBoundaries: false,
             itemBuilder: (_, index) {
               if(index == 0)
+              {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(dataModel.playlists.length.toString() + " playlists"),
+                );
+              }
+              if(index == 1)
                 {
                   final playlistNameController = TextEditingController();
                   return Container(height: 70, decoration: BoxDecoration(
@@ -93,7 +100,7 @@ class PlaylistListBuilder extends StatelessWidget {
                     ),
                   );
                 }
-              var playlist = dataModel.playlists[index - 1];
+              var playlist = dataModel.playlists[index - 2];
 
               return Container(height: 70, decoration: BoxDecoration(
                   border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
@@ -155,7 +162,7 @@ class PlaylistListBuilder extends StatelessWidget {
                 ),
               );
             },
-            itemCount: dataModel.playlists.length + 1
+            itemCount: dataModel.playlists.length + 2
         ),
       ),
     );

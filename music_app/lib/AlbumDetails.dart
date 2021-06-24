@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/SongList.dart';
 import 'package:music_app/main.dart';
 import 'package:provider/provider.dart';
 
@@ -44,6 +45,7 @@ class AlbumDetails extends StatelessWidget {
                                         return AlbumArtView(image: album.albumArt);
                                       })),),
                               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Text(album.albumArtist), Text("Tracks: " + album.songs.length.toString())],),
+                              ShuffleButton(dataModel: dataModel, futureSongs: album.songs)
                             ],);
                           }
                         var song = album.songs[index - 1];
@@ -70,7 +72,7 @@ class AlbumDetails extends StatelessWidget {
                           child: AlbumDetailsListItem(song: song, index: index, album: album,),
                         );
                       },
-                      itemCount: album.songs.length + 1
+                      itemCount: album.songs.length + 2
                   ),
                 ),
               )

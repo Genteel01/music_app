@@ -31,14 +31,21 @@ class _AlbumListState extends State<AlbumList> {
                     addAutomaticKeepAlives: false,
                     addRepaintBoundaries: false,
                     itemBuilder: (_, index) {
-                      var album = dataModel.albums[index];
+                      if(index == 0)
+                      {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(dataModel.albums.length.toString() + " albums"),
+                        );
+                      }
+                      var album = dataModel.albums[index - 1];
                       if(album.songs.length == 0)
                         {
                           return Container(height: 0);
                         }
                       return AlbumListItem(album: album, index: index, allowSelection: true,);
                     },
-                    itemCount: dataModel.albums.length
+                    itemCount: dataModel.albums.length + 1
                 ),
               ),
             )

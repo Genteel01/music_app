@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/SongList.dart';
 import 'package:music_app/main.dart';
 import 'package:provider/provider.dart';
 
@@ -32,7 +33,11 @@ class PlaylistDetails extends StatelessWidget {
                     border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
                   child: ListView.builder(
                       itemBuilder: (_, index) {
-                        var song = playlist.songs[index];
+                        if(index == 0)
+                        {
+                          return ShuffleButton(dataModel: dataModel, futureSongs: playlist.songs);
+                        }
+                        var song = playlist.songs[index - 1];
 
                         return Container(height: 70, decoration: BoxDecoration(
                             border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
@@ -41,13 +46,13 @@ class PlaylistDetails extends StatelessWidget {
                             subtitle: Text(song.album),
                             trailing: Text(song.durationString()),
                             leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
-                            onTap: () async => {
+                            onTap: () => {
                               dataModel.setCurrentlyPlaying(song, playlist.songs),
                             },
                           ),
                         );
                       },
-                      itemCount: playlist.songs.length
+                      itemCount: playlist.songs.length + 1
                   ),
                 ),
               )

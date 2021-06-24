@@ -31,14 +31,21 @@ class _ArtistListState extends State<ArtistList> {
                     addAutomaticKeepAlives: false,
                     addRepaintBoundaries: false,
                     itemBuilder: (_, index) {
-                      var artist = dataModel.artists[index];
+                      if(index == 0)
+                      {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(dataModel.artists.length.toString() + " artists"),
+                        );
+                      }
+                      var artist = dataModel.artists[index - 1];
                       if(artist.songs.length == 0)
                       {
                         return Container(height: 0);
                       }
                       return ArtistListItem(artist: artist, index: index, allowSelection: true,);
                     },
-                    itemCount: dataModel.artists.length
+                    itemCount: dataModel.artists.length + 1
                 ),
               ),
             )

@@ -31,14 +31,38 @@ class _SongListState extends State<SongList> {
                     addAutomaticKeepAlives: false,
                     addRepaintBoundaries: false,
                     itemBuilder: (_, index) {
-                      var song = dataModel.songs[index];
-
+                      if(index == 0)
+                      {
+                        return ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,);
+                      }
+                      var song = dataModel.songs[index - 1];
                       return SongListItem(song: song, index: index, allowSelection: true,);
                     },
-                    itemCount: dataModel.songs.length
+                    itemCount: dataModel.songs.length + 1
                 ),
               ),
             )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ShuffleButton extends StatelessWidget {
+  const ShuffleButton({
+    Key? key, required this.dataModel, required this.futureSongs
+  }) : super(key: key);
+  final DataModel dataModel;
+  final List<Song> futureSongs;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: Align(alignment: Alignment.centerLeft,
+        child: Column(mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton.icon(onPressed: () => {dataModel.playRandomSong(futureSongs)}, icon: Icon(Icons.shuffle), label: Text("Shuffle " + futureSongs.length.toString() + " tracks")),
           ],
         ),
       ),

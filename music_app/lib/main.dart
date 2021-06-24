@@ -30,7 +30,6 @@ import 'SongList.dart';
 
 //TODO lock screen and notifications pulldown controls
 //TODO settings page with adding and removing locations to look for music
-//TODO shuffle buttons and item counts at the top of each list
 void main() {
   runApp(MyApp());
 }
