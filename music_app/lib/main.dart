@@ -60,7 +60,7 @@ class MyTabBar extends StatelessWidget {
     Tab(child: Row(children: [Icon(Icons.album), Text(" Albums")],mainAxisAlignment: MainAxisAlignment.center,),),
   ];
 
-  TextEditingController searchController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(
