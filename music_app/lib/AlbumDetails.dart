@@ -1,3 +1,4 @@
+import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/SongList.dart';
 import 'package:music_app/main.dart';
@@ -20,6 +21,7 @@ class AlbumDetails extends StatelessWidget {
   }
 
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
+    ScrollController myScrollController = ScrollController();
     Album album = dataModel.albums[index];
     return Scaffold(
         appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
@@ -33,40 +35,45 @@ class AlbumDetails extends StatelessWidget {
               Expanded(
                 child: Container(decoration: BoxDecoration(
                     border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
-                  child: ListView.builder(
-                      itemBuilder: (_, index) {
-                        //At the top of the list display the album art
-                        if(index == 0)
-                          {
-                            return Column(children: [
-                              InkWell(child: Hero(tag: "album_art", child: album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(album.albumArt!)), onTap: () =>
-                                  Navigator.push(context, MaterialPageRoute(
-                                      builder: (context) {
-                                        return AlbumArtView(image: album.albumArt);
-                                      })),),
-                              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Text(album.albumArtist), Text("Tracks: " + album.songs.length.toString())],),
-                              ShuffleButton(dataModel: dataModel, futureSongs: album.songs)
-                            ],);
-                          }
-                        var song = album.songs[index - 1];
-                        //print the discnumber as a heading if you are at the start of the new disc
-                        if(index == 1 || song.discNumber != album.songs[index - 1].discNumber)
-                          {
-                            return Column(
-                              children: [
-                                //Disc number
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 2.0, bottom: 2),
-                                  child: Text("Disc " + song.discNumber.toString()),
-                                ),
-                                //Song list tile
-                                AlbumDetailsListItem(song: song, album: album,)
-                              ],
-                            );
-                          }
-                        return AlbumDetailsListItem(song: song, album: album,);
-                      },
-                      itemCount: album.songs.length + 1
+                  child: DraggableScrollbar.arrows(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    controller: myScrollController,
+                    child: ListView.builder(
+                      controller: myScrollController,
+                        itemBuilder: (_, index) {
+                          //At the top of the list display the album art
+                          if(index == 0)
+                            {
+                              return Column(children: [
+                                InkWell(child: Hero(tag: "album_art", child: album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(album.albumArt!)), onTap: () =>
+                                    Navigator.push(context, MaterialPageRoute(
+                                        builder: (context) {
+                                          return AlbumArtView(image: album.albumArt);
+                                        })),),
+                                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Text(album.albumArtist), Text("Tracks: " + album.songs.length.toString())],),
+                                ShuffleButton(dataModel: dataModel, futureSongs: album.songs)
+                              ],);
+                            }
+                          var song = album.songs[index - 1];
+                          //print the discnumber as a heading if you are at the start of the new disc
+                          if(index == 1 || song.discNumber != album.songs[index - 2].discNumber)
+                            {
+                              return Column(
+                                children: [
+                                  //Disc number
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 2.0, bottom: 2),
+                                    child: Text("Disc " + song.discNumber.toString()),
+                                  ),
+                                  //Song list tile
+                                  AlbumDetailsListItem(song: song, album: album,)
+                                ],
+                              );
+                            }
+                          return AlbumDetailsListItem(song: song, album: album,);
+                        },
+                        itemCount: album.songs.length + 1,
+                    ),
                   ),
                 ),
               )

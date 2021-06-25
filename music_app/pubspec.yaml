@@ -29,6 +29,7 @@ dependencies:
   path_provider:
   just_audio:
   enum_to_string:
+  draggable_scrollbar:
 
 
   # The following adds the Cupertino Icons font to your application.

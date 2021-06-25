@@ -1,3 +1,4 @@
+import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/SongList.dart';
 import 'package:music_app/main.dart';
@@ -20,6 +21,7 @@ class ArtistDetails extends StatelessWidget {
   }
 
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
+    ScrollController myScrollController = ScrollController();
     Artist artist = dataModel.artists[index];
     return Scaffold(
         appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
@@ -33,29 +35,34 @@ class ArtistDetails extends StatelessWidget {
               Expanded(
                 child: Container(decoration: BoxDecoration(
                     border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
-                  child: ListView.builder(
-                      itemBuilder: (_, index) {
-                        if(index == 0)
-                        {
-                          return ShuffleButton(dataModel: dataModel, futureSongs: artist.songs);
-                        }
-                        var song = artist.songs[index - 1];
-                        //If you're at a new album print an album heading
-                        if(index == 1 || song.album != artist.songs[index - 1].album)
-                        {
-                          return Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2.0, bottom: 2),
-                                child: Text(song.album),
-                              ),
-                              ArtistDetailsListItem(song: song, artist: artist,),
-                            ],
-                          );
-                        }
-                        return ArtistDetailsListItem(song: song, artist: artist,);
-                      },
-                      itemCount: artist.songs.length + 1
+                  child: DraggableScrollbar.arrows(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    controller: myScrollController,
+                    child: ListView.builder(
+                      controller: myScrollController,
+                        itemBuilder: (_, index) {
+                          if(index == 0)
+                          {
+                            return ShuffleButton(dataModel: dataModel, futureSongs: artist.songs);
+                          }
+                          var song = artist.songs[index - 1];
+                          //If you're at a new album print an album heading
+                          if(index == 1 || song.album != artist.songs[index - 2].album)
+                          {
+                            return Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2.0, bottom: 2),
+                                  child: Text(song.album),
+                                ),
+                                ArtistDetailsListItem(song: song, artist: artist,),
+                              ],
+                            );
+                          }
+                          return ArtistDetailsListItem(song: song, artist: artist,);
+                        },
+                        itemCount: artist.songs.length + 1,
+                    ),
                   ),
                 ),
               )

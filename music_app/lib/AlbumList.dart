@@ -1,3 +1,4 @@
+import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,6 +20,7 @@ class _AlbumListState extends State<AlbumList> {
     );
   }
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _){
+    ScrollController myScrollController = ScrollController();
     return Scaffold(
       body: Center(
         child: Column(
@@ -27,23 +29,29 @@ class _AlbumListState extends State<AlbumList> {
             Expanded(
               child: Container(decoration: BoxDecoration(
                   border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
-                child: ListView.builder(
-                    itemBuilder: (_, index) {
-                      if(index == 0)
-                      {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(dataModel.albums.length.toString() + " albums"),
-                        );
-                      }
-                      var album = dataModel.albums[index - 1];
-                      if(album.songs.length == 0)
+                child: DraggableScrollbar.arrows(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  controller: myScrollController,
+                  child: ListView.builder(
+                    controller: myScrollController,
+                      itemBuilder: (_, index) {
+                        if(index == 0)
                         {
-                          return Container(height: 0);
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(dataModel.albums.length.toString() + " albums"),
+                          );
                         }
-                      return AlbumListItem(album: album, allowSelection: true,);
-                    },
-                    itemCount: dataModel.albums.length + 1
+                        var album = dataModel.albums[index - 1];
+                        if(album.songs.length == 0)
+                          {
+                            return Container(height: 0);
+                          }
+                        return AlbumListItem(album: album, allowSelection: true,);
+                      },
+                      itemCount: dataModel.albums.length + 1,
+                    itemExtent: 70,
+                  ),
                 ),
               ),
             )

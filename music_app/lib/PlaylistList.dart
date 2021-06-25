@@ -1,3 +1,4 @@
+import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/PlaylistDetails.dart';
 import 'package:provider/provider.dart';
@@ -45,100 +46,107 @@ class PlaylistListBuilder extends StatelessWidget {
     );
   }
   Widget buildList(BuildContext context, DataModel dataModel, _){
+    ScrollController myScrollController = ScrollController();
     return Expanded(
       child: Container(decoration: BoxDecoration(
           border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
-        child: ListView.builder(
-            itemBuilder: (_, index) {
-              if(index == 0)
-              {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(dataModel.playlists.length.toString() + " playlists"),
-                );
-              }
-              if(index == 1)
+        child: DraggableScrollbar.arrows(
+          backgroundColor: Theme.of(context).primaryColor,
+          controller: myScrollController,
+          child: ListView.builder(
+            controller: myScrollController,
+              itemBuilder: (_, index) {
+                if(index == 0)
                 {
-                  final playlistNameController = TextEditingController();
-                  return Container(height: 70, decoration: BoxDecoration(
-                      border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
-                    child: Center(
-                      child: ListTile(
-                        leading: Icon(Icons.add_box),
-                        title: Text("Create new Playlist"),
-                        onTap: () => {
-                          showDialog<bool>(
-                              context: context,
-                              builder: (BuildContext context) =>
-                                  AlertDialog(
-                                    title: const Text("New Playlist"),
-                                    content: TextField(controller: playlistNameController, textCapitalization: TextCapitalization.sentences, decoration: InputDecoration(hintText: "Playlist " + (dataModel.playlists.length + 1).toString()),),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context, false),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context, true),
-                                        child: const Text('Create'),
-                                      ),
-                                    ],
-                                  )
-                          ).then((value) =>
-                          {
-                              if(value != null && value)
-                                {
-                                  dataModel.createPlaylist(playlistNameController.text)
-                                }
-                          }),
-                        },
-                      ),
-                    ),
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(dataModel.playlists.length.toString() + " playlists"),
                   );
                 }
-              var playlist = dataModel.playlists[index - 2];
+                if(index == 1)
+                  {
+                    final playlistNameController = TextEditingController();
+                    return Container(height: 70, decoration: BoxDecoration(
+                        border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+                      child: Center(
+                        child: ListTile(
+                          leading: Icon(Icons.add_box),
+                          title: Text("Create new Playlist"),
+                          onTap: () => {
+                            showDialog<bool>(
+                                context: context,
+                                builder: (BuildContext context) =>
+                                    AlertDialog(
+                                      title: const Text("New Playlist"),
+                                      content: TextField(controller: playlistNameController, textCapitalization: TextCapitalization.sentences, decoration: InputDecoration(hintText: "Playlist " + (dataModel.playlists.length + 1).toString()),),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          child: const Text('Create'),
+                                        ),
+                                      ],
+                                    )
+                            ).then((value) =>
+                            {
+                                if(value != null && value)
+                                  {
+                                    dataModel.createPlaylist(playlistNameController.text)
+                                  }
+                            }),
+                          },
+                        ),
+                      ),
+                    );
+                  }
+                var playlist = dataModel.playlists[index - 2];
 
-              return Container(height: 70, decoration: BoxDecoration(
-                  border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
-                child: Center(
-                  child: ListTile(
-                    selected: !addingToPlaylist && dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)),
-                    title: Text(playlist.name),
-                    trailing: Text(playlist.songs.length.toString() + " Tracks"),
-                    onTap: () => {
-                      if(addingToPlaylist)
-                        {
-                          dataModel.addToPlaylist(playlist),
-                          Navigator.pop(context)
-                        }
-                      else
-                        {
-                          if(dataModel.selectedIndices.length == 0)
-                            {
-                              Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) {
-                                    return PlaylistDetails(index: index - 2);
-                                }))
-                            }
-                          else
-                            {
-                              dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist)
-                            }
-                        }
-                    },
-                    onLongPress: () => {
-                      if(!addingToPlaylist)
-                        {
-                          dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist)
-                        }
-                    },
+                return Container(height: 70, decoration: BoxDecoration(
+                    border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+                  child: Center(
+                    child: ListTile(
+                      selected: !addingToPlaylist && dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)),
+                      title: Text(playlist.name),
+                      trailing: Text(playlist.songs.length.toString() + " Tracks"),
+                      onTap: () => {
+                        if(addingToPlaylist)
+                          {
+                            dataModel.addToPlaylist(playlist),
+                            Navigator.pop(context)
+                          }
+                        else
+                          {
+                            if(dataModel.selectedIndices.length == 0)
+                              {
+                                Navigator.push(context, MaterialPageRoute(
+                                    builder: (context) {
+                                      return PlaylistDetails(index: index - 2);
+                                  }))
+                              }
+                            else
+                              {
+                                dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist)
+                              }
+                          }
+                      },
+                      onLongPress: () => {
+                        if(!addingToPlaylist)
+                          {
+                            dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist)
+                          }
+                      },
+                    ),
                   ),
-                ),
-              );
-            },
-            itemCount: dataModel.playlists.length + 2
+                );
+              },
+              itemCount: dataModel.playlists.length + 2,
+            itemExtent: 70,
+          ),
         ),
       ),
     );

@@ -22,7 +22,6 @@ import 'SongList.dart';
 //TODO feedback (adding to playlists, removing from playlists)
 //TODO Marquee on overflowing text
 //TODO adding to playlists from the playlist details screen
-//TODO Scrollbars
 //Part of the selection behaviour for playlist details screen
 //TODO reordering playlists
 //Both of these two can be in a hamburger menu
