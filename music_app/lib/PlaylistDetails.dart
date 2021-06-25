@@ -22,7 +22,7 @@ class PlaylistDetails extends StatelessWidget {
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
     Playlist playlist = dataModel.playlists[index];
     return Scaffold(
-        appBar: dataModel.selectedItems.length > 0 ? AppBar(automaticallyImplyLeading: false,
+        appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
           title: SelectingAppBarTitle(playlist: playlist,),
         ) : AppBar(
           title: Text(playlist.name),
@@ -41,7 +41,7 @@ class PlaylistDetails extends StatelessWidget {
                         }
                         var song = playlist.songs[index - 1];
 
-                        return SongListItem(song: song, allowSelection: true, futureSongs: playlist.songs);
+                        return SongListItem(song: song, allowSelection: true, futureSongs: playlist.songs, index: index - 1);
                       },
                       itemCount: playlist.songs.length + 1
                   ),

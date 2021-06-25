@@ -9,6 +9,7 @@ import 'Artist.dart';
 import 'DataModel.dart';
 import 'Playlist.dart';
 import 'PlaylistList.dart';
+import 'Song.dart';
 import 'SongList.dart';
 //Saving/loading from json
 //TODO https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
@@ -81,7 +82,7 @@ class MyTabBar extends StatelessWidget {
         },
         ),
         bottomNavigationBar: CurrentlyPlayingBar(),
-        appBar: dataModel.selectedItems.length > 0 ? AppBar(
+        appBar: dataModel.selectedIndices.length > 0 ? AppBar(
             title: SelectingAppBarTitle(),
             bottom: NonTappableTabBar(tabBar: TabBar(tabs: myTabs, isScrollable: true,),)
         ) : AppBar(
@@ -130,7 +131,7 @@ class MyTabBar extends StatelessWidget {
           ),
         ),
         body: TabBarView(
-          physics: dataModel.selectedItems.length > 0 ? NeverScrollableScrollPhysics() : null,
+          physics: dataModel.selectedIndices.length > 0 ? NeverScrollableScrollPhysics() : null,
           children: [
             PlaylistList(),
             SongList(),
@@ -168,12 +169,12 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
             },),
             Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-              child: Text(dataModel.selectedItems.length.toString() + " Selected"),
+              child: Text(dataModel.selectedIndices.length.toString() + " Selected"),
             ),
           ],
         ),
-        ElevatedButton(child: Text(dataModel.isSelectingPlaylists() || widget.playlist != null ? "Remove" : "Add To"), onPressed: () => {
-          if(dataModel.isSelectingPlaylists())
+        ElevatedButton(child: Text(dataModel.selectionType == Playlist || widget.playlist != null ? "Remove" : "Add To"), onPressed: () => {
+          if(dataModel.selectionType == Playlist)
             {
               dataModel.deletePlaylists()
             }
@@ -330,7 +331,8 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
   }
 
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
-    List<Object> oldSelections = [];
+    List<int> oldSelections = [];
+    Type oldSelectionType = Song;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.center,
@@ -363,7 +365,8 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
               SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.playlist_add), onPressed: () => {
                 dataModel.selectedItems.forEach((element) { oldSelections.add(element);}),
                 dataModel.clearSelections(),
-                dataModel.selectedItems.add(dataModel.settings.currentlyPlaying!),
+                oldSelectionType = dataModel.selectionType,
+                dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.currentlyPlaying!), Song),
                   showModalBottomSheet<void>(
                     isScrollControlled: true,
                     context: context,
@@ -384,7 +387,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                         ),
                       );
                     },
-                  ).then((value) => {dataModel.clearSelections(), oldSelections.forEach((element) {dataModel.toggleSelection(element);})})
+                  ).then((value) => {dataModel.clearSelections(), oldSelections.forEach((element) {dataModel.toggleSelection(element, oldSelectionType);})})
                 },),
               ),
             ],

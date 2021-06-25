@@ -75,13 +75,13 @@ class _AlbumListItemState extends State<AlbumListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedItems.contains(widget.album),
+        selected: dataModel.selectedIndices.contains(dataModel.albums.indexOf(widget.album)),
         title: Text(widget.album.name),
         trailing: Text(widget.album.songs.length.toString() + " tracks"),
         subtitle: Text(widget.album.albumArtist),
         leading: SizedBox(width: 50, height: 50, child: widget.album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(widget.album.albumArt!)),
         onTap: () => {
-          if(dataModel.selectedItems.length == 0)
+          if(dataModel.selectedIndices.length == 0)
             {
               Navigator.push(context, MaterialPageRoute(
                   builder: (context) {
@@ -92,13 +92,13 @@ class _AlbumListItemState extends State<AlbumListItem> {
             }
           else if(widget.allowSelection)
             {
-              dataModel.toggleSelection(widget.album)
+              dataModel.toggleSelection(dataModel.albums.indexOf(widget.album), Album)
             }
         },
         onLongPress: () => {
           if(widget.allowSelection)
             {
-              dataModel.toggleSelection(widget.album)
+              dataModel.toggleSelection(dataModel.albums.indexOf(widget.album), Album)
             }
         },
       ),

@@ -40,7 +40,7 @@ class SearchResults extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 2.0, bottom: 2),
                           child: Text("Songs"),
                         ),
-                        SongListItem(song: song, allowSelection: false, futureSongs: dataModel.buildUpNext(),),
+                        SongListItem(song: song, allowSelection: false, futureSongs: dataModel.buildUpNext(), index: index),
                       ],
                     );
                   }
@@ -77,7 +77,7 @@ class SearchResults extends StatelessWidget {
               if(item.runtimeType == Song)
                 {
                   Song song = item as Song;
-                  return SongListItem(song: song, allowSelection: false, futureSongs: dataModel.buildUpNext(),);
+                  return SongListItem(song: song, allowSelection: false, futureSongs: dataModel.buildUpNext(), index: index);
                 }
               //If the item is an album display an album list tile
               else if(item.runtimeType == Album)

@@ -77,12 +77,12 @@ class _ArtistListItemState extends State<ArtistListItem> {
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: Align(alignment: Alignment.center,
         child: ListTile(
-          selected: dataModel.selectedItems.contains(widget.artist),
+          selected: dataModel.selectedIndices.contains(dataModel.artists.indexOf(widget.artist)),
           title: Text(widget.artist.name),
           trailing: Text(widget.artist.songs.length.toString() + " tracks"),
           leading: SizedBox(width: 50, height: 50, child: !widget.artist.songs.any((element) => dataModel.getAlbumArt(element) != null) ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != null))!)),
           onTap: () async => {
-            if(dataModel.selectedItems.length == 0)
+            if(dataModel.selectedIndices.length == 0)
               {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (context) {
@@ -93,13 +93,13 @@ class _ArtistListItemState extends State<ArtistListItem> {
               }
             else if(widget.allowSelection)
               {
-                dataModel.toggleSelection(widget.artist)
+                dataModel.toggleSelection(dataModel.artists.indexOf(widget.artist), Artist)
               }
           },
           onLongPress: () => {
             if(widget.allowSelection)
               {
-                dataModel.toggleSelection(widget.artist)
+                dataModel.toggleSelection(dataModel.artists.indexOf(widget.artist), Artist)
               }
           },
         ),

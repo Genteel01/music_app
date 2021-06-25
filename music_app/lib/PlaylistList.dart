@@ -3,6 +3,7 @@ import 'package:music_app/PlaylistDetails.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
+import 'Playlist.dart';
 class PlaylistList extends StatefulWidget {
   const PlaylistList({Key? key}) : super(key: key);
 
@@ -106,7 +107,7 @@ class PlaylistListBuilder extends StatelessWidget {
                   border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                 child: Center(
                   child: ListTile(
-                    selected: !addingToPlaylist && dataModel.selectedItems.contains(playlist),
+                    selected: !addingToPlaylist && dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)),
                     title: Text(playlist.name),
                     trailing: Text(playlist.songs.length.toString() + " Tracks"),
                     onTap: () => {
@@ -117,7 +118,7 @@ class PlaylistListBuilder extends StatelessWidget {
                         }
                       else
                         {
-                          if(dataModel.selectedItems.length == 0)
+                          if(dataModel.selectedIndices.length == 0)
                             {
                               Navigator.push(context, MaterialPageRoute(
                                   builder: (context) {
@@ -126,14 +127,14 @@ class PlaylistListBuilder extends StatelessWidget {
                             }
                           else
                             {
-                              dataModel.toggleSelection(playlist)
+                              dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist)
                             }
                         }
                     },
                     onLongPress: () => {
                       if(!addingToPlaylist)
                         {
-                          dataModel.toggleSelection(playlist)
+                          dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist)
                         }
                     },
                   ),
