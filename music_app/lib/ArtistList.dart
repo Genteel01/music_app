@@ -39,7 +39,7 @@ class _ArtistListState extends State<ArtistList> {
                         {
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.artists.length.toString() + " Artists", style: TextStyle(fontSize: 16,),)),
+                            child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.artists.length == 1 ? dataModel.artists.length.toString() + " Artist" : dataModel.artists.length.toString() + " Artists", style: TextStyle(fontSize: 16,),)),
                           );
                         }
                         var artist = dataModel.artists[index - 1];
@@ -85,7 +85,7 @@ class _ArtistListItemState extends State<ArtistListItem> {
         child: ListTile(
           selected: dataModel.selectedIndices.contains(dataModel.artists.indexOf(widget.artist)),
           title: Text(widget.artist.name),
-          trailing: Text(widget.artist.songs.length.toString() + " tracks"),
+          trailing: Text(widget.artist.songs.length == 1 ? widget.artist.songs.length.toString() + " track" : widget.artist.songs.length.toString() + " tracks"),
           leading: SizedBox(width: 50, height: 50, child: !widget.artist.songs.any((element) => dataModel.getAlbumArt(element) != null) ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != null))!)),
           onTap: () async => {
             if(dataModel.selectedIndices.length == 0)

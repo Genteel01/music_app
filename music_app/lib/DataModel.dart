@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
@@ -38,9 +39,7 @@ class DataModel extends ChangeNotifier {
   List<Album> albums = [];
   List<Playlist> playlists = [];
 
-  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, startingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: []);
-
-  List<String> directoryPaths = [];
+  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, startingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: [], directoryPaths: []);
 
   String appDocumentsDirectory = "";
 
@@ -204,19 +203,25 @@ class DataModel extends ChangeNotifier {
   //Adds a new directory to the places where you look for songs
   Future<void> getNewDirectory() async
   {
-    //TODO remove this line once I stop testing with a system reset button
-    appDocumentsDirectory = await getAppDocumentsDirectory();
     //Have the user pick a new location to look for music
     String? newDirectoryPath = await FilePicker.platform.getDirectoryPath();
-    if(newDirectoryPath != null)
+    if(newDirectoryPath != null && !settings.directoryPaths.contains(newDirectoryPath))
     {
-      directoryPaths.add(newDirectoryPath);
+      settings.directoryPaths.add(newDirectoryPath);
     }
-    //Save this location to the file
-    String directoryPathsJson = jsonEncode(directoryPaths);
-    File(appDocumentsDirectory + "/music_locations.txt").writeAsString(directoryPathsJson);
+    await saveSettings();
+    await fetch();
+    notifyListeners();
   }
 
+  Future<void> removeDirectoryPath(String path) async
+  {
+    settings.directoryPaths.remove(path);
+    await saveSettings();
+    await deleteSongList();
+    await fetch();
+    notifyListeners();
+  }
   void createPlaylist(String playlistName)
   {
     String finalName = playlistName == "" ? "Playlist " + (playlists.length + 1).toString() : playlistName;
@@ -273,20 +278,6 @@ class DataModel extends ChangeNotifier {
     playlists.clear();
 
 
-    /*//If you haven't already got locations to look for music
-    if(!File(appDocumentsDirectory + "/music_locations.txt").existsSync())
-      {
-          await getNewDirectory();
-      }*/
-    //If you have already got locations then load them.
-    try
-      {
-        directoryPaths = jsonDecode(File(appDocumentsDirectory + "/music_locations.txt").readAsStringSync()).cast<String>();
-      }
-    catch (error)
-    {
-      await getNewDirectory();
-    }
     var retriever = new MetadataRetriever();
     //If the album art directory doesn't exist create it
     if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
@@ -314,12 +305,28 @@ class DataModel extends ChangeNotifier {
       var jsonFile = jsonDecode(songsFile);
       songs = await Song.loadSongFile(jsonFile);
     }
+    //Load your settings file
+    try
+    {
+      String settingsFile = await File(appDocumentsDirectory + "/settings.txt").readAsString();
+      var jsonFile = jsonDecode(settingsFile);
+      settings = Settings.fromJson(jsonFile);
+      settings.loadSongs(songs);
+      if(settings.currentlyPlaying != null)
+      {
+        await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
+        audioPlayer.pause();
+      }
+    }
+    catch(error){
+
+    }
     //Sort the songs into artists and albums
     songs.forEach((element) {
       addToArtistsAndAlbums(element, null, null);
     });
     //Check for new songs within the directories you are looking at
-    await Future.forEach(directoryPaths, (String directoryPath) async {
+    await Future.forEach(settings.directoryPaths, (String directoryPath) async {
       //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
       var directoryMap = Directory(directoryPath).listSync(recursive: true);
       await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
@@ -354,20 +361,6 @@ class DataModel extends ChangeNotifier {
       var jsonFile = jsonDecode(playlistsFile);
       playlists = Playlist.loadPlaylistFile(jsonFile, songs);
     }
-    //Load your settings file
-    try
-    {
-      String settingsFile = await File(appDocumentsDirectory + "/settings.txt").readAsString();
-      var jsonFile = jsonDecode(settingsFile);
-      settings = Settings.fromJson(jsonFile);
-      settings.loadSongs(songs);
-      if(settings.currentlyPlaying != null)
-        {
-          await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
-          audioPlayer.pause();
-        }
-    }
-    catch(error){}
     //Sort the song and album lists
     sortByTrackName(songs);
     //sortByDuration(songs);
@@ -706,7 +699,10 @@ class DataModel extends ChangeNotifier {
   playRandomSong(List<Song> futureSongs)
   {
     settings.shuffle = true;
-    setCurrentlyPlaying(futureSongs[randomNumbers.nextInt(futureSongs.length)], futureSongs);
+    if(futureSongs.length > 0)
+      {
+        setCurrentlyPlaying(futureSongs[randomNumbers.nextInt(futureSongs.length)], futureSongs);
+      }
     saveSettings();
   }
   
@@ -746,9 +742,9 @@ class DataModel extends ChangeNotifier {
       }
   }
 
-  void saveSettings()
+  Future<void> saveSettings() async
   {
-    File(appDocumentsDirectory + "/settings.txt").writeAsString(jsonEncode(settings.toJson()));
+    await File(appDocumentsDirectory + "/settings.txt").writeAsString(jsonEncode(settings.toJson()));
   }
 
   void savePlaylists()
@@ -757,4 +753,11 @@ class DataModel extends ChangeNotifier {
     File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
   }
 
+  Future<void> deleteSongList() async
+  {
+    if(File(appDocumentsDirectory + "/songs.txt").existsSync())
+    {
+      await File(appDocumentsDirectory + "/songs.txt").delete();
+    }
+  }
 }

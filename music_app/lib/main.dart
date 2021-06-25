@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:music_app/ArtistList.dart';
 import 'package:music_app/Search.dart';
+import 'package:music_app/Settings.dart';
 import 'package:provider/provider.dart';
 
 import 'Album.dart';
@@ -29,7 +30,6 @@ import 'SongList.dart';
 //TODO deleting playlists from the playlist details screen
 
 //TODO lock screen and notifications pulldown controls
-//TODO settings page with adding and removing locations to look for music
 void main() {
   runApp(MyApp());
 }
@@ -59,6 +59,7 @@ class MyTabBar extends StatelessWidget {
   ];
 
   final TextEditingController searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(
@@ -69,16 +70,6 @@ class MyTabBar extends StatelessWidget {
     return DefaultTabController(
       length: myTabs.length,
       child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.library_music), onPressed: () async => {
-          if(!dataModel.loading)
-            {
-              dataModel.directoryPaths = [],
-              await dataModel.getNewDirectory(),
-              await dataModel.fetch()
-            }
-        },
-        ),
         bottomNavigationBar: CurrentlyPlayingBar(),
         appBar: dataModel.selectedIndices.length > 0 ? AppBar(
             title: SelectingAppBarTitle(),
@@ -89,38 +80,52 @@ class MyTabBar extends StatelessWidget {
               //Title
               Text("Music"),
               //Search Button
-              ElevatedButton.icon(onPressed: () => {
-                showModalBottomSheet<void>(
-                  isScrollControlled: true,
-                  context: context,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(30))),
-                  builder: (BuildContext context) {
-                    return Padding(
-                      padding: MediaQuery
-                          .of(context)
-                          .viewInsets,
-                      child: Container(
-                        height: 500,
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: TextField(controller: searchController, decoration: InputDecoration(hintText: "Search"), onChanged: (s) => {
-                                dataModel.getSearchResults(s)
-                              },)
+              Row(
+                children: [
+                  ElevatedButton.icon(onPressed: () => {
+                    showModalBottomSheet<void>(
+                      isScrollControlled: true,
+                      context: context,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(30))),
+                      builder: (BuildContext context) {
+                        return Padding(
+                          padding: MediaQuery
+                              .of(context)
+                              .viewInsets,
+                          child: Container(
+                            height: 500,
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: TextField(controller: searchController, decoration: InputDecoration(hintText: "Search"), onChanged: (s) => {
+                                    dataModel.getSearchResults(s)
+                                  },)
+                                ),
+                                SearchResults(),
+                              ],
                             ),
-                            SearchResults(),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ).then((value) => {
-                  searchController.text = "",
-                  dataModel.searchResults.clear()
-                })
-              }, icon: Icon(Icons.search), label: Text("Search"))
+                          ),
+                        );
+                      },
+                    ).then((value) => {
+                      searchController.text = "",
+                      dataModel.searchResults.clear()
+                    })
+                  }, icon: Icon(Icons.search), label: Text("Search")),
+                  //Menu
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: InkWell(child: Icon(Icons.settings), onTap: () => {
+                      Navigator.push(context, MaterialPageRoute(
+                          builder: (context) {
+                            return SettingsPage();
+                          }))
+                    },),
+                  ),
+                ],
+              ),
             ],
           ),
           bottom: TabBar(

@@ -7,7 +7,20 @@ import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
 import 'Playlist.dart';
-
+//TODO do the menu (with settings, rename, delete, and reorder options)
+/*
+*           PopupMenuButton<String>(
+            onSelected: handleClick,
+            itemBuilder: (BuildContext context) {
+              return {'Logout', 'Settings'}.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
+          ),
+* */
 class PlaylistDetails extends StatelessWidget {
   final int index;
 

@@ -65,7 +65,7 @@ class PlaylistListBuilder extends StatelessWidget {
                         child: ListTile(
                           leading: Icon(Icons.add_box),
                           title: Text("Create new Playlist"),
-                          subtitle: Text(dataModel.playlists.length.toString() + " Playlists"),
+                          subtitle: Text(dataModel.playlists.length == 1 ? dataModel.playlists.length.toString() + " Playlist" : dataModel.playlists.length.toString() + " Playlists"),
                           onTap: () => {
                             showDialog<bool>(
                                 context: context,
@@ -106,7 +106,7 @@ class PlaylistListBuilder extends StatelessWidget {
                     child: ListTile(
                       selected: !addingToPlaylist && dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)),
                       title: Text(playlist.name),
-                      trailing: Text(playlist.songs.length.toString() + " Tracks"),
+                      trailing: Text(playlist.songs.length == 1 ? playlist.songs.length.toString() + " Track" : playlist.songs.length.toString() + " Tracks"),
                       onTap: () => {
                         if(addingToPlaylist)
                           {

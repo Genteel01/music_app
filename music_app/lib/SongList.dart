@@ -68,7 +68,7 @@ class ShuffleButton extends StatelessWidget {
       child: Align(alignment: Alignment.centerLeft,
         child: Column(mainAxisSize: MainAxisSize.min,
           children: [
-            ElevatedButton.icon(onPressed: () => {dataModel.playRandomSong(futureSongs)}, icon: Icon(Icons.shuffle), label: Text("Shuffle " + futureSongs.length.toString() + " tracks")),
+            ElevatedButton.icon(onPressed: () => {dataModel.playRandomSong(futureSongs)}, icon: Icon(Icons.shuffle), label: Text(futureSongs.length == 1 ? "Shuffle " + futureSongs.length.toString() + " track" : "Shuffle " + futureSongs.length.toString() + " tracks" )),
           ],
         ),
       ),
