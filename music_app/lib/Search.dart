@@ -6,9 +6,7 @@ import 'package:provider/provider.dart';
 
 
 import 'Album.dart';
-import 'AlbumDetails.dart';
 import 'Artist.dart';
-import 'ArtistDetails.dart';
 import 'DataModel.dart';
 import 'Song.dart';
 
