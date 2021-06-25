@@ -19,13 +19,12 @@ import 'SongList.dart';
 //TODO https://pub.dev/packages/just_audio
 //TODO https://pub.dev/packages/assets_audio_player
 
-//TODO feedback (adding to playlists)
+//TODO feedback (adding to playlists, removing from playlists)
 //TODO Marquee on overflowing text
 //TODO adding to playlists from the playlist details screen
 //TODO Scrollbars
-//Both of these two are part of the selection behaviour for playlist details screen
+//Part of the selection behaviour for playlist details screen
 //TODO reordering playlists
-//TODO removing from playlists
 //Both of these two can be in a hamburger menu
 //TODO renaming playlists
 //TODO deleting playlists from the playlist details screen
@@ -364,8 +363,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                 dataModel.toggleLoop(),
               },)),
               SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.playlist_add), onPressed: () => {
-                //TODO use a temp list to store the currently selected list and restore it after closing the modal
-                dataModel.selectedIndices.forEach((element) { oldSelections.add(element);}),
+                dataModel.selectedItems.forEach((element) { oldSelections.add(element);}),
                 dataModel.clearSelections(),
                 oldSelectionType = dataModel.selectionType,
                 dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.currentlyPlaying!), Song),
