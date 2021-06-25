@@ -51,7 +51,6 @@ class MyApp extends StatelessWidget {
 
 class MyTabBar extends StatelessWidget {
   MyTabBar({Key? key}) : super(key: key);
-//TODO work out how to retain the list positions when you change tabs
   final List<Tab> myTabs = [
     Tab(child: Row(children: [Icon(Icons.library_music), Text(" Playlists")],mainAxisAlignment: MainAxisAlignment.center,),),
     Tab(child: Row(children: [Icon(Icons.music_note), Text(" Tracks")],mainAxisAlignment: MainAxisAlignment.center,),),
@@ -132,10 +131,10 @@ class MyTabBar extends StatelessWidget {
         body: TabBarView(
           physics: dataModel.selectedIndices.length > 0 ? NeverScrollableScrollPhysics() : null,
           children: [
-            PlaylistList(),
-            SongList(),
-            ArtistList(),
-            AlbumList(),
+            PlaylistList(key: PageStorageKey("playlist_key"),),
+            SongList(key: PageStorageKey("song_key"),),
+            ArtistList(key: PageStorageKey("artist_key"),),
+            AlbumList(key: PageStorageKey("album_key"),),
           ],
         ),
       ),

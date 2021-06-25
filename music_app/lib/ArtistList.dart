@@ -39,7 +39,7 @@ class _ArtistListState extends State<ArtistList> {
                         {
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text(dataModel.artists.length.toString() + " artists"),
+                            child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.artists.length.toString() + " Artists", style: TextStyle(fontSize: 16,),)),
                           );
                         }
                         var artist = dataModel.artists[index - 1];

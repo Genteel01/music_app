@@ -39,7 +39,7 @@ class _AlbumListState extends State<AlbumList> {
                         {
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text(dataModel.albums.length.toString() + " albums"),
+                            child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.albums.length.toString() + " Albums", style: TextStyle(fontSize: 16,),)),
                           );
                         }
                         var album = dataModel.albums[index - 1];
