@@ -7,6 +7,7 @@ import 'Album.dart';
 import 'AlbumList.dart';
 import 'Artist.dart';
 import 'DataModel.dart';
+import 'Playlist.dart';
 import 'PlaylistList.dart';
 import 'SongList.dart';
 //Saving/loading from json
@@ -143,9 +144,10 @@ class MyTabBar extends StatelessWidget {
   }
 }
 class SelectingAppBarTitle extends StatefulWidget {
-  const SelectingAppBarTitle({Key? key, this.album, this.artist}) : super(key: key);
+  const SelectingAppBarTitle({Key? key, this.album, this.artist, this.playlist}) : super(key: key);
   final Album? album;
   final Artist? artist;
+  final Playlist? playlist;
   @override
   _SelectingAppBarTitleState createState() => _SelectingAppBarTitleState();
 }
@@ -162,8 +164,8 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
       children: [
         Row(
           children: [
-            ElevatedButton(child: Text(dataModel.returnAllSelected(widget.album, widget.artist) ? "Clear" : "All"), onPressed: () => {
-                dataModel.returnAllSelected(widget.album, widget.artist) ? dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist)
+            ElevatedButton(child: Text(dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist) ? "Clear" : "All"), onPressed: () => {
+                dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist) ? dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist, widget.playlist)
             },),
             Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0),
@@ -171,28 +173,42 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
             ),
           ],
         ),
-        ElevatedButton(child: Text(dataModel.isSelectingPlaylists() ? "Remove" : "Add To"), onPressed: () => {
-          dataModel.isSelectingPlaylists() ? dataModel.deletePlaylists() : showModalBottomSheet<void>(
-            isScrollControlled: true,
-            context: context,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(
-                top: Radius.circular(30))),
-            builder: (BuildContext context) {
-              return Padding(
-                padding: MediaQuery
-                    .of(context)
-                    .viewInsets,
-                child: Container(
-                  height: 400,
-                  //color: Colors.amber,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 16.0),
-                    child: Flex(direction: Axis.vertical, children: [PlaylistListBuilder(addingToPlaylist: true,)]),
-                  ),
-                ),
-              );
-            },
-          )
+        ElevatedButton(child: Text(dataModel.isSelectingPlaylists() || widget.playlist != null ? "Remove" : "Add To"), onPressed: () => {
+          if(dataModel.isSelectingPlaylists())
+            {
+              dataModel.deletePlaylists()
+            }
+          else if(widget.playlist != null)
+            {
+              dataModel.removeFromPlaylist(widget.playlist!)
+            }
+          else
+            {
+              showModalBottomSheet<void>(
+                isScrollControlled: true,
+                context: context,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(30))),
+                builder: (BuildContext context) {
+                  return Padding(
+                    padding: MediaQuery
+                        .of(context)
+                        .viewInsets,
+                    child: Container(
+                      height: 400,
+                      //color: Colors.amber,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Flex(direction: Axis.vertical, children: [
+                          PlaylistListBuilder(addingToPlaylist: true,)
+                        ]),
+                      ),
+                    ),
+                  );
+                },
+              )
+            }
         },),
       ],
     );

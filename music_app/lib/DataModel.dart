@@ -97,8 +97,17 @@ class DataModel extends ChangeNotifier {
     selectedItems.clear();
     notifyListeners();
   }
+
+  removeFromPlaylist(Playlist playlist)
+  {
+    selectedItems.forEach((element) {
+      playlist.songs.remove(element);
+    });
+    clearSelections();
+    notifyListeners();
+  }
   //Returns true if all the values in the selection type you are working with are selected, false otherwise
-  bool returnAllSelected(Album? album, Artist? artist)
+  bool returnAllSelected(Album? album, Artist? artist, Playlist? playlist)
   {
     if(selectedItems.length > 0) {
       if (selectedItems[0].runtimeType == Song) {
@@ -108,6 +117,10 @@ class DataModel extends ChangeNotifier {
         else if (artist != null) {
           return selectedItems.length == artist.songs.length;
         }
+        else if(playlist != null)
+          {
+            return selectedItems.length == playlist.songs.length;
+          }
         else {
           return selectedItems.length == songs.length;
         }
@@ -126,7 +139,7 @@ class DataModel extends ChangeNotifier {
   }
   
   //Selects all the values for the selection type you are currently working with
-  void selectAll(Album? album, Artist? artist)
+  void selectAll(Album? album, Artist? artist, Playlist? playlist)
   {
     //Int to say whether you are working with albums (0), artists(1), songs(2), or playlists(3)
     int typeOfSelection = 2;
@@ -160,6 +173,10 @@ class DataModel extends ChangeNotifier {
               else if(artist != null)
                 {
                   selectedItems.addAll(artist.songs);
+                }
+              else if(playlist != null)
+                {
+                  selectedItems.addAll(playlist.songs);
                 }
               else
                 {
