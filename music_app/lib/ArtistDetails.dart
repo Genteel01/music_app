@@ -85,10 +85,15 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedItems.contains(widget.song),
+        selected: dataModel.selectedItems.contains(widget.song) || (dataModel.selectedItems.length == 0 && dataModel.settings.currentlyPlaying == widget.song),
         title: Text(widget.song.name),
         subtitle: Text(widget.song.album),
-        trailing: Text(widget.song.durationString()),
+        trailing: dataModel.settings.currentlyPlaying == widget.song ? Row(mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(widget.song.durationString()),
+            Icon(Icons.play_arrow)
+          ],
+        ) : Text(widget.song.durationString()),
         leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.song)!)),
         onTap: () => {
           if(dataModel.selectedItems.length == 0)

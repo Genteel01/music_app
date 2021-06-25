@@ -50,7 +50,7 @@ class AlbumDetails extends StatelessWidget {
                           }
                         var song = album.songs[index - 1];
                         //print the discnumber as a heading if you are at the start of the new disc
-                        if(index == 1 || song.discNumber != album.songs[index - 2].discNumber)
+                        if(index == 1 || song.discNumber != album.songs[index - 1].discNumber)
                           {
                             return Column(
                               children: [
@@ -66,7 +66,7 @@ class AlbumDetails extends StatelessWidget {
                           }
                         return AlbumDetailsListItem(song: song, album: album,);
                       },
-                      itemCount: album.songs.length + 2
+                      itemCount: album.songs.length + 1
                   ),
                 ),
               )
@@ -96,10 +96,15 @@ class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedItems.contains(widget.song),
+        selected: dataModel.selectedItems.contains(widget.song) || (dataModel.selectedItems.length == 0 && dataModel.settings.currentlyPlaying == widget.song) ,
         title: Text(widget.song.name),
         subtitle: Text(widget.song.artist),
-        trailing: Text(widget.song.durationString()),
+        trailing: dataModel.settings.currentlyPlaying == widget.song ? Row(mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(widget.song.durationString()),
+            Icon(Icons.play_arrow)
+          ],
+        ) : Text(widget.song.durationString()),
         leading: Text(widget.song.trackNumber.toString()),
         onTap: () => {
           if(dataModel.selectedItems.length == 0)
