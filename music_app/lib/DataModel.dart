@@ -373,7 +373,6 @@ class DataModel extends ChangeNotifier {
       sortByNumber(element.songs);
     });
     //Remove all the artists and albums that have 0 songs in them
-    //TODO Test this part by changing the directory that is used to search songs.
     for (int i = albums.length; i > 0; i--)
       {
         if(albums[i - 1].songs.length == 0)

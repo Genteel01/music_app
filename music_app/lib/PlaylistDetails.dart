@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
 import 'Playlist.dart';
-//TODO do the menu (with settings, rename, delete, and reorder options)
+//TODO do the menu (with settings, rename, delete, add to playlist and reorder options)
 /*
 *           PopupMenuButton<String>(
             onSelected: handleClick,

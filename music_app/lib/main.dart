@@ -18,16 +18,9 @@ import 'SongList.dart';
 
 //TODO https://pub.dev/packages/audio_service
 //TODO https://pub.dev/packages/just_audio
-//TODO https://pub.dev/packages/assets_audio_player
 
 //TODO feedback (adding to playlists, removing from playlists)
 //TODO Marquee on overflowing text
-//TODO adding to playlists from the playlist details screen
-//Part of the selection behaviour for playlist details screen
-//TODO reordering playlists
-//Both of these two can be in a hamburger menu
-//TODO renaming playlists
-//TODO deleting playlists from the playlist details screen
 
 //TODO lock screen and notifications pulldown controls
 void main() {
