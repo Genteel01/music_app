@@ -60,17 +60,11 @@ class AlbumDetails extends StatelessWidget {
                                   child: Text("Disc " + song.discNumber.toString()),
                                 ),
                                 //Song list tile
-                                Container(height: 70, decoration: BoxDecoration(
-                                    border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
-                                  child: AlbumDetailsListItem(song: song, index: index, album: album,),
-                                )
+                                AlbumDetailsListItem(song: song, index: index, album: album,)
                               ],
                             );
                           }
-                        return Container(height: 70, decoration: BoxDecoration(
-                            border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
-                          child: AlbumDetailsListItem(song: song, index: index, album: album,),
-                        );
+                        return AlbumDetailsListItem(song: song, index: index, album: album,);
                       },
                       itemCount: album.songs.length + 2
                   ),
@@ -100,47 +94,50 @@ class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
     );
   }
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
-    return ListTile(
-      selected: dataModel.selectedIndices.contains(widget.index),
-      title: Text(widget.song.name),
-      subtitle: Text(widget.song.artist),
-      trailing: Text(widget.song.durationString()),
-      leading: Text(widget.song.trackNumber.toString()),
-      onTap: () => {
-        if(!dataModel.selecting)
-          {
-            dataModel.setCurrentlyPlaying(widget.song, widget.album.songs),
-          }
-        else
-          {
-            if(dataModel.selectedIndices.contains(widget.index))
-              {
-                dataModel.selectedSongs.remove(widget.song),
-                dataModel.selectedIndices.remove(widget.index),
-                dataModel.setSelecting(),
-              }
-            else
-              {
-                dataModel.selectedSongs.add(widget.song),
-                dataModel.selectedIndices.add(widget.index),
-                dataModel.setSelecting(),
-              }
-          }
-      },
-      onLongPress: () => {
-        if(dataModel.selectedSongs.contains(widget.song))
-          {
-            dataModel.selectedSongs.remove(widget.song),
-            dataModel.selectedIndices.remove(widget.index),
-            dataModel.setSelecting(),
-          }
-        else
-          {
-            dataModel.selectedSongs.add(widget.song),
-            dataModel.selectedIndices.add(widget.index),
-            dataModel.setSelecting(),
-          }
-      },
+    return Container(height: 70, decoration: BoxDecoration(
+        border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+      child: ListTile(
+        selected: dataModel.selectedIndices.contains(widget.index),
+        title: Text(widget.song.name),
+        subtitle: Text(widget.song.artist),
+        trailing: Text(widget.song.durationString()),
+        leading: Text(widget.song.trackNumber.toString()),
+        onTap: () => {
+          if(!dataModel.selecting)
+            {
+              dataModel.setCurrentlyPlaying(widget.song, widget.album.songs),
+            }
+          else
+            {
+              if(dataModel.selectedIndices.contains(widget.index))
+                {
+                  dataModel.selectedSongs.remove(widget.song),
+                  dataModel.selectedIndices.remove(widget.index),
+                  dataModel.setSelecting(),
+                }
+              else
+                {
+                  dataModel.selectedSongs.add(widget.song),
+                  dataModel.selectedIndices.add(widget.index),
+                  dataModel.setSelecting(),
+                }
+            }
+        },
+        onLongPress: () => {
+          if(dataModel.selectedSongs.contains(widget.song))
+            {
+              dataModel.selectedSongs.remove(widget.song),
+              dataModel.selectedIndices.remove(widget.index),
+              dataModel.setSelecting(),
+            }
+          else
+            {
+              dataModel.selectedSongs.add(widget.song),
+              dataModel.selectedIndices.add(widget.index),
+              dataModel.setSelecting(),
+            }
+        },
+      ),
     );
   }
 }

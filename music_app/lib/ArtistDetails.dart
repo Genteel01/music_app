@@ -49,17 +49,11 @@ class ArtistDetails extends StatelessWidget {
                                 padding: const EdgeInsets.only(top: 2.0, bottom: 2),
                                 child: Text(song.album),
                               ),
-                              Container(height: 70, decoration: BoxDecoration(
-                                  border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
-                                child: ArtistDetailsListItem(song: song, index: index, artist: artist,),
-                              ),
+                              ArtistDetailsListItem(song: song, index: index, artist: artist,),
                             ],
                           );
                         }
-                        return Container(height: 70, decoration: BoxDecoration(
-                            border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
-                          child: ArtistDetailsListItem(song: song, index: index, artist: artist,),
-                        );
+                        return ArtistDetailsListItem(song: song, index: index, artist: artist,);
                       },
                       itemCount: artist.songs.length + 1
                   ),
@@ -89,47 +83,50 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
     );
   }
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
-    return ListTile(
-      selected: dataModel.selectedIndices.contains(widget.index),
-      title: Text(widget.song.name),
-      subtitle: Text(widget.song.album),
-      trailing: Text(widget.song.durationString()),
-      leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.song)!)),
-      onTap: () => {
-        if(!dataModel.selecting)
-          {
-            dataModel.setCurrentlyPlaying(widget.song, widget.artist.songs),
-          }
-        else
-          {
-            if(dataModel.selectedIndices.contains(widget.index))
-              {
-                dataModel.selectedSongs.remove(widget.song),
-                dataModel.selectedIndices.remove(widget.index),
-                dataModel.setSelecting(),
-              }
-            else
-              {
-                dataModel.selectedSongs.add(widget.song),
-                dataModel.selectedIndices.add(widget.index),
-                dataModel.setSelecting(),
-              }
-          }
-      },
-      onLongPress: () => {
-        if(dataModel.selectedSongs.contains(widget.song))
-          {
-            dataModel.selectedSongs.remove(widget.song),
-            dataModel.selectedIndices.remove(widget.index),
-            dataModel.setSelecting(),
-          }
-        else
-          {
-            dataModel.selectedSongs.add(widget.song),
-            dataModel.selectedIndices.add(widget.index),
-            dataModel.setSelecting(),
-          }
-      },
+    return Container(height: 70, decoration: BoxDecoration(
+        border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+      child: ListTile(
+        selected: dataModel.selectedIndices.contains(widget.index),
+        title: Text(widget.song.name),
+        subtitle: Text(widget.song.album),
+        trailing: Text(widget.song.durationString()),
+        leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.song)!)),
+        onTap: () => {
+          if(!dataModel.selecting)
+            {
+              dataModel.setCurrentlyPlaying(widget.song, widget.artist.songs),
+            }
+          else
+            {
+              if(dataModel.selectedIndices.contains(widget.index))
+                {
+                  dataModel.selectedSongs.remove(widget.song),
+                  dataModel.selectedIndices.remove(widget.index),
+                  dataModel.setSelecting(),
+                }
+              else
+                {
+                  dataModel.selectedSongs.add(widget.song),
+                  dataModel.selectedIndices.add(widget.index),
+                  dataModel.setSelecting(),
+                }
+            }
+        },
+        onLongPress: () => {
+          if(dataModel.selectedSongs.contains(widget.song))
+            {
+              dataModel.selectedSongs.remove(widget.song),
+              dataModel.selectedIndices.remove(widget.index),
+              dataModel.setSelecting(),
+            }
+          else
+            {
+              dataModel.selectedSongs.add(widget.song),
+              dataModel.selectedIndices.add(widget.index),
+              dataModel.setSelecting(),
+            }
+        },
+      ),
     );
   }
 }

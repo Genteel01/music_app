@@ -36,7 +36,7 @@ class _SongListState extends State<SongList> {
                         return ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,);
                       }
                       var song = dataModel.songs[index - 1];
-                      return SongListItem(song: song, index: index, allowSelection: true,);
+                      return SongListItem(song: song, index: index, allowSelection: true, futureSongs: dataModel.songs,);
                     },
                     itemCount: dataModel.songs.length + 1
                 ),
@@ -72,11 +72,13 @@ class ShuffleButton extends StatelessWidget {
 
 
 class SongListItem extends StatefulWidget {
-  const SongListItem({Key? key, required this.song, required this.index, required this.allowSelection}) : super(key: key);
+  const SongListItem({Key? key, required this.song, required this.index, required this.allowSelection, required this.futureSongs}) : super(key: key);
   final Song song;
   final int index;
   //Selection will be disabled if the item is being shown in search results
   final bool allowSelection;
+  //Which songs will be added to upnext when you play a song
+  final List<Song> futureSongs;
 
   @override
   _SongListItemState createState() => _SongListItemState();
@@ -106,7 +108,7 @@ class _SongListItemState extends State<SongListItem> {
         onTap: () => {
           if(!dataModel.selecting)
             {
-              dataModel.setCurrentlyPlaying(widget.song, widget.allowSelection ? dataModel.songs : dataModel.buildUpNext()),
+              dataModel.setCurrentlyPlaying(widget.song, widget.futureSongs),
             }
           else if(widget.allowSelection)
             {

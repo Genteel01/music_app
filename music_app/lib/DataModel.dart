@@ -27,6 +27,8 @@ enum LoopType {
 //TODO Cut some of the list.contains if it's possible to
 
 //TODO for faster loading try storing songs in the album and artist files too, and loading them into the song list too, then do a songs.reduce() to get rid of duplicates after loading
+
+//TODO it might be even faster to store all the data in a single text file
 //This might not actually be faster, and might not be worth the effort (also it would use a lot more memory and more storage space)
 class DataModel extends ChangeNotifier {
 

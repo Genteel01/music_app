@@ -1,3 +1,4 @@
+import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/SongList.dart';
 import 'package:music_app/main.dart';
@@ -39,18 +40,7 @@ class PlaylistDetails extends StatelessWidget {
                         }
                         var song = playlist.songs[index - 1];
 
-                        return Container(height: 70, decoration: BoxDecoration(
-                            border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
-                          child: ListTile(
-                            title: Text(song.name),
-                            subtitle: Text(song.album),
-                            trailing: Text(song.durationString()),
-                            leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
-                            onTap: () => {
-                              dataModel.setCurrentlyPlaying(song, playlist.songs),
-                            },
-                          ),
-                        );
+                        return SongListItem(song: song, index: index, allowSelection: true, futureSongs: playlist.songs);
                       },
                       itemCount: playlist.songs.length + 1
                   ),
