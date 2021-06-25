@@ -28,8 +28,6 @@ class _AlbumListState extends State<AlbumList> {
               child: Container(decoration: BoxDecoration(
                   border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
                 child: ListView.builder(
-                    addAutomaticKeepAlives: false,
-                    addRepaintBoundaries: false,
                     itemBuilder: (_, index) {
                       if(index == 0)
                       {
