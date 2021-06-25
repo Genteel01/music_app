@@ -22,7 +22,7 @@ class AlbumDetails extends StatelessWidget {
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
     Album album = dataModel.albums[index];
     return Scaffold(
-        appBar: dataModel.selectedItems.length > 0 ? AppBar(automaticallyImplyLeading: false,
+        appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
           title: SelectingAppBarTitle(album: album,),
         ) : AppBar(
           title: Text(album.name),
@@ -96,7 +96,7 @@ class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedItems.contains(widget.song) || (dataModel.selectedItems.length == 0 && dataModel.settings.currentlyPlaying == widget.song) ,
+        selected: dataModel.selectedIndices.contains(widget.album.songs.indexOf(widget.song)) || (dataModel.selectedIndices.length == 0 && dataModel.settings.currentlyPlaying == widget.song) ,
         title: Text(widget.song.name),
         subtitle: Text(widget.song.artist),
         trailing: dataModel.settings.currentlyPlaying == widget.song ? Row(mainAxisSize: MainAxisSize.min,
@@ -107,17 +107,17 @@ class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
         ) : Text(widget.song.durationString()),
         leading: Text(widget.song.trackNumber.toString()),
         onTap: () => {
-          if(dataModel.selectedItems.length == 0)
+          if(dataModel.selectedIndices.length == 0)
             {
               dataModel.setCurrentlyPlaying(widget.song, widget.album.songs),
             }
           else
             {
-              dataModel.toggleSelection(widget.song)
+              dataModel.toggleSelection(widget.album.songs.indexOf(widget.song), Song)
             }
         },
         onLongPress: () => {
-            dataModel.toggleSelection(widget.song)
+            dataModel.toggleSelection(widget.album.songs.indexOf(widget.song), Song)
         },
       ),
     );

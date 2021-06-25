@@ -46,9 +46,11 @@ class DataModel extends ChangeNotifier {
 
   final audioPlayer = AudioPlayer();
 
-  List<Object> selectedItems = [];
+  List<int> selectedIndices = [];
+  Type selectionType = Song;
 
   List<Object> searchResults = [];
+
 
   Random randomNumbers = new Random();
   getSearchResults(String searchText)
@@ -94,45 +96,46 @@ class DataModel extends ChangeNotifier {
 
   clearSelections()
   {
-    selectedItems.clear();
+    selectedIndices.clear();
     notifyListeners();
   }
 
   removeFromPlaylist(Playlist playlist)
   {
-    selectedItems.forEach((element) {
-      playlist.songs.remove(element);
+    selectedIndices.forEach((element) {
+      playlist.songs.removeAt(element);
     });
     clearSelections();
     notifyListeners();
+    savePlaylists();
   }
   //Returns true if all the values in the selection type you are working with are selected, false otherwise
   bool returnAllSelected(Album? album, Artist? artist, Playlist? playlist)
   {
-    if(selectedItems.length > 0) {
-      if (selectedItems[0].runtimeType == Song) {
+    if(selectedIndices.length > 0) {
+      if (selectionType == Song) {
         if (album != null) {
-          return selectedItems.length == album.songs.length;
+          return selectedIndices.length == album.songs.length;
         }
         else if (artist != null) {
-          return selectedItems.length == artist.songs.length;
+          return selectedIndices.length == artist.songs.length;
         }
         else if(playlist != null)
           {
-            return selectedItems.length == playlist.songs.length;
+            return selectedIndices.length == playlist.songs.length;
           }
         else {
-          return selectedItems.length == songs.length;
+          return selectedIndices.length == songs.length;
         }
       }
-      if (selectedItems[0].runtimeType == Album) {
-        return selectedItems.length == albums.length;
+      if (selectionType == Album) {
+        return selectedIndices.length == albums.length;
       }
-      if (selectedItems[0].runtimeType == Artist) {
-        return selectedItems.length == artists.length;
+      if (selectionType == Artist) {
+        return selectedIndices.length == artists.length;
       }
-      if (selectedItems[0].runtimeType == Playlist) {
-        return selectedItems.length == playlists.length;
+      if (selectionType == Playlist) {
+        return selectedIndices.length == playlists.length;
       }
     }
     return false;
@@ -141,64 +144,47 @@ class DataModel extends ChangeNotifier {
   //Selects all the values for the selection type you are currently working with
   void selectAll(Album? album, Artist? artist, Playlist? playlist)
   {
-    //Int to say whether you are working with albums (0), artists(1), songs(2), or playlists(3)
-    int typeOfSelection = 2;
-    if(selectedItems[0].runtimeType == Song)
-    {
-      typeOfSelection = 2;
-    }
-    if(selectedItems[0].runtimeType == Album)
-    {
-      typeOfSelection = 0;
-    }
-    if(selectedItems[0].runtimeType == Artist)
-    {
-      typeOfSelection = 1;
-    }
-    if(selectedItems[0].runtimeType == Playlist)
-    {
-      typeOfSelection = 3;
-    }
     clearSelections();
-    switch (typeOfSelection)
+    switch (selectionType)
     {
-      case 0: selectedItems.addAll(albums);
+      case Album: selectedIndices.addAll(List<int>.generate(albums.length, (i) => i));
               break;
-      case 1: selectedItems.addAll(artists);
+      case Artist: selectedIndices.addAll(List<int>.generate(artists.length, (i) => i));
               break;
-      case 2: if(album != null)
+      case Song: if(album != null)
                 {
-                  selectedItems.addAll(album.songs);
+                  selectedIndices.addAll(List<int>.generate(album.songs.length, (i) => i));
                 }
               else if(artist != null)
                 {
-                  selectedItems.addAll(artist.songs);
+                  selectedIndices.addAll(List<int>.generate(artist.songs.length, (i) => i));
                 }
               else if(playlist != null)
                 {
-                  selectedItems.addAll(playlist.songs);
+                  selectedIndices.addAll(List<int>.generate(playlist.songs.length, (i) => i));
                 }
               else
                 {
-                  selectedItems.addAll(songs);
+                  selectedIndices.addAll(List<int>.generate(songs.length, (i) => i));
                 }
                 break;
-      case 3: selectedItems.addAll(playlists);
+      case Playlist: selectedIndices.addAll(List<int>.generate(playlists.length, (i) => i));
               break;
     }
     notifyListeners();
   }
 
-  void toggleSelection(Object item)
+  void toggleSelection(int index, Type newSelectionType)
   {
-    if(selectedItems.contains(item))
+    if(selectedIndices.contains(index))
     {
-      selectedItems.remove(item);
+      selectedIndices.remove(index);
     }
     else
     {
-      selectedItems.add(item);
+      selectedIndices.add(index);
     }
+    selectionType = newSelectionType;
     notifyListeners();
   }
 
@@ -240,26 +226,21 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  //Returns true if you are selecting playlists, false otherwise
-  bool isSelectingPlaylists()
-  {
-    return selectedItems[0].runtimeType == Playlist;
-  }
   void addToPlaylist(Playlist playlist)
   {
       List<Song> newSongs = [];
-      selectedItems.forEach((element) {
-        if(element.runtimeType == Song)
+      selectedIndices.forEach((element) {
+        if(selectionType == Song)
           {
-            newSongs.add(element as Song);
+            newSongs.add(songs[element]);
           }
-        else if(element.runtimeType == Artist)
+        else if(selectionType == Artist)
           {
-            newSongs.addAll((element as Artist).songs);
+            newSongs.addAll((artists[element]).songs);
           }
-        else if(element.runtimeType == Album)
+        else if(selectionType == Album)
           {
-            newSongs.addAll((element as Album).songs);
+            newSongs.addAll((albums[element]).songs);
           }
       });
       playlist.addToPlaylist(newSongs);
@@ -269,8 +250,8 @@ class DataModel extends ChangeNotifier {
 
   void deletePlaylists()
   {
-    selectedItems.forEach((element) {
-      playlists.remove(element);
+    selectedIndices.forEach((element) {
+      playlists.removeAt(element);
     });
     savePlaylists();
     clearSelections();

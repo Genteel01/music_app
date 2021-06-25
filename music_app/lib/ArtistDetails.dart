@@ -22,7 +22,7 @@ class ArtistDetails extends StatelessWidget {
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
     Artist artist = dataModel.artists[index];
     return Scaffold(
-        appBar: dataModel.selectedItems.length > 0 ? AppBar(automaticallyImplyLeading: false,
+        appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
           title: SelectingAppBarTitle(artist: artist,),
         ) : AppBar(
           title: Text(artist.name),
@@ -85,7 +85,7 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedItems.contains(widget.song) || (dataModel.selectedItems.length == 0 && dataModel.settings.currentlyPlaying == widget.song),
+        selected: dataModel.selectedIndices.contains(widget.artist.songs.indexOf(widget.song)) || (dataModel.selectedIndices.length == 0 && dataModel.settings.currentlyPlaying == widget.song),
         title: Text(widget.song.name),
         subtitle: Text(widget.song.album),
         trailing: dataModel.settings.currentlyPlaying == widget.song ? Row(mainAxisSize: MainAxisSize.min,
@@ -96,17 +96,17 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
         ) : Text(widget.song.durationString()),
         leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.song)!)),
         onTap: () => {
-          if(dataModel.selectedItems.length == 0)
+          if(dataModel.selectedIndices.length == 0)
             {
               dataModel.setCurrentlyPlaying(widget.song, widget.artist.songs),
             }
           else
             {
-              dataModel.toggleSelection(widget.song)
+              dataModel.toggleSelection(widget.artist.songs.indexOf(widget.song), Song)
             }
         },
         onLongPress: () => {
-          dataModel.toggleSelection(widget.song)
+          dataModel.toggleSelection(widget.artist.songs.indexOf(widget.song), Song)
         },
       ),
     );
