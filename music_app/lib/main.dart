@@ -315,6 +315,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
   }
 
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
+    List<Object> oldSelections = [];
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.center,
@@ -346,6 +347,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
               },)),
               SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.playlist_add), onPressed: () => {
                 //TODO use a temp list to store the currently selected list and restore it after closing the modal
+                dataModel.selectedItems.forEach((element) { oldSelections.add(element);}),
                 dataModel.clearSelections(),
                 dataModel.selectedItems.add(dataModel.settings.currentlyPlaying!),
                   showModalBottomSheet<void>(
@@ -368,7 +370,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                         ),
                       );
                     },
-                  ).then((value) => {dataModel.clearSelections()})
+                  ).then((value) => {dataModel.clearSelections(), oldSelections.forEach((element) {dataModel.toggleSelection(element);})})
                 },),
               ),
             ],
