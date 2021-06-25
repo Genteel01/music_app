@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:music_app/ArtistList.dart';
+import 'package:music_app/Search.dart';
 import 'package:provider/provider.dart';
 
 import 'Album.dart';
 import 'AlbumList.dart';
 import 'Artist.dart';
 import 'DataModel.dart';
+import 'Playlist.dart';
 import 'PlaylistList.dart';
 import 'SongList.dart';
 //Saving/loading from json
@@ -16,15 +18,18 @@ import 'SongList.dart';
 //TODO https://pub.dev/packages/just_audio
 //TODO https://pub.dev/packages/assets_audio_player
 
-
-//TODO Searching
+//TODO feedback (adding to playlists, removing from playlists)
 //TODO Marquee on overflowing text
 //TODO adding to playlists from the playlist details screen
 //TODO Scrollbars
+//Part of the selection behaviour for playlist details screen
 //TODO reordering playlists
-//TODO removing from playlists
+//Both of these two can be in a hamburger menu
+//TODO renaming playlists
+//TODO deleting playlists from the playlist details screen
+
 //TODO lock screen and notifications pulldown controls
-//TODO settings page with adding adn removing locations to look for music
+//TODO settings page with adding and removing locations to look for music
 void main() {
   runApp(MyApp());
 }
@@ -54,6 +59,7 @@ class MyTabBar extends StatelessWidget {
     Tab(child: Row(children: [Icon(Icons.album), Text(" Albums")],mainAxisAlignment: MainAxisAlignment.center,),),
   ];
 
+  final TextEditingController searchController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(
@@ -75,18 +81,56 @@ class MyTabBar extends StatelessWidget {
         },
         ),
         bottomNavigationBar: CurrentlyPlayingBar(),
-        appBar: dataModel.selecting ? AppBar(
+        appBar: dataModel.selectedItems.length > 0 ? AppBar(
             title: SelectingAppBarTitle(),
             bottom: NonTappableTabBar(tabBar: TabBar(tabs: myTabs, isScrollable: true,),)
         ) : AppBar(
-          title: Text("Music App"),
+          title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              //Title
+              Text("Music"),
+              //Search Button
+              ElevatedButton.icon(onPressed: () => {
+                showModalBottomSheet<void>(
+                  isScrollControlled: true,
+                  context: context,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(30))),
+                  builder: (BuildContext context) {
+                    return Padding(
+                      padding: MediaQuery
+                          .of(context)
+                          .viewInsets,
+                      child: Container(
+                        height: 500,
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextField(controller: searchController, decoration: InputDecoration(hintText: "Search"), onChanged: (s) => {
+                                dataModel.getSearchResults(s)
+                              },)
+                            ),
+                            SearchResults(),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ).then((value) => {
+                  searchController.text = "",
+                  dataModel.searchResults.clear()
+                })
+              }, icon: Icon(Icons.search), label: Text("Search"))
+            ],
+          ),
           bottom: TabBar(
             isScrollable: true,
             tabs: myTabs,
           ),
         ),
         body: TabBarView(
-          physics: dataModel.selecting ? NeverScrollableScrollPhysics() : null,
+          physics: dataModel.selectedItems.length > 0 ? NeverScrollableScrollPhysics() : null,
           children: [
             PlaylistList(),
             SongList(),
@@ -99,9 +143,10 @@ class MyTabBar extends StatelessWidget {
   }
 }
 class SelectingAppBarTitle extends StatefulWidget {
-  const SelectingAppBarTitle({Key? key, this.album, this.artist}) : super(key: key);
+  const SelectingAppBarTitle({Key? key, this.album, this.artist, this.playlist}) : super(key: key);
   final Album? album;
   final Artist? artist;
+  final Playlist? playlist;
   @override
   _SelectingAppBarTitleState createState() => _SelectingAppBarTitleState();
 }
@@ -118,37 +163,51 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
       children: [
         Row(
           children: [
-            ElevatedButton(child: Text(dataModel.returnAllSelected(widget.album, widget.artist) ? "Clear" : "All"), onPressed: () => {
-                dataModel.returnAllSelected(widget.album, widget.artist) ? dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist)
+            ElevatedButton(child: Text(dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist) ? "Clear" : "All"), onPressed: () => {
+                dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist) ? dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist, widget.playlist)
             },),
             Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-              child: Text(dataModel.selectedIndices.length.toString() + " Selected"),
+              child: Text(dataModel.selectedItems.length.toString() + " Selected"),
             ),
           ],
         ),
-        ElevatedButton(child: Text(dataModel.isSelectingPlaylists() ? "Remove" : "Add To"), onPressed: () => {
-          dataModel.isSelectingPlaylists() ? dataModel.deletePlaylists() : showModalBottomSheet<void>(
-            isScrollControlled: true,
-            context: context,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(
-                top: Radius.circular(30))),
-            builder: (BuildContext context) {
-              return Padding(
-                padding: MediaQuery
-                    .of(context)
-                    .viewInsets,
-                child: Container(
-                  height: 400,
-                  //color: Colors.amber,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: PlaylistListBuilder(addingToPlaylist: true,),
-                  ),
-                ),
-              );
-            },
-          )
+        ElevatedButton(child: Text(dataModel.isSelectingPlaylists() || widget.playlist != null ? "Remove" : "Add To"), onPressed: () => {
+          if(dataModel.isSelectingPlaylists())
+            {
+              dataModel.deletePlaylists()
+            }
+          else if(widget.playlist != null)
+            {
+              dataModel.removeFromPlaylist(widget.playlist!)
+            }
+          else
+            {
+              showModalBottomSheet<void>(
+                isScrollControlled: true,
+                context: context,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(30))),
+                builder: (BuildContext context) {
+                  return Padding(
+                    padding: MediaQuery
+                        .of(context)
+                        .viewInsets,
+                    child: Container(
+                      height: 400,
+                      //color: Colors.amber,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Flex(direction: Axis.vertical, children: [
+                          PlaylistListBuilder(addingToPlaylist: true,)
+                        ]),
+                      ),
+                    ),
+                  );
+                },
+              )
+            }
         },),
       ],
     );
@@ -211,7 +270,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
                   .of(context)
                   .viewInsets,
               child: Container(
-                height: 400,
+                height: 430,
                 //color: Colors.amber,
                 child: PlayingSongDetails(),
               ),
@@ -271,9 +330,10 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
   }
 
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
+    List<Object> oldSelections = [];
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Column(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           //Album art image
           SizedBox(height: 200, width: 200, child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
@@ -289,52 +349,79 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
             padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
             child: Text(dataModel.settings.currentlyPlaying!.album, overflow: TextOverflow.ellipsis,),
           ),
-          //Seekbar, shuffle, and loop row
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              //Shuffle button
-              SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon( dataModel.settings.shuffle ? Icons.shuffle : Icons.arrow_right_alt, color: Colors.grey[50],), heroTag: null, onPressed: () => {
+          //shuffle, loop, and add to playlist row
+          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              SizedBox(width: 30, height: 30, child: FloatingActionButton(backgroundColor: dataModel.settings.shuffle ? Theme.of(context).primaryColor : Colors.grey, child: Icon( Icons.shuffle, color: Colors.grey[50],), heroTag: null, onPressed: () => {
                 dataModel.toggleShuffle(),
               },)),
-              //Seekbar
-              StreamBuilder<Duration> (
-                stream: dataModel.audioPlayer.positionStream,
-                  builder: (context, snapshot) {
-                  if(snapshot.hasData)
-                    {
-                      final position = snapshot.data;
-                      return Row(
-                        children: [
-                          //Current position
-                          (position!.inSeconds % 60) < 10 ? Text(position.inMinutes.toString() + ":0" + (position.inSeconds % 60).toStringAsFixed(0)) :
-                          Text(position.inMinutes.toString() + ":" + (position.inSeconds % 60).toStringAsFixed(0)),
-                          //Position Slider
-                          Slider(value: position.inSeconds.toDouble(), max: dataModel.audioPlayer.duration!.inSeconds.toDouble(), onChanged: (value) => {
-                            dataModel.audioPlayer.seek(Duration(seconds: value.toInt()))
-                          },),
-                          //Duration
-                          (dataModel.audioPlayer.duration!.inSeconds % 60) < 10 ? Text(dataModel.audioPlayer.duration!.inMinutes.toString() + ":0" + (dataModel.audioPlayer.duration!.inSeconds % 60).toStringAsFixed(0)) :
-                          Text(dataModel.audioPlayer.duration!.inMinutes.toString() + ":" + (dataModel.audioPlayer.duration!.inSeconds % 60).toStringAsFixed(0)),
-                        ],
+              //Loop button
+              SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(dataModel.settings.loop == LoopType.singleSong ? Icons.repeat_one : (dataModel.settings.loop == LoopType.loop ? Icons.repeat : Icons.arrow_right_alt)
+                , color: Colors.grey[50],), heroTag: null, onPressed: () => {
+                dataModel.toggleLoop(),
+              },)),
+              SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.playlist_add), onPressed: () => {
+                dataModel.selectedItems.forEach((element) { oldSelections.add(element);}),
+                dataModel.clearSelections(),
+                dataModel.selectedItems.add(dataModel.settings.currentlyPlaying!),
+                  showModalBottomSheet<void>(
+                    isScrollControlled: true,
+                    context: context,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(30))),
+                    builder: (BuildContext context) {
+                      return Padding(
+                        padding: MediaQuery
+                            .of(context)
+                            .viewInsets,
+                        child: Container(
+                          height: 400,
+                          //color: Colors.amber,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 16.0),
+                            child: Flex(direction: Axis.vertical, children: [PlaylistListBuilder(addingToPlaylist: true,)]),
+                          ),
+                        ),
                       );
-                    }
-                  return Row(
+                    },
+                  ).then((value) => {dataModel.clearSelections(), oldSelections.forEach((element) {dataModel.toggleSelection(element);})})
+                },),
+              ),
+            ],
+          ),
+          //Seekbar
+          StreamBuilder<Duration> (
+            stream: dataModel.audioPlayer.positionStream,
+              builder: (context, snapshot) {
+              if(snapshot.hasData)
+                {
+                  final position = snapshot.data;
+                  return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       //Current position
-                      Text("0:00"),
+                      (position!.inSeconds % 60) < 10 ? Text(position.inMinutes.toString() + ":0" + (position.inSeconds % 60).toStringAsFixed(0)) :
+                      Text(position.inMinutes.toString() + ":" + (position.inSeconds % 60).toStringAsFixed(0)),
                       //Position Slider
-                      Slider(value: 0, max: dataModel.audioPlayer.duration!.inSeconds.toDouble(), onChanged: (value) => {},),
+                      Slider(value: position.inSeconds.toDouble(), max: dataModel.audioPlayer.duration!.inSeconds.toDouble(), onChanged: (value) => {
+                        dataModel.audioPlayer.seek(Duration(seconds: value.toInt()))
+                      },),
                       //Duration
-                      Text("0:00"),
+                      (dataModel.audioPlayer.duration!.inSeconds % 60) < 10 ? Text(dataModel.audioPlayer.duration!.inMinutes.toString() + ":0" + (dataModel.audioPlayer.duration!.inSeconds % 60).toStringAsFixed(0)) :
+                      Text(dataModel.audioPlayer.duration!.inMinutes.toString() + ":" + (dataModel.audioPlayer.duration!.inSeconds % 60).toStringAsFixed(0)),
                     ],
                   );
-                  }
-              ),
-            //Loop button
-            SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(dataModel.settings.loop == LoopType.singleSong ? Icons.repeat_one : (dataModel.settings.loop == LoopType.loop ? Icons.repeat : Icons.arrow_right_alt)
-              , color: Colors.grey[50],), heroTag: null, onPressed: () => {
-              dataModel.toggleLoop(),
-            },)),
-            ],
+                }
+              return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  //Current position
+                  Text("0:00"),
+                  //Position Slider
+                  Slider(value: 0, max: 1, onChanged: (value) => {},),
+                  //Duration
+                  Text("0:00"),
+                ],
+              );
+              }
           ),
           //Audio Controls
           Padding(

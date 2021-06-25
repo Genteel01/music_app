@@ -53,6 +53,13 @@ class PlaylistListBuilder extends StatelessWidget {
             addRepaintBoundaries: false,
             itemBuilder: (_, index) {
               if(index == 0)
+              {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(dataModel.playlists.length.toString() + " playlists"),
+                );
+              }
+              if(index == 1)
                 {
                   final playlistNameController = TextEditingController();
                   return Container(height: 70, decoration: BoxDecoration(
@@ -93,13 +100,13 @@ class PlaylistListBuilder extends StatelessWidget {
                     ),
                   );
                 }
-              var playlist = dataModel.playlists[index - 1];
+              var playlist = dataModel.playlists[index - 2];
 
               return Container(height: 70, decoration: BoxDecoration(
                   border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                 child: Center(
                   child: ListTile(
-                    selected: !addingToPlaylist && dataModel.selectedIndices.contains(index),
+                    selected: !addingToPlaylist && dataModel.selectedItems.contains(playlist),
                     title: Text(playlist.name),
                     trailing: Text(playlist.songs.length.toString() + " Tracks"),
                     onTap: () => {
@@ -110,52 +117,30 @@ class PlaylistListBuilder extends StatelessWidget {
                         }
                       else
                         {
-                          if(!dataModel.selecting)
+                          if(dataModel.selectedItems.length == 0)
                             {
                               Navigator.push(context, MaterialPageRoute(
                                   builder: (context) {
-                                    return PlaylistDetails(index: index - 1);
+                                    return PlaylistDetails(index: index - 2);
                                 }))
                             }
                           else
                             {
-                              if(dataModel.selectedIndices.contains(index))
-                                {
-                                  dataModel.selectedPlaylists.remove(playlist),
-                                  dataModel.selectedIndices.remove(index),
-                                  dataModel.setSelecting(),
-                                }
-                              else
-                                {
-                                  dataModel.selectedPlaylists.add(playlist),
-                                  dataModel.selectedIndices.add(index),
-                                  dataModel.setSelecting(),
-                                }
+                              dataModel.toggleSelection(playlist)
                             }
                         }
                     },
                     onLongPress: () => {
                       if(!addingToPlaylist)
                         {
-                          if(dataModel.selectedPlaylists.contains(playlist))
-                            {
-                              dataModel.selectedPlaylists.remove(playlist),
-                              dataModel.selectedIndices.remove(index),
-                              dataModel.setSelecting(),
-                            }
-                          else
-                            {
-                              dataModel.selectedPlaylists.add(playlist),
-                              dataModel.selectedIndices.add(index),
-                              dataModel.setSelecting(),
-                            }
+                          dataModel.toggleSelection(playlist)
                         }
                     },
                   ),
                 ),
               );
             },
-            itemCount: dataModel.playlists.length + 1
+            itemCount: dataModel.playlists.length + 2
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -26,6 +27,8 @@ enum LoopType {
 //TODO Cut some of the list.contains if it's possible to
 
 //TODO for faster loading try storing songs in the album and artist files too, and loading them into the song list too, then do a songs.reduce() to get rid of duplicates after loading
+
+//TODO it might be even faster to store all the data in a single text file
 //This might not actually be faster, and might not be worth the effort (also it would use a lot more memory and more storage space)
 class DataModel extends ChangeNotifier {
 
@@ -43,122 +46,162 @@ class DataModel extends ChangeNotifier {
 
   final audioPlayer = AudioPlayer();
 
-  bool selecting = false;
-  List<Song> selectedSongs = [];
-  List<Album> selectedAlbums = [];
-  List<Artist> selectedArtists = [];
-  List<Playlist> selectedPlaylists = [];
-  List<int> selectedIndices = [];
+  List<Object> selectedItems = [];
 
-  setSelecting()
+  List<Object> searchResults = [];
+
+  Random randomNumbers = new Random();
+  getSearchResults(String searchText)
   {
-    if(selectedSongs.length == 0 && selectedAlbums.length == 0 && selectedArtists.length == 0 && selectedPlaylists.length == 0)
-      {
-        selecting = false;
-      }
-    else
-      {
-        selecting = true;
-      }
+    searchResults.clear();
+    if(searchText != "") {
+      artists.forEach((element) {
+        if (element.name.toUpperCase().contains(searchText.toUpperCase())) {
+          searchResults.add(element);
+        }
+      });
+      albums.forEach((element) {
+        if (element.name.toUpperCase().contains(searchText.toUpperCase()) ||
+            element.albumArtist.toUpperCase().contains(
+                searchText.toUpperCase())) {
+          searchResults.add(element);
+        }
+      });
+      songs.forEach((element) {
+        if (element.name.toUpperCase().contains(searchText.toUpperCase()) ||
+            element.artist.toUpperCase().contains(searchText.toUpperCase()) ||
+            element.album.toUpperCase().contains(searchText.toUpperCase()) ||
+            element.albumArtist.toUpperCase().contains(
+                searchText.toUpperCase())) {
+          searchResults.add(element);
+        }
+      });
+    }
     notifyListeners();
+  }
+
+  List<Song> buildUpNext()
+  {
+    List<Song> newList = [];
+    searchResults.forEach((element) {
+      if(element.runtimeType == Song)
+      {
+        newList.add(element as Song);
+      }
+    });
+    return newList;
   }
 
   clearSelections()
   {
-    selectedSongs.clear();
-    selectedAlbums.clear();
-    selectedArtists.clear();
-    selectedIndices.clear();
-    selectedPlaylists.clear();
-    selecting = false;
+    selectedItems.clear();
+    notifyListeners();
+  }
+
+  removeFromPlaylist(Playlist playlist)
+  {
+    selectedItems.forEach((element) {
+      playlist.songs.remove(element);
+    });
+    clearSelections();
     notifyListeners();
   }
   //Returns true if all the values in the selection type you are working with are selected, false otherwise
-  bool returnAllSelected(Album? album, Artist? artist)
+  bool returnAllSelected(Album? album, Artist? artist, Playlist? playlist)
   {
-    if(selectedSongs.length > 0)
-      {
-        if(album != null)
+    if(selectedItems.length > 0) {
+      if (selectedItems[0].runtimeType == Song) {
+        if (album != null) {
+          return selectedItems.length == album.songs.length;
+        }
+        else if (artist != null) {
+          return selectedItems.length == artist.songs.length;
+        }
+        else if(playlist != null)
           {
-            return selectedSongs.length == album.songs.length;
+            return selectedItems.length == playlist.songs.length;
           }
-        else if (artist != null)
-          {
-            return selectedSongs.length == artist.songs.length;
-          }
-        else
-          {
-            return selectedSongs.length == songs.length;
-          }
+        else {
+          return selectedItems.length == songs.length;
+        }
       }
-    if(selectedAlbums.length > 0)
-    {
-      return selectedAlbums.length == albums.length;
-    }
-    if(selectedArtists.length > 0)
-    {
-      return selectedArtists.length == artists.length;
-    }
-    if(selectedPlaylists.length > 0)
-    {
-      return selectedPlaylists.length == playlists.length;
+      if (selectedItems[0].runtimeType == Album) {
+        return selectedItems.length == albums.length;
+      }
+      if (selectedItems[0].runtimeType == Artist) {
+        return selectedItems.length == artists.length;
+      }
+      if (selectedItems[0].runtimeType == Playlist) {
+        return selectedItems.length == playlists.length;
+      }
     }
     return false;
   }
   
   //Selects all the values for the selection type you are currently working with
-  void selectAll(Album? album, Artist? artist)
+  void selectAll(Album? album, Artist? artist, Playlist? playlist)
   {
     //Int to say whether you are working with albums (0), artists(1), songs(2), or playlists(3)
     int typeOfSelection = 2;
-    if(selectedSongs.length > 0)
+    if(selectedItems[0].runtimeType == Song)
     {
       typeOfSelection = 2;
     }
-    if(selectedAlbums.length > 0)
+    if(selectedItems[0].runtimeType == Album)
     {
       typeOfSelection = 0;
     }
-    if(selectedArtists.length > 0)
+    if(selectedItems[0].runtimeType == Artist)
     {
       typeOfSelection = 1;
     }
-    if(selectedPlaylists.length > 0)
+    if(selectedItems[0].runtimeType == Playlist)
     {
       typeOfSelection = 3;
     }
     clearSelections();
-    selecting = true;
     switch (typeOfSelection)
     {
-      case 0: selectedAlbums.addAll(albums);
-              selectedIndices.addAll(List<int>.generate(selectedAlbums.length, (i) => i));
+      case 0: selectedItems.addAll(albums);
               break;
-      case 1: selectedArtists.addAll(artists);
-              selectedIndices.addAll(List<int>.generate(selectedArtists.length, (i) => i));
+      case 1: selectedItems.addAll(artists);
               break;
       case 2: if(album != null)
                 {
-                  selectedSongs.addAll(album.songs);
-                  selectedIndices.addAll(List<int>.generate(selectedSongs.length, (i) => i));
+                  selectedItems.addAll(album.songs);
                 }
               else if(artist != null)
                 {
-                  selectedSongs.addAll(artist.songs);
-                  selectedIndices.addAll(List<int>.generate(selectedSongs.length, (i) => i));
+                  selectedItems.addAll(artist.songs);
+                }
+              else if(playlist != null)
+                {
+                  selectedItems.addAll(playlist.songs);
                 }
               else
                 {
-                  selectedSongs.addAll(songs);
-                  selectedIndices.addAll(List<int>.generate(selectedSongs.length, (i) => i));
+                  selectedItems.addAll(songs);
                 }
                 break;
-      case 3: selectedPlaylists.addAll(playlists);
-              selectedIndices.addAll(List<int>.generate(selectedPlaylists.length, (i) => i));
+      case 3: selectedItems.addAll(playlists);
               break;
     }
     notifyListeners();
   }
+
+  void toggleSelection(Object item)
+  {
+    if(selectedItems.contains(item))
+    {
+      selectedItems.remove(item);
+    }
+    else
+    {
+      selectedItems.add(item);
+    }
+    notifyListeners();
+  }
+
   //replaced this
   DataModel()
   {
@@ -200,17 +243,24 @@ class DataModel extends ChangeNotifier {
   //Returns true if you are selecting playlists, false otherwise
   bool isSelectingPlaylists()
   {
-    return selectedPlaylists.length > 0;
+    return selectedItems[0].runtimeType == Playlist;
   }
   void addToPlaylist(Playlist playlist)
   {
       List<Song> newSongs = [];
-      newSongs.addAll(selectedSongs);
-      selectedArtists.forEach((element) {
-        newSongs.addAll(element.songs);
-      });
-      selectedAlbums.forEach((element) {
-        newSongs.addAll(element.songs);
+      selectedItems.forEach((element) {
+        if(element.runtimeType == Song)
+          {
+            newSongs.add(element as Song);
+          }
+        else if(element.runtimeType == Artist)
+          {
+            newSongs.addAll((element as Artist).songs);
+          }
+        else if(element.runtimeType == Album)
+          {
+            newSongs.addAll((element as Album).songs);
+          }
       });
       playlist.addToPlaylist(newSongs);
       savePlaylists();
@@ -219,7 +269,7 @@ class DataModel extends ChangeNotifier {
 
   void deletePlaylists()
   {
-    selectedPlaylists.forEach((element) {
+    selectedItems.forEach((element) {
       playlists.remove(element);
     });
     savePlaylists();
@@ -669,6 +719,15 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
     saveSettings();
   }
+  
+  //Plays a random song and sets shuffle to true
+  playRandomSong(List<Song> futureSongs)
+  {
+    settings.shuffle = true;
+    setCurrentlyPlaying(futureSongs[randomNumbers.nextInt(futureSongs.length)], futureSongs);
+    saveSettings();
+  }
+  
 
   void toggleLoop()
   {
