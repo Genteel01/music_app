@@ -363,7 +363,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                 dataModel.toggleLoop(),
               },)),
               SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.playlist_add), onPressed: () => {
-                dataModel.selectedItems.forEach((element) { oldSelections.add(element);}),
+                dataModel.selectedIndices.forEach((element) { oldSelections.add(element);}),
                 dataModel.clearSelections(),
                 oldSelectionType = dataModel.selectionType,
                 dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.currentlyPlaying!), Song),
