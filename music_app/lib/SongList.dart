@@ -37,7 +37,7 @@ class _SongListState extends State<SongList> {
                         return ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,);
                       }
                       var song = dataModel.songs[index - 1];
-                      return SongListItem(song: song, allowSelection: true, futureSongs: dataModel.songs,);
+                      return SongListItem(song: song, allowSelection: true, futureSongs: dataModel.songs, index: index - 1);
                     },
                     itemCount: dataModel.songs.length + 1
                 ),
@@ -73,7 +73,7 @@ class ShuffleButton extends StatelessWidget {
 
 
 class SongListItem extends StatefulWidget {
-  const SongListItem({Key? key, required this.song, required this.allowSelection, required this.futureSongs, this.playlist}) : super(key: key);
+  const SongListItem({Key? key, required this.song, required this.allowSelection, required this.futureSongs, this.playlist, required this.index}) : super(key: key);
   final Song song;
   //Selection will be disabled if the item is being shown in search results
   final bool allowSelection;
@@ -81,6 +81,8 @@ class SongListItem extends StatefulWidget {
   final List<Song> futureSongs;
   //Need this for the selection graphic
   final Playlist? playlist;
+  //Need this because there might be several copies of the same song in a playlist
+  final int index;
 
   @override
   _SongListItemState createState() => _SongListItemState();
@@ -97,7 +99,7 @@ class _SongListItemState extends State<SongListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: (widget.playlist == null ? dataModel.selectedIndices.contains(dataModel.songs.indexOf(widget.song)) : dataModel.selectedIndices.contains(widget.playlist!.songs.indexOf(widget.song))) || (dataModel.selectedIndices.length == 0 && dataModel.settings.currentlyPlaying == widget.song),
+        selected: dataModel.selectedIndices.contains(widget.index) || (dataModel.selectedIndices.length == 0 && dataModel.settings.currentlyPlaying == widget.song),
         title: Text(widget.song.name),
         subtitle: Text(widget.song.artist),
         trailing: dataModel.settings.currentlyPlaying == widget.song ? Row(mainAxisSize: MainAxisSize.min,
@@ -114,13 +116,13 @@ class _SongListItemState extends State<SongListItem> {
             }
           else if(widget.allowSelection)
             {
-              dataModel.toggleSelection(widget.playlist == null ? dataModel.songs.indexOf(widget.song) : widget.playlist!.songs.indexOf(widget.song), Song)
+              dataModel.toggleSelection(widget.index, Song)
             }
         },
         onLongPress: () => {
           if(widget.allowSelection)
             {
-              dataModel.toggleSelection(widget.playlist == null ? dataModel.songs.indexOf(widget.song) : widget.playlist!.songs.indexOf(widget.song), Song)
+              dataModel.toggleSelection(widget.index, Song)
             }
         },
       ),

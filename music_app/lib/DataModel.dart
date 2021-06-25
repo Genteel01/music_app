@@ -102,6 +102,7 @@ class DataModel extends ChangeNotifier {
 
   removeFromPlaylist(Playlist playlist)
   {
+    selectedIndices.sort((a, b) => b.compareTo(a));
     selectedIndices.forEach((element) {
       playlist.songs.removeAt(element);
     });

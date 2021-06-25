@@ -9,6 +9,7 @@ import 'Artist.dart';
 import 'DataModel.dart';
 import 'Playlist.dart';
 import 'PlaylistList.dart';
+import 'Song.dart';
 import 'SongList.dart';
 //Saving/loading from json
 //TODO https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
@@ -332,6 +333,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
 
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     List<int> oldSelections = [];
+    Type oldSelectionType = Song;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.center,
@@ -365,7 +367,8 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                 //TODO use a temp list to store the currently selected list and restore it after closing the modal
                 dataModel.selectedIndices.forEach((element) { oldSelections.add(element);}),
                 dataModel.clearSelections(),
-                dataModel.selectedIndices.add(dataModel.songs.indexOf(dataModel.settings.currentlyPlaying!)),
+                oldSelectionType = dataModel.selectionType,
+                dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.currentlyPlaying!), Song),
                   showModalBottomSheet<void>(
                     isScrollControlled: true,
                     context: context,
@@ -386,7 +389,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                         ),
                       );
                     },
-                  ).then((value) => {dataModel.clearSelections(), oldSelections.forEach((element) {dataModel.toggleSelection(element, dataModel.selectionType);})})
+                  ).then((value) => {dataModel.clearSelections(), oldSelections.forEach((element) {dataModel.toggleSelection(element, oldSelectionType);})})
                 },),
               ),
             ],
