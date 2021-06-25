@@ -22,7 +22,7 @@ class AlbumDetails extends StatelessWidget {
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
     Album album = dataModel.albums[index];
     return Scaffold(
-        appBar: dataModel.selecting ? AppBar(automaticallyImplyLeading: false,
+        appBar: dataModel.selectedItems.length > 0 ? AppBar(automaticallyImplyLeading: false,
           title: SelectingAppBarTitle(album: album,),
         ) : AppBar(
           title: Text(album.name),
@@ -60,11 +60,11 @@ class AlbumDetails extends StatelessWidget {
                                   child: Text("Disc " + song.discNumber.toString()),
                                 ),
                                 //Song list tile
-                                AlbumDetailsListItem(song: song, index: index, album: album,)
+                                AlbumDetailsListItem(song: song, album: album,)
                               ],
                             );
                           }
-                        return AlbumDetailsListItem(song: song, index: index, album: album,);
+                        return AlbumDetailsListItem(song: song, album: album,);
                       },
                       itemCount: album.songs.length + 2
                   ),
@@ -77,9 +77,8 @@ class AlbumDetails extends StatelessWidget {
 }
 
 class AlbumDetailsListItem extends StatefulWidget {
-  const AlbumDetailsListItem({Key? key, required this.song, required this.index, required this.album}) : super(key: key);
+  const AlbumDetailsListItem({Key? key, required this.song, required this.album}) : super(key: key);
   final Song song;
-  final int index;
   final Album album;
 
   @override
@@ -97,45 +96,23 @@ class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.index),
+        selected: dataModel.selectedItems.contains(widget.song),
         title: Text(widget.song.name),
         subtitle: Text(widget.song.artist),
         trailing: Text(widget.song.durationString()),
         leading: Text(widget.song.trackNumber.toString()),
         onTap: () => {
-          if(!dataModel.selecting)
+          if(dataModel.selectedItems.length == 0)
             {
               dataModel.setCurrentlyPlaying(widget.song, widget.album.songs),
             }
           else
             {
-              if(dataModel.selectedIndices.contains(widget.index))
-                {
-                  dataModel.selectedSongs.remove(widget.song),
-                  dataModel.selectedIndices.remove(widget.index),
-                  dataModel.setSelecting(),
-                }
-              else
-                {
-                  dataModel.selectedSongs.add(widget.song),
-                  dataModel.selectedIndices.add(widget.index),
-                  dataModel.setSelecting(),
-                }
+              dataModel.toggleSelection(widget.song)
             }
         },
         onLongPress: () => {
-          if(dataModel.selectedSongs.contains(widget.song))
-            {
-              dataModel.selectedSongs.remove(widget.song),
-              dataModel.selectedIndices.remove(widget.index),
-              dataModel.setSelecting(),
-            }
-          else
-            {
-              dataModel.selectedSongs.add(widget.song),
-              dataModel.selectedIndices.add(widget.index),
-              dataModel.setSelecting(),
-            }
+            dataModel.toggleSelection(widget.song)
         },
       ),
     );

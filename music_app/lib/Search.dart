@@ -40,7 +40,7 @@ class SearchResults extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 2.0, bottom: 2),
                           child: Text("Songs"),
                         ),
-                        SongListItem(song: song, index: index, allowSelection: false, futureSongs: dataModel.buildUpNext(),),
+                        SongListItem(song: song, allowSelection: false, futureSongs: dataModel.buildUpNext(),),
                       ],
                     );
                   }
@@ -54,7 +54,7 @@ class SearchResults extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 2.0, bottom: 2),
                           child: Text("Albums"),
                         ),
-                        AlbumListItem(album: album, index: index, allowSelection: false),
+                        AlbumListItem(album: album, allowSelection: false),
                       ],
                     );
                   }
@@ -68,7 +68,7 @@ class SearchResults extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 2.0, bottom: 2),
                           child: Text("Artists"),
                         ),
-                        ArtistListItem(artist: artist, index: index, allowSelection: false),
+                        ArtistListItem(artist: artist, allowSelection: false),
                       ],
                     );
                   }
@@ -77,19 +77,19 @@ class SearchResults extends StatelessWidget {
               if(item.runtimeType == Song)
                 {
                   Song song = item as Song;
-                  return SongListItem(song: song, index: index, allowSelection: false, futureSongs: dataModel.buildUpNext(),);
+                  return SongListItem(song: song, allowSelection: false, futureSongs: dataModel.buildUpNext(),);
                 }
               //If the item is an album display an album list tile
               else if(item.runtimeType == Album)
                 {
                   Album album = item as Album;
-                  return AlbumListItem(album: album, index: index, allowSelection: false);
+                  return AlbumListItem(album: album, allowSelection: false);
                 }
               //If it is neither display an artist list tile
               else
                 {
                   Artist artist = item as Artist;
-                  return ArtistListItem(artist: artist, index: index, allowSelection: false);
+                  return ArtistListItem(artist: artist, allowSelection: false);
                 }
             },
             itemCount: dataModel.searchResults.length

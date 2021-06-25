@@ -81,7 +81,7 @@ class MyTabBar extends StatelessWidget {
         },
         ),
         bottomNavigationBar: CurrentlyPlayingBar(),
-        appBar: dataModel.selecting ? AppBar(
+        appBar: dataModel.selectedItems.length > 0 ? AppBar(
             title: SelectingAppBarTitle(),
             bottom: NonTappableTabBar(tabBar: TabBar(tabs: myTabs, isScrollable: true,),)
         ) : AppBar(
@@ -130,7 +130,7 @@ class MyTabBar extends StatelessWidget {
           ),
         ),
         body: TabBarView(
-          physics: dataModel.selecting ? NeverScrollableScrollPhysics() : null,
+          physics: dataModel.selectedItems.length > 0 ? NeverScrollableScrollPhysics() : null,
           children: [
             PlaylistList(),
             SongList(),
@@ -167,7 +167,7 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
             },),
             Padding(
               padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-              child: Text(dataModel.selectedIndices.length.toString() + " Selected"),
+              child: Text(dataModel.selectedItems.length.toString() + " Selected"),
             ),
           ],
         ),
@@ -345,8 +345,9 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                 dataModel.toggleLoop(),
               },)),
               SizedBox(width: 30, height: 30, child: FloatingActionButton(child: Icon(Icons.playlist_add), onPressed: () => {
+                //TODO use a temp list to store the currently selected list and restore it after closing the modal
                 dataModel.clearSelections(),
-                dataModel.selectedSongs.add(dataModel.settings.currentlyPlaying!),
+                dataModel.selectedItems.add(dataModel.settings.currentlyPlaying!),
                   showModalBottomSheet<void>(
                     isScrollControlled: true,
                     context: context,

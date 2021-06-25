@@ -43,7 +43,7 @@ class _ArtistListState extends State<ArtistList> {
                       {
                         return Container(height: 0);
                       }
-                      return ArtistListItem(artist: artist, index: index, allowSelection: true,);
+                      return ArtistListItem(artist: artist, allowSelection: true,);
                     },
                     itemCount: dataModel.artists.length + 1
                 ),
@@ -57,9 +57,8 @@ class _ArtistListState extends State<ArtistList> {
 }
 
 class ArtistListItem extends StatefulWidget {
-  const ArtistListItem({Key? key, required this.artist, required this.index, required this.allowSelection}) : super(key: key);
+  const ArtistListItem({Key? key, required this.artist, required this.allowSelection}) : super(key: key);
   final Artist artist;
-  final int index;
   //Selection will be disabled if the item is being shown in search results
   final bool allowSelection;
   @override
@@ -78,12 +77,12 @@ class _ArtistListItemState extends State<ArtistListItem> {
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: Align(alignment: Alignment.center,
         child: ListTile(
-          selected: dataModel.selectedIndices.contains(widget.index),
+          selected: dataModel.selectedItems.contains(widget.artist),
           title: Text(widget.artist.name),
           trailing: Text(widget.artist.songs.length.toString() + " tracks"),
           leading: SizedBox(width: 50, height: 50, child: !widget.artist.songs.any((element) => dataModel.getAlbumArt(element) != null) ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != null))!)),
           onTap: () async => {
-            if(!dataModel.selecting)
+            if(dataModel.selectedItems.length == 0)
               {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (context) {
@@ -94,35 +93,13 @@ class _ArtistListItemState extends State<ArtistListItem> {
               }
             else if(widget.allowSelection)
               {
-                if(dataModel.selectedIndices.contains(widget.index))
-                  {
-                    dataModel.selectedArtists.remove(widget.artist),
-                    dataModel.selectedIndices.remove(widget.index),
-                    dataModel.setSelecting(),
-                  }
-                else
-                  {
-                    dataModel.selectedArtists.add(widget.artist),
-                    dataModel.selectedIndices.add(widget.index),
-                    dataModel.setSelecting(),
-                  }
+                dataModel.toggleSelection(widget.artist)
               }
           },
           onLongPress: () => {
             if(widget.allowSelection)
               {
-                if(dataModel.selectedIndices.contains(widget.index))
-                  {
-                    dataModel.selectedArtists.remove(widget.artist),
-                    dataModel.selectedIndices.remove(widget.index),
-                    dataModel.setSelecting(),
-                  }
-                else
-                  {
-                    dataModel.selectedArtists.add(widget.artist),
-                    dataModel.selectedIndices.add(widget.index),
-                    dataModel.setSelecting(),
-                  }
+                dataModel.toggleSelection(widget.artist)
               }
           },
         ),

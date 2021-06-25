@@ -43,7 +43,7 @@ class _AlbumListState extends State<AlbumList> {
                         {
                           return Container(height: 0);
                         }
-                      return AlbumListItem(album: album, index: index, allowSelection: true,);
+                      return AlbumListItem(album: album, allowSelection: true,);
                     },
                     itemCount: dataModel.albums.length + 1
                 ),
@@ -56,9 +56,8 @@ class _AlbumListState extends State<AlbumList> {
   }
 }
 class AlbumListItem extends StatefulWidget {
-  const AlbumListItem({Key? key, required this.album, required this.index, required this.allowSelection}) : super(key: key);
+  const AlbumListItem({Key? key, required this.album, required this.allowSelection}) : super(key: key);
   final Album album;
-  final int index;
   //Selection will be disabled if the item is being shown in search results
   final bool allowSelection;
   @override
@@ -76,13 +75,13 @@ class _AlbumListItemState extends State<AlbumListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.index),
+        selected: dataModel.selectedItems.contains(widget.album),
         title: Text(widget.album.name),
         trailing: Text(widget.album.songs.length.toString() + " tracks"),
         subtitle: Text(widget.album.albumArtist),
         leading: SizedBox(width: 50, height: 50, child: widget.album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(widget.album.albumArt!)),
         onTap: () => {
-          if(!dataModel.selecting)
+          if(dataModel.selectedItems.length == 0)
             {
               Navigator.push(context, MaterialPageRoute(
                   builder: (context) {
@@ -93,35 +92,13 @@ class _AlbumListItemState extends State<AlbumListItem> {
             }
           else if(widget.allowSelection)
             {
-              if(dataModel.selectedIndices.contains(widget.index))
-                {
-                  dataModel.selectedAlbums.remove(widget.album),
-                  dataModel.selectedIndices.remove(widget.index),
-                  dataModel.setSelecting(),
-                }
-              else
-                {
-                  dataModel.selectedAlbums.add(widget.album),
-                  dataModel.selectedIndices.add(widget.index),
-                  dataModel.setSelecting(),
-                }
+              dataModel.toggleSelection(widget.album)
             }
         },
         onLongPress: () => {
           if(widget.allowSelection)
             {
-              if(dataModel.selectedIndices.contains(widget.index))
-                {
-                  dataModel.selectedAlbums.remove(widget.album),
-                  dataModel.selectedIndices.remove(widget.index),
-                  dataModel.setSelecting(),
-                }
-              else
-                {
-                  dataModel.selectedAlbums.add(widget.album),
-                  dataModel.selectedIndices.add(widget.index),
-                  dataModel.setSelecting(),
-                }
+              dataModel.toggleSelection(widget.album)
             }
         },
       ),

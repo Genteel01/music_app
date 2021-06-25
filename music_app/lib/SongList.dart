@@ -36,7 +36,7 @@ class _SongListState extends State<SongList> {
                         return ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,);
                       }
                       var song = dataModel.songs[index - 1];
-                      return SongListItem(song: song, index: index, allowSelection: true, futureSongs: dataModel.songs,);
+                      return SongListItem(song: song, allowSelection: true, futureSongs: dataModel.songs,);
                     },
                     itemCount: dataModel.songs.length + 1
                 ),
@@ -72,9 +72,8 @@ class ShuffleButton extends StatelessWidget {
 
 
 class SongListItem extends StatefulWidget {
-  const SongListItem({Key? key, required this.song, required this.index, required this.allowSelection, required this.futureSongs}) : super(key: key);
+  const SongListItem({Key? key, required this.song, required this.allowSelection, required this.futureSongs}) : super(key: key);
   final Song song;
-  final int index;
   //Selection will be disabled if the item is being shown in search results
   final bool allowSelection;
   //Which songs will be added to upnext when you play a song
@@ -95,7 +94,7 @@ class _SongListItemState extends State<SongListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.index) || (!dataModel.selecting && dataModel.settings.currentlyPlaying == widget.song),
+        selected: dataModel.selectedItems.contains(widget.song) || (dataModel.selectedItems.length == 0 && dataModel.settings.currentlyPlaying == widget.song),
         title: Text(widget.song.name),
         subtitle: Text(widget.song.artist),
         trailing: dataModel.settings.currentlyPlaying == widget.song ? Row(mainAxisSize: MainAxisSize.min,
@@ -106,41 +105,19 @@ class _SongListItemState extends State<SongListItem> {
         ) : Text(widget.song.durationString()),
         leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.song)!)),
         onTap: () => {
-          if(!dataModel.selecting)
+          if(dataModel.selectedItems.length == 0)
             {
               dataModel.setCurrentlyPlaying(widget.song, widget.futureSongs),
             }
           else if(widget.allowSelection)
             {
-              if(dataModel.selectedIndices.contains(widget.index))
-                {
-                  dataModel.selectedSongs.remove(widget.song),
-                  dataModel.selectedIndices.remove(widget.index),
-                  dataModel.setSelecting(),
-                }
-              else
-                {
-                  dataModel.selectedSongs.add(widget.song),
-                  dataModel.selectedIndices.add(widget.index),
-                  dataModel.setSelecting(),
-                }
+              dataModel.toggleSelection(widget.song)
             }
         },
         onLongPress: () => {
           if(widget.allowSelection)
             {
-              if(dataModel.selectedSongs.contains(widget.song))
-                {
-                  dataModel.selectedSongs.remove(widget.song),
-                  dataModel.selectedIndices.remove(widget.index),
-                  dataModel.setSelecting(),
-                }
-              else
-                {
-                  dataModel.selectedSongs.add(widget.song),
-                  dataModel.selectedIndices.add(widget.index),
-                  dataModel.setSelecting(),
-                }
+              dataModel.toggleSelection(widget.song)
             }
         },
       ),

@@ -106,7 +106,7 @@ class PlaylistListBuilder extends StatelessWidget {
                   border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                 child: Center(
                   child: ListTile(
-                    selected: !addingToPlaylist && dataModel.selectedIndices.contains(index),
+                    selected: !addingToPlaylist && dataModel.selectedItems.contains(playlist),
                     title: Text(playlist.name),
                     trailing: Text(playlist.songs.length.toString() + " Tracks"),
                     onTap: () => {
@@ -117,45 +117,23 @@ class PlaylistListBuilder extends StatelessWidget {
                         }
                       else
                         {
-                          if(!dataModel.selecting)
+                          if(dataModel.selectedItems.length == 0)
                             {
                               Navigator.push(context, MaterialPageRoute(
                                   builder: (context) {
-                                    return PlaylistDetails(index: index - 1);
+                                    return PlaylistDetails(index: index - 2);
                                 }))
                             }
                           else
                             {
-                              if(dataModel.selectedIndices.contains(index))
-                                {
-                                  dataModel.selectedPlaylists.remove(playlist),
-                                  dataModel.selectedIndices.remove(index),
-                                  dataModel.setSelecting(),
-                                }
-                              else
-                                {
-                                  dataModel.selectedPlaylists.add(playlist),
-                                  dataModel.selectedIndices.add(index),
-                                  dataModel.setSelecting(),
-                                }
+                              dataModel.toggleSelection(playlist)
                             }
                         }
                     },
                     onLongPress: () => {
                       if(!addingToPlaylist)
                         {
-                          if(dataModel.selectedPlaylists.contains(playlist))
-                            {
-                              dataModel.selectedPlaylists.remove(playlist),
-                              dataModel.selectedIndices.remove(index),
-                              dataModel.setSelecting(),
-                            }
-                          else
-                            {
-                              dataModel.selectedPlaylists.add(playlist),
-                              dataModel.selectedIndices.add(index),
-                              dataModel.setSelecting(),
-                            }
+                          dataModel.toggleSelection(playlist)
                         }
                     },
                   ),

@@ -22,7 +22,7 @@ class ArtistDetails extends StatelessWidget {
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
     Artist artist = dataModel.artists[index];
     return Scaffold(
-        appBar: dataModel.selecting ? AppBar(automaticallyImplyLeading: false,
+        appBar: dataModel.selectedItems.length > 0 ? AppBar(automaticallyImplyLeading: false,
           title: SelectingAppBarTitle(artist: artist,),
         ) : AppBar(
           title: Text(artist.name),
@@ -49,11 +49,11 @@ class ArtistDetails extends StatelessWidget {
                                 padding: const EdgeInsets.only(top: 2.0, bottom: 2),
                                 child: Text(song.album),
                               ),
-                              ArtistDetailsListItem(song: song, index: index, artist: artist,),
+                              ArtistDetailsListItem(song: song, artist: artist,),
                             ],
                           );
                         }
-                        return ArtistDetailsListItem(song: song, index: index, artist: artist,);
+                        return ArtistDetailsListItem(song: song, artist: artist,);
                       },
                       itemCount: artist.songs.length + 1
                   ),
@@ -66,9 +66,8 @@ class ArtistDetails extends StatelessWidget {
 }
 
 class ArtistDetailsListItem extends StatefulWidget {
-  const ArtistDetailsListItem({Key? key, required this.song, required this.index, required this.artist}) : super(key: key);
+  const ArtistDetailsListItem({Key? key, required this.song, required this.artist}) : super(key: key);
   final Song song;
-  final int index;
   final Artist artist;
 
   @override
@@ -86,45 +85,23 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.index),
+        selected: dataModel.selectedItems.contains(widget.song),
         title: Text(widget.song.name),
         subtitle: Text(widget.song.album),
         trailing: Text(widget.song.durationString()),
         leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.song)!)),
         onTap: () => {
-          if(!dataModel.selecting)
+          if(dataModel.selectedItems.length == 0)
             {
               dataModel.setCurrentlyPlaying(widget.song, widget.artist.songs),
             }
           else
             {
-              if(dataModel.selectedIndices.contains(widget.index))
-                {
-                  dataModel.selectedSongs.remove(widget.song),
-                  dataModel.selectedIndices.remove(widget.index),
-                  dataModel.setSelecting(),
-                }
-              else
-                {
-                  dataModel.selectedSongs.add(widget.song),
-                  dataModel.selectedIndices.add(widget.index),
-                  dataModel.setSelecting(),
-                }
+              dataModel.toggleSelection(widget.song)
             }
         },
         onLongPress: () => {
-          if(dataModel.selectedSongs.contains(widget.song))
-            {
-              dataModel.selectedSongs.remove(widget.song),
-              dataModel.selectedIndices.remove(widget.index),
-              dataModel.setSelecting(),
-            }
-          else
-            {
-              dataModel.selectedSongs.add(widget.song),
-              dataModel.selectedIndices.add(widget.index),
-              dataModel.setSelecting(),
-            }
+          dataModel.toggleSelection(widget.song)
         },
       ),
     );

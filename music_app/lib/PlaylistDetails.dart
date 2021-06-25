@@ -39,7 +39,7 @@ class PlaylistDetails extends StatelessWidget {
                         }
                         var song = playlist.songs[index - 1];
 
-                        return SongListItem(song: song, index: index, allowSelection: true, futureSongs: playlist.songs);
+                        return SongListItem(song: song, allowSelection: true, futureSongs: playlist.songs);
                       },
                       itemCount: playlist.songs.length + 1
                   ),
