@@ -23,6 +23,8 @@ import 'SongList.dart';
 //TODO Marquee on overflowing text
 
 //TODO lock screen and notifications pulldown controls
+
+//TODO if there are no locations to look for music replace the song, artist, and album lists with the same list item that is used to add and remove them on the settings page
 void main() {
   runApp(MyApp());
 }
