@@ -110,39 +110,50 @@ class _SettingsPageState extends State<SettingsPage> {
                     border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
                     child: ListView(
                       children: [
-                        ListTile(
-                            title: Text("Music Directories"),
-                          subtitle: Text("Choose where to look for music on this device"),
-                          onTap: () => {
-                            showModalBottomSheet<void>(
-                              isScrollControlled: true,
-                              context: context,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(30))),
-                              builder: (BuildContext context) {
-                                return Padding(
-                                  padding: MediaQuery
-                                      .of(context)
-                                      .viewInsets,
-                                  child: Container(
-                                    height: 400,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(top: 16.0),
-                                      child: PathsList(),
-                                    ),
-                                  ),
-                                );
-                              },
-                            )
-                          },
-                        ),
+                        DirectoriesMenuListItem(),
                       ],
                     )
                 ),
               )
             ]
         )
+    );
+  }
+}
+
+class DirectoriesMenuListItem extends StatelessWidget {
+  const DirectoriesMenuListItem({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+        title: Text("Music Directories"),
+      subtitle: Text("Choose where to look for music on this device"),
+      onTap: () => {
+        showModalBottomSheet<void>(
+          isScrollControlled: true,
+          context: context,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(30))),
+          builder: (BuildContext context) {
+            return Padding(
+              padding: MediaQuery
+                  .of(context)
+                  .viewInsets,
+              child: Container(
+                height: 400,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: PathsList(),
+                ),
+              ),
+            );
+          },
+        )
+      },
     );
   }
 }

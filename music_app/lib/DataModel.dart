@@ -25,12 +25,6 @@ enum LoopType {
   loop,
   singleSong,
 }
-//TODO Cut some of the list.contains if it's possible to
-
-//TODO for faster loading try storing songs in the album and artist files too, and loading them into the song list too, then do a songs.reduce() to get rid of duplicates after loading
-
-//TODO it might be even faster to store all the data in a single text file
-//This might not actually be faster, and might not be worth the effort (also it would use a lot more memory and more storage space)
 class DataModel extends ChangeNotifier {
 
   bool loading = false;
@@ -341,6 +335,7 @@ class DataModel extends ChangeNotifier {
     await Future.forEach(settings.directoryPaths, (String directoryPath) async {
       //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
       var directoryMap = Directory(directoryPath).listSync(recursive: true);
+
       await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
         if(filePath.path.endsWith("mp3") || filePath.path.endsWith("flac") || filePath.path.endsWith("m4a"))
         {

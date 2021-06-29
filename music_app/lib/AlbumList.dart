@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'Album.dart';
 import 'AlbumDetails.dart';
 import 'DataModel.dart';
+import 'Settings.dart';
 class AlbumList extends StatefulWidget {
   const AlbumList({Key? key, required this.goToDetails}) : super(key: key);
   final bool goToDetails;
@@ -37,6 +38,10 @@ class _AlbumListState extends State<AlbumList> {
                       itemBuilder: (_, index) {
                         if(index == 0)
                         {
+                          if(dataModel.songs.length == 0)
+                          {
+                            return DirectoriesMenuListItem();
+                          }
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.albums.length == 1 ? dataModel.albums.length.toString() + " Album" : dataModel.albums.length.toString() + " Albums", style: TextStyle(fontSize: 16,),)),

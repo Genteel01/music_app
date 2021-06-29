@@ -19,12 +19,11 @@ import 'SongList.dart';
 //TODO https://pub.dev/packages/audio_service
 //TODO https://pub.dev/packages/just_audio
 
-//TODO feedback (adding to playlists, removing from playlists)
+//TODO feedback (adding to playlists, removing from playlists, creating playlists, deleting playlists, adding file path, removing file path)
 //TODO Marquee on overflowing text
+//TODO make sure the titles and subtitles don't ever overflow on all the list items
 
 //TODO lock screen and notifications pulldown controls
-
-//TODO if there are no locations to look for music replace the song, artist, and album lists with the same list item that is used to add and remove them on the settings page
 void main() {
   runApp(MyApp());
 }

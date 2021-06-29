@@ -1,5 +1,6 @@
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
+import 'package:music_app/Settings.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
@@ -37,6 +38,10 @@ class _SongListState extends State<SongList> {
                       itemBuilder: (_, index) {
                         if(index == 0)
                         {
+                          if(dataModel.songs.length == 0)
+                            {
+                              return DirectoriesMenuListItem();
+                            }
                           if(widget.playSongs)
                             {
                               return ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,);
