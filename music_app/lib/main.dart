@@ -111,7 +111,7 @@ class MyTabBar extends StatelessWidget {
                   //Menu
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
-                    child: InkWell(child: Icon(Icons.settings), onTap: () => {
+                    child: InkWell(child: Icon(Icons.settings, color: dataModel.errorMessage == "" ? Colors.grey[50] : Colors.red), onTap: () => {
                       Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
                             return SettingsPage();
@@ -127,7 +127,7 @@ class MyTabBar extends StatelessWidget {
             tabs: myTabs,
           ),
         ),
-        body: TabBarView(
+        body: dataModel.songs.length == 0 && dataModel.errorMessage != "" ? Padding(padding: const EdgeInsets.all(8.0), child: Text(dataModel.errorMessage),) : TabBarView(
           physics: dataModel.selectedIndices.length > 0 ? NeverScrollableScrollPhysics() : null,
           children: [
             PlaylistList(key: PageStorageKey("playlist_key"),),

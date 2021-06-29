@@ -103,13 +103,14 @@ class _SettingsPageState extends State<SettingsPage> {
         appBar: AppBar(
           title: Text("Settings"),
         ),
-        body: Column(
+        body: dataModel.loading ? Center(child: CircularProgressIndicator()) : Column(
             children: <Widget>[
               Expanded(
                 child: Container(decoration: BoxDecoration(
                     border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
                     child: ListView(
                       children: [
+                        if(dataModel.errorMessage != "") Padding(padding: const EdgeInsets.all(8.0), child: Text(dataModel.errorMessage),),
                         DirectoriesMenuListItem(),
                       ],
                     )

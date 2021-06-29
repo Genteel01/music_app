@@ -44,6 +44,7 @@ class DataModel extends ChangeNotifier {
 
   List<Object> searchResults = [];
 
+  String errorMessage = "";
 
   Random randomNumbers = new Random();
   getSearchResults(String searchText)
@@ -280,6 +281,7 @@ class DataModel extends ChangeNotifier {
     artists.clear();
     albums.clear();
     playlists.clear();
+    errorMessage = "";
 
 
     var retriever = new MetadataRetriever();
@@ -333,13 +335,13 @@ class DataModel extends ChangeNotifier {
     });
     //Check for new songs within the directories you are looking at
     await Future.forEach(settings.directoryPaths, (String directoryPath) async {
-      //TODO wrap this in a try catch block to deal with the cases where it tries to map inaccessible system files
-      var directoryMap = Directory(directoryPath).listSync(recursive: true);
-
-      await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
-        if(filePath.path.endsWith("mp3") || filePath.path.endsWith("flac") || filePath.path.endsWith("m4a"))
-        {
-          if(!songs.any((element) => element.filePath == filePath.path))
+      try
+      {
+        var directoryMap = Directory(directoryPath).listSync(recursive: true);
+        await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
+          if(filePath.path.endsWith("mp3") || filePath.path.endsWith("flac") || filePath.path.endsWith("m4a"))
+          {
+            if(!songs.any((element) => element.filePath == filePath.path))
             {
               Song newSong;
               Uint8List? albumArt;
@@ -358,8 +360,13 @@ class DataModel extends ChangeNotifier {
               songs.add(newSong);
               addToArtistsAndAlbums(newSong, albumArt, albumYear);
             }
-        }
-      });
+          }
+        });
+      }
+      catch(error)
+      {
+        errorMessage = errorMessage + "The directory \"" + directoryPath + "\" contains inaccessible system files, and could not be mapped\n";
+      }
     });
     //If the playlists file exists load everything from it
     try
