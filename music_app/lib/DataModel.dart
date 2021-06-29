@@ -290,31 +290,35 @@ class DataModel extends ChangeNotifier {
 
     var retriever = new MetadataRetriever();
     //If the album art directory doesn't exist create it
-    if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
+    try
     {
       Directory(appDocumentsDirectory + "/albumart").createSync();
     }
+    catch(error){}
     //If the albums file exists load everything from it
-    if(File(appDocumentsDirectory + "/albums.txt").existsSync())
+    try
       {
         String albumFile = await File(appDocumentsDirectory + "/albums.txt").readAsString();
         var jsonFile = jsonDecode(albumFile);
         albums = Album.loadAlbumFile(jsonFile, appDocumentsDirectory);
       }
+    catch (error){}
     //If the artists file exists load everything from it
-    if(File(appDocumentsDirectory + "/artists.txt").existsSync())
+    try
     {
       String artistsFile = await File(appDocumentsDirectory + "/artists.txt").readAsString();
       var jsonFile = jsonDecode(artistsFile);
       artists = Artist.loadArtistFile(jsonFile);
     }
+    catch (error){}
     //If the songs file exists load everything from it
-    if(File(appDocumentsDirectory + "/songs.txt").existsSync())
+    try
     {
       String songsFile = await File(appDocumentsDirectory + "/songs.txt").readAsString();
       var jsonFile = jsonDecode(songsFile);
       songs = await Song.loadSongFile(jsonFile);
     }
+    catch (error){}
     //Load your settings file
     try
     {
@@ -328,9 +332,7 @@ class DataModel extends ChangeNotifier {
         audioPlayer.pause();
       }
     }
-    catch(error){
-
-    }
+    catch(error){}
     //Sort the songs into artists and albums
     songs.forEach((element) {
       addToArtistsAndAlbums(element, null, null);
@@ -365,12 +367,13 @@ class DataModel extends ChangeNotifier {
       });
     });
     //If the playlists file exists load everything from it
-    if(File(appDocumentsDirectory + "/playlists.txt").existsSync())
+    try
     {
       String playlistsFile = await File(appDocumentsDirectory + "/playlists.txt").readAsString();
       var jsonFile = jsonDecode(playlistsFile);
       playlists = Playlist.loadPlaylistFile(jsonFile, songs);
     }
+    catch (error){}
     //Sort the song and album lists
     sortByTrackName(songs);
     //sortByDuration(songs);
@@ -421,7 +424,6 @@ class DataModel extends ChangeNotifier {
     }
     //Set up the listener to detect when songs finish
     audioPlayer.playerStateStream.listen((state) {
-      print(state.processingState);
       if(state.processingState == ProcessingState.completed)
         {
           if(settings.loop == LoopType.singleSong)
@@ -434,26 +436,6 @@ class DataModel extends ChangeNotifier {
             }
         }
     });
-    //Check for changed album metadata
-    /*await Future.forEach(albums, (Album album) async {
-      if(album.lastModified.isBefore(album.songs[0].lastModified))
-        {
-          Uint8List? albumArt;
-          String albumYear = "Unknown Year";
-          File file = File(album.songs[0].filePath);
-          await retriever.setFile(file);
-          Metadata metaData = await retriever.metadata;
-          if (retriever.albumArt != null) {
-            albumArt = retriever.albumArt!;
-          }
-          if(metaData.year != null)
-          {
-            albumYear = metaData.year.toString();
-          }
-
-        }
-    });*/
-
 
     loading = false;
     notifyListeners();

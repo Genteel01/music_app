@@ -15,10 +15,11 @@ class Album{
 
   void updateAlbum(String newYear, Uint8List? newAlbumArt, DateTime newLastModified, String directoryPath)
   {
-    if(File(directoryPath + "/albumart" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).existsSync())
+    try
       {
-        File(directoryPath + "/albumart" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).delete();
+        File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).delete();
       }
+    catch(error){}
     year = newYear;
     albumArt = newAlbumArt;
     lastModified = newLastModified;
@@ -38,9 +39,20 @@ class Album{
         albumArtist = json['albumArtist'],
         year = json['year'],
         songs = [],
-        albumArt = File(directoryPath + "/albumart" + json['name'].replaceAll("/", "_") + json['albumArtist'].replaceAll("/", "_") + json['year'].replaceAll("/", "_")).existsSync() ? File(directoryPath + "/albumart" + json['name'].replaceAll("/", "_") + json['albumArtist'].replaceAll("/", "_") + json['year'].replaceAll("/", "_")).readAsBytesSync() : null,
+        albumArt = Album.loadAlbumArt(json['name'], json['albumArtist'], json['year'], directoryPath),
         lastModified = DateTime.fromMillisecondsSinceEpoch(json['lastModified']);
 
+  static Uint8List? loadAlbumArt(String name, String albumArtist, String year, String directoryPath)
+  {
+    try
+    {
+      return File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).readAsBytesSync();
+    }
+    catch(error)
+    {
+      return null;
+    }
+  }
   /*static Uint8List? convertImage(List<dynamic>? source)
   {
     if(source == null)
@@ -69,7 +81,7 @@ class Album{
       newAlbums.add(element.toJson());
       if(element.albumArt != null)
         {
-          File(directoryPath + "/albumart" + element.name.replaceAll("/", "_") + element.albumArtist.replaceAll("/", "_") + element.year.replaceAll("/", "_")).writeAsBytes(element.albumArt!);
+          File(directoryPath + "/albumart/" + element.name.replaceAll("/", "_") + element.albumArtist.replaceAll("/", "_") + element.year.replaceAll("/", "_")).writeAsBytes(element.albumArt!);
         }
     });
     return newAlbums;

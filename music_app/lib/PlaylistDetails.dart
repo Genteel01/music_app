@@ -9,8 +9,6 @@ import 'AlbumList.dart';
 import 'ArtistList.dart';
 import 'DataModel.dart';
 import 'Playlist.dart';
-import 'Song.dart';
-//TODO do the menu (with settings, rename, delete, add to playlist and reorder options)
 class PlaylistDetails extends StatefulWidget {
   final int index;
 
