@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
 import 'Playlist.dart';
+import 'Settings.dart';
 //TODO do the menu (with settings, rename, delete, add to playlist and reorder options)
 /*
 *           PopupMenuButton<String>(
@@ -35,12 +36,41 @@ class PlaylistDetails extends StatelessWidget {
 
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
     ScrollController myScrollController = ScrollController();
+    void selectMenuButton(String button)
+    {
+      switch (button)
+      {
+        case "Rename":
+          break;
+        case "Reorder":
+          break;
+        case "Delete":
+          break;
+        case "Add to Playlist":
+          break;
+      }
+    }
     Playlist playlist = dataModel.playlists[index];
     return Scaffold(
         appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
           title: SelectingAppBarTitle(playlist: playlist,),
         ) : AppBar(
-          title: Text(playlist.name),
+          title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(playlist.name),
+              PopupMenuButton<String>(
+                onSelected: selectMenuButton,
+                itemBuilder: (BuildContext context) {
+                  return {"Rename", "Reorder", "Delete", "Add to Playlist"}.map((String choice) {
+                    return PopupMenuItem<String>(
+                      value: choice,
+                      child: Text(choice),
+                    );
+                  }).toList();
+                },
+              ),
+            ],
+          ),
         ),
         bottomNavigationBar: CurrentlyPlayingBar(),
         body: Column(
