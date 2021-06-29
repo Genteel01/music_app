@@ -9,12 +9,25 @@ import 'AlbumList.dart';
 import 'ArtistList.dart';
 import 'DataModel.dart';
 import 'Playlist.dart';
+import 'Song.dart';
 //TODO do the menu (with settings, rename, delete, add to playlist and reorder options)
-class PlaylistDetails extends StatelessWidget {
+class PlaylistDetails extends StatefulWidget {
   final int index;
 
   PlaylistDetails({required this.index}) : super();
+
+  @override
+  _PlaylistDetailsState createState() => _PlaylistDetailsState();
+}
+
+class _PlaylistDetailsState extends State<PlaylistDetails> {
   final filterController = TextEditingController();
+  bool? reordering;
+  @override
+  void initState() {
+    super.initState();
+    reordering = false;
+  }
   @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(
@@ -23,7 +36,7 @@ class PlaylistDetails extends StatelessWidget {
   }
 
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
-    Playlist playlist = dataModel.playlists[index];
+    Playlist playlist = dataModel.playlists[widget.index];
     ScrollController myScrollController = ScrollController();
     void selectMenuButton(String button)
     {
@@ -60,6 +73,9 @@ class PlaylistDetails extends StatelessWidget {
           });
           break;
         case "Reorder":
+          setState(() {
+            reordering = true;
+          });
           break;
         case "Delete":
           dataModel.removePlaylist(playlist);
@@ -82,10 +98,15 @@ class PlaylistDetails extends StatelessWidget {
     return Scaffold(
         appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
           title: SelectingAppBarTitle(playlist: playlist,),
-        ) : AppBar(
+        ) : AppBar(automaticallyImplyLeading: !reordering!,
           title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(playlist.name),
+              reordering! ? ElevatedButton(onPressed: () => {
+                setState(() {
+                  reordering = false;
+                }),
+              }, child: Text("End")) :
               PopupMenuButton<String>(
                 onSelected: selectMenuButton,
                 itemBuilder: (BuildContext context) {
@@ -104,7 +125,27 @@ class PlaylistDetails extends StatelessWidget {
         body: Column(
             children: <Widget>[
               Expanded(
-                child: Container(decoration: BoxDecoration(
+                child: reordering! ? ReorderableListView.builder(
+                    itemBuilder: (_, index) {
+                      var song = playlist.songs[index];
+
+                      //return SongListItem(key: Key(index.toString()), song: song, allowSelection: false, futureSongs: playlist.songs, index: index, playSongs: false,);
+                      return Container(key: Key(index.toString()), height: 70, decoration: BoxDecoration(
+                          border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+                        child: ListTile(
+                          title: Text(song.name),
+                          subtitle: Text(song.artist),
+                          trailing: Icon(Icons.menu),
+                          leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
+                        ),
+                      );
+                    },
+                    itemCount: playlist.songs.length,
+                  onReorder: (int oldIndex, int newIndex) {
+                    dataModel.reorderPlaylist(oldIndex, newIndex, playlist);
+                  },
+                )
+                : Container(decoration: BoxDecoration(
                     border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
                   child: DraggableScrollbar.arrows(
                     backgroundColor: Theme.of(context).primaryColor,

@@ -254,6 +254,16 @@ class DataModel extends ChangeNotifier {
       clearSelections();
   }
 
+  void reorderPlaylist(int oldIndex, int newIndex, Playlist playlist)
+  {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final Song item = playlist.songs.removeAt(oldIndex);
+    playlist.songs.insert(newIndex, item);
+    notifyListeners();
+    savePlaylists();
+  }
   void deletePlaylists()
   {
     selectedIndices.forEach((element) {
