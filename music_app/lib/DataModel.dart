@@ -504,44 +504,53 @@ class DataModel extends ChangeNotifier {
   Future<void> clearAllData() async
   {
     String documentStorage = await getAppDocumentsDirectory();
-    if(File(documentStorage + "/albums.txt").existsSync())
+    try
     {
       File(documentStorage + "/albums.txt").delete();
     }
+    catch(error){}
     //If the artists directory exists load everything from it, else create it
-    if(File(documentStorage + "/artists.txt").existsSync())
+    try
     {
       File(documentStorage + "/artists.txt").delete();
     }
+    catch(error){}
     //If the songs directory doesn't exist create it
-    if(File(documentStorage + "/songs.txt").existsSync())
+    try
     {
       File(documentStorage + "/songs.txt").delete();
     }
-    if(Directory(documentStorage + "/songs").existsSync())
+    catch(error){}
+    try
     {
       Directory(documentStorage + "/songs").delete(recursive: true);
     }
-    if(Directory(documentStorage + "/albums").existsSync())
+    catch(error){}
+    try
       {
         Directory(documentStorage + "/albums").delete(recursive: true);
       }
-    if(Directory(documentStorage + "/artists").existsSync())
+    catch(error){}
+    try
       {
         Directory(documentStorage + "/artists").delete(recursive: true);
       }
-    if(Directory(documentStorage + "/albumart").existsSync())
+    catch(error){}
+    try
     {
       Directory(documentStorage + "/albumart").delete(recursive: true);
     }
-    if(File(documentStorage + "/playlists.txt").existsSync())
+    catch(error){}
+    try
     {
       File(documentStorage + "/playlists.txt").delete();
     }
-    if(File(documentStorage + "/settings.txt").existsSync())
+    catch(error){}
+    try
     {
       File(documentStorage + "/settings.txt").delete();
     }
+    catch(error){}
   }
 
   void addToArtistsAndAlbums(Song newSong, Uint8List? albumArt, String? albumYear)
@@ -746,10 +755,11 @@ class DataModel extends ChangeNotifier {
 
   Future<void> deleteSongList() async
   {
-    if(File(appDocumentsDirectory + "/songs.txt").existsSync())
+    try
     {
       await File(appDocumentsDirectory + "/songs.txt").delete();
     }
+    catch(error){}
   }
 
   void renamePlaylist(Playlist playlist, String newName)

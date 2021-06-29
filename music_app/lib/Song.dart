@@ -101,7 +101,7 @@ class Song {
     await Future.forEach(data, (dynamic element) async {
       Song newSong = Song.fromJson(element);
       //Check if the song still exists
-      if(File(newSong.filePath).existsSync())
+      try
       {
         //Check for updated metadata
         if(File(newSong.filePath).lastModifiedSync().isAfter(newSong.lastModified))
@@ -113,6 +113,7 @@ class Song {
         }
         newSongs.add(Song.fromJson(element));
       }
+      catch(error){}
     });
     return newSongs;
   }
