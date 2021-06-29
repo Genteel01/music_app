@@ -759,4 +759,14 @@ class DataModel extends ChangeNotifier {
       await File(appDocumentsDirectory + "/songs.txt").delete();
     }
   }
+
+  void renamePlaylist(Playlist playlist, String newName)
+  {
+    if(newName != "")
+      {
+        playlist.name = newName;
+        notifyListeners();
+        savePlaylists();
+      }
+  }
 }

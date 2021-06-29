@@ -35,12 +35,41 @@ class PlaylistDetails extends StatelessWidget {
   }
 
   Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
+    Playlist playlist = dataModel.playlists[index];
     ScrollController myScrollController = ScrollController();
     void selectMenuButton(String button)
     {
       switch (button)
       {
         case "Rename":
+          final playlistNameController = TextEditingController();
+          playlistNameController.text = playlist.name;
+          showDialog<bool>(
+              context: context,
+              builder: (BuildContext context) =>
+                  AlertDialog(
+                    title: const Text("New Playlist"),
+                    content: TextField(controller: playlistNameController, textCapitalization: TextCapitalization.sentences, decoration: InputDecoration(hintText: playlist.name),),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pop(context, false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pop(context, true),
+                        child: const Text('Create'),
+                      ),
+                    ],
+                  )
+          ).then((value) =>
+          {
+            if(value != null && value)
+              {
+                dataModel.renamePlaylist(playlist, playlistNameController.text)
+              }
+          });
           break;
         case "Reorder":
           break;
@@ -50,7 +79,6 @@ class PlaylistDetails extends StatelessWidget {
           break;
       }
     }
-    Playlist playlist = dataModel.playlists[index];
     return Scaffold(
         appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
           title: SelectingAppBarTitle(playlist: playlist,),
