@@ -6,8 +6,8 @@ import 'DataModel.dart';
 import 'Playlist.dart';
 import 'Song.dart';
 class SongList extends StatefulWidget {
-  const SongList({Key? key}) : super(key: key);
-
+  const SongList({Key? key, required this.playSongs}) : super(key: key);
+  final bool playSongs;
   @override
   _SongListState createState() => _SongListState();
 }
@@ -37,10 +37,20 @@ class _SongListState extends State<SongList> {
                       itemBuilder: (_, index) {
                         if(index == 0)
                         {
-                          return ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,);
+                          if(widget.playSongs)
+                            {
+                              return ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,);
+                            }
+                          else
+                            {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.songs.length == 1 ? dataModel.songs.length.toString() + " Song" : dataModel.songs.length.toString() + " Songs", style: TextStyle(fontSize: 16,),)),
+                              );
+                            }
                         }
                         var song = dataModel.songs[index - 1];
-                        return SongListItem(song: song, allowSelection: true, futureSongs: dataModel.songs, index: index - 1);
+                        return SongListItem(song: song, allowSelection: true, futureSongs: dataModel.songs, index: index - 1, playSongs: widget.playSongs,);
                       },
                       itemCount: dataModel.songs.length + 1,
                       itemExtent: 70,
@@ -78,7 +88,7 @@ class ShuffleButton extends StatelessWidget {
 
 
 class SongListItem extends StatefulWidget {
-  const SongListItem({Key? key, required this.song, required this.allowSelection, required this.futureSongs, this.playlist, required this.index}) : super(key: key);
+  const SongListItem({Key? key, required this.song, required this.allowSelection, required this.futureSongs, this.playlist, required this.index, required this.playSongs}) : super(key: key);
   final Song song;
   //Selection will be disabled if the item is being shown in search results
   final bool allowSelection;
@@ -88,6 +98,8 @@ class SongListItem extends StatefulWidget {
   final Playlist? playlist;
   //Need this because there might be several copies of the same song in a playlist
   final int index;
+  //When adding to a playlist from the playlist details screen we don't want to be able to play songs
+  final bool playSongs;
 
   @override
   _SongListItemState createState() => _SongListItemState();
@@ -115,7 +127,7 @@ class _SongListItemState extends State<SongListItem> {
         ) : Text(widget.song.durationString()),
         leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.song)!)),
         onTap: () => {
-          if(dataModel.selectedIndices.length == 0)
+          if(dataModel.selectedIndices.length == 0 && widget.playSongs)
             {
               dataModel.setCurrentlyPlaying(widget.song, widget.futureSongs),
             }

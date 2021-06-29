@@ -6,8 +6,8 @@ import 'package:provider/provider.dart';
 import 'Artist.dart';
 import 'DataModel.dart';
 class ArtistList extends StatefulWidget {
-  const ArtistList({Key? key}) : super(key: key);
-
+  const ArtistList({Key? key, required this.goToDetails}) : super(key: key);
+  final bool goToDetails;
   @override
   _ArtistListState createState() => _ArtistListState();
 }
@@ -47,7 +47,7 @@ class _ArtistListState extends State<ArtistList> {
                         {
                           return Container(height: 0);
                         }
-                        return ArtistListItem(artist: artist, allowSelection: true,);
+                        return ArtistListItem(artist: artist, allowSelection: true, goToDetails: widget.goToDetails);
                       },
                       itemCount: dataModel.artists.length + 1,
                     itemExtent: 70,
@@ -63,8 +63,9 @@ class _ArtistListState extends State<ArtistList> {
 }
 
 class ArtistListItem extends StatefulWidget {
-  const ArtistListItem({Key? key, required this.artist, required this.allowSelection}) : super(key: key);
+  const ArtistListItem({Key? key, required this.artist, required this.allowSelection, required this.goToDetails}) : super(key: key);
   final Artist artist;
+  final bool goToDetails;
   //Selection will be disabled if the item is being shown in search results
   final bool allowSelection;
   @override
@@ -88,7 +89,7 @@ class _ArtistListItemState extends State<ArtistListItem> {
           trailing: Text(widget.artist.songs.length == 1 ? widget.artist.songs.length.toString() + " track" : widget.artist.songs.length.toString() + " tracks"),
           leading: SizedBox(width: 50, height: 50, child: !widget.artist.songs.any((element) => dataModel.getAlbumArt(element) != null) ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != null))!)),
           onTap: () async => {
-            if(dataModel.selectedIndices.length == 0)
+            if(dataModel.selectedIndices.length == 0 && widget.goToDetails)
               {
                 Navigator.push(context, MaterialPageRoute(
                     builder: (context) {

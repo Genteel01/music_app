@@ -132,9 +132,9 @@ class MyTabBar extends StatelessWidget {
           physics: dataModel.selectedIndices.length > 0 ? NeverScrollableScrollPhysics() : null,
           children: [
             PlaylistList(key: PageStorageKey("playlist_key"),),
-            SongList(key: PageStorageKey("song_key"),),
-            ArtistList(key: PageStorageKey("artist_key"),),
-            AlbumList(key: PageStorageKey("album_key"),),
+            SongList(key: PageStorageKey("song_key"), playSongs: true,),
+            ArtistList(key: PageStorageKey("artist_key"), goToDetails: true,),
+            AlbumList(key: PageStorageKey("album_key"), goToDetails: true,),
           ],
         ),
       ),
@@ -142,10 +142,11 @@ class MyTabBar extends StatelessWidget {
   }
 }
 class SelectingAppBarTitle extends StatefulWidget {
-  const SelectingAppBarTitle({Key? key, this.album, this.artist, this.playlist}) : super(key: key);
+  const SelectingAppBarTitle({Key? key, this.album, this.artist, this.playlist, this.rightButtonReplacement}) : super(key: key);
   final Album? album;
   final Artist? artist;
   final Playlist? playlist;
+  final Widget? rightButtonReplacement;
   @override
   _SelectingAppBarTitleState createState() => _SelectingAppBarTitleState();
 }
@@ -171,6 +172,7 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
             ),
           ],
         ),
+        widget.rightButtonReplacement != null ? widget.rightButtonReplacement! :
         ElevatedButton(child: Text(dataModel.selectionType == Playlist || widget.playlist != null ? "Remove" : "Add To"), onPressed: () => {
           if(dataModel.selectionType == Playlist)
             {

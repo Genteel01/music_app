@@ -120,7 +120,9 @@ class PlaylistListBuilder extends StatelessWidget {
                                 Navigator.push(context, MaterialPageRoute(
                                     builder: (context) {
                                       return PlaylistDetails(index: index - 1);
-                                  }))
+                                  })).then((value) {
+                                  dataModel.clearSelections();
+                                })
                               }
                             else
                               {

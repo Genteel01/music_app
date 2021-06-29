@@ -6,8 +6,8 @@ import 'Album.dart';
 import 'AlbumDetails.dart';
 import 'DataModel.dart';
 class AlbumList extends StatefulWidget {
-  const AlbumList({Key? key}) : super(key: key);
-
+  const AlbumList({Key? key, required this.goToDetails}) : super(key: key);
+  final bool goToDetails;
   @override
   _AlbumListState createState() => _AlbumListState();
 }
@@ -47,7 +47,7 @@ class _AlbumListState extends State<AlbumList> {
                           {
                             return Container(height: 0);
                           }
-                        return AlbumListItem(album: album, allowSelection: true,);
+                        return AlbumListItem(album: album, allowSelection: true, goToDetails: widget.goToDetails,);
                       },
                       itemCount: dataModel.albums.length + 1,
                     itemExtent: 70,
@@ -62,10 +62,11 @@ class _AlbumListState extends State<AlbumList> {
   }
 }
 class AlbumListItem extends StatefulWidget {
-  const AlbumListItem({Key? key, required this.album, required this.allowSelection}) : super(key: key);
+  const AlbumListItem({Key? key, required this.album, required this.allowSelection, required this.goToDetails}) : super(key: key);
   final Album album;
   //Selection will be disabled if the item is being shown in search results
   final bool allowSelection;
+  final bool goToDetails;
   @override
   _AlbumListItemState createState() => _AlbumListItemState();
 }
@@ -87,7 +88,7 @@ class _AlbumListItemState extends State<AlbumListItem> {
         subtitle: Text(widget.album.albumArtist),
         leading: SizedBox(width: 50, height: 50, child: widget.album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(widget.album.albumArt!)),
         onTap: () => {
-          if(dataModel.selectedIndices.length == 0)
+          if(dataModel.selectedIndices.length == 0 && widget.goToDetails)
             {
               Navigator.push(context, MaterialPageRoute(
                   builder: (context) {

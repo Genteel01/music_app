@@ -236,18 +236,18 @@ class DataModel extends ChangeNotifier {
   {
       List<Song> newSongs = [];
       selectedIndices.forEach((element) {
-        if(selectionType == Song)
-          {
-            newSongs.add(songs[element]);
-          }
-        else if(selectionType == Artist)
-          {
-            newSongs.addAll((artists[element]).songs);
-          }
-        else if(selectionType == Album)
-          {
-            newSongs.addAll((albums[element]).songs);
-          }
+        if (selectionType == Song)
+        {
+          newSongs.add(songs[element]);
+        }
+        else if (selectionType == Artist)
+        {
+          newSongs.addAll((artists[element]).songs);
+        }
+        else if (selectionType == Album)
+        {
+          newSongs.addAll((albums[element]).songs);
+        }
       });
       playlist.addToPlaylist(newSongs);
       savePlaylists();
@@ -768,5 +768,11 @@ class DataModel extends ChangeNotifier {
         notifyListeners();
         savePlaylists();
       }
+  }
+  void removePlaylist(Playlist playlist)
+  {
+    playlists.remove(playlist);
+    notifyListeners();
+    savePlaylists();
   }
 }
