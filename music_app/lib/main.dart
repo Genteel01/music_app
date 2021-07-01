@@ -22,7 +22,6 @@ import 'SongList.dart';
 //TODO https://pub.dev/packages/just_audio
 
 //TODO feedback (adding to playlists, removing from playlists, creating playlists, deleting playlists, adding file path, removing file path)
-//TODO Marquee on overflowing text
 
 //TODO lock screen and notifications pulldown controls
 //TODO test blutooth buttons (may need to figure out a way to intercept the signals) (Seems like it's part of audio_service)
@@ -258,9 +257,9 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
                         child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
                           //Container(height: 40, child: Text(dataModel.settings.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16),)),
                           Expanded(child: AutoSizeText(dataModel.settings.currentlyPlaying!.name, maxLines: 1, style: TextStyle(fontSize: 16), minFontSize: 16, overflowReplacement:
-                          Marquee(style: TextStyle(fontSize: 16), crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.currentlyPlaying!.name + "    ", velocity: 35, pauseAfterRound: Duration(seconds: 2), fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
+                          Marquee(style: TextStyle(fontSize: 16), crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.currentlyPlaying!.name, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
                           Expanded(child: AutoSizeText(dataModel.settings.currentlyPlaying!.artist, maxLines: 1, overflowReplacement:
-                          Marquee(crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.currentlyPlaying!.artist + "    ", velocity: 35, pauseAfterRound: Duration(seconds: 2), fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
+                          Marquee(crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.currentlyPlaying!.artist, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
                         ],),
                       ),
                     ),
