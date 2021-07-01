@@ -1,4 +1,6 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:marquee/marquee.dart';
 import 'package:music_app/ArtistList.dart';
 import 'package:music_app/Search.dart';
 import 'package:music_app/Settings.dart';
@@ -252,10 +254,13 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
                   children: [
                     SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
                     Expanded(
-                      child: Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                        child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, crossAxisAlignment: CrossAxisAlignment.start,children: [
-                          Container(height: 40, child: Text(dataModel.settings.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16),)),
-                          Expanded(child: Text(dataModel.settings.currentlyPlaying!.artist, maxLines: 1, overflow: TextOverflow.ellipsis,)),
+                      child: Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0),
+                        child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          //Container(height: 40, child: Text(dataModel.settings.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16),)),
+                          Expanded(child: AutoSizeText(dataModel.settings.currentlyPlaying!.name, maxLines: 1, style: TextStyle(fontSize: 16), minFontSize: 16, overflowReplacement:
+                          Marquee(style: TextStyle(fontSize: 16), crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.currentlyPlaying!.name + "    ", velocity: 35, pauseAfterRound: Duration(seconds: 2), fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
+                          Expanded(child: AutoSizeText(dataModel.settings.currentlyPlaying!.artist, maxLines: 1, overflowReplacement:
+                          Marquee(crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.currentlyPlaying!.artist + "    ", velocity: 35, pauseAfterRound: Duration(seconds: 2), fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
                         ],),
                       ),
                     ),
