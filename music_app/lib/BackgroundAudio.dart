@@ -8,9 +8,7 @@ import 'Song.dart';
 
 class AudioPlayerTask extends BackgroundAudioTask {
   final audioPlayer = AudioPlayer();
-  List<Song> upNext = [];
-  List<String> upNextSongPaths = [];
-  DataModel? dataModel;
+  int startingIndex = 0;
 
   //DataModel dataModel;
   /*AudioPlayerTask(DataModel newDataModel)
@@ -27,13 +25,33 @@ class AudioPlayerTask extends BackgroundAudioTask {
     print("onStart");
     //print("DataModel info: " + dataModel.loading.toString());
     super.onStart(params);
-    ReceivePort audioServicePort = ReceivePort();
-    audioServicePort.listen((message) {
-      dataModel = message as DataModel;
+    audioPlayer.currentIndexStream.listen((event) {
+      if(event != startingIndex)
+        {
+          AudioServiceBackground.setState(
+              position: Duration(),
+              processingState: AudioProcessingState.completed);
+          AudioServiceBackground.setState(
+              processingState: AudioProcessingState.ready);
+        }
     });
+    /*audioPlayer.playerStateStream.listen((state) {
+      print("_____________________Isolate processing state: " + state.processingState.toString());
+      if(state.processingState == ProcessingState.completed)
+      {
+        AudioServiceBackground.setState(
+            position: Duration(),
+            processingState: AudioProcessingState.completed);
+      }
+      else if(state.processingState == ProcessingState.ready)
+        {
+          AudioServiceBackground.setState(
+              processingState: AudioProcessingState.ready);
+        }
+    });*/
     AudioServiceBackground.setState(
-        controls: [MediaControl.pause, MediaControl.stop],
-        playing: true,
+        /*controls: [MediaControl.pause, MediaControl.stop],
+        playing: true,*/
         processingState: AudioProcessingState.connecting);
   }
 
@@ -49,24 +67,37 @@ class AudioPlayerTask extends BackgroundAudioTask {
   Future<void> onPlay() async {
     audioPlayer.play();
     AudioServiceBackground.setState(
-        controls: [MediaControl.skipToPrevious, MediaControl.pause, MediaControl.skipToNext, MediaControl.stop],
+        controls: [MediaControl.skipToPrevious, MediaControl.pause, MediaControl.skipToNext],
         playing: true,
         processingState: AudioProcessingState.ready,);
     // Connect to the URL
   }
   @override
   Future<void> onSkipToNext() {
+    AudioServiceBackground.setState(
+        processingState: AudioProcessingState.skippingToNext,
+        position: Duration());
     return audioPlayer.seekToNext();
   }
 
   @override
-  Future<void> onSkipToPrevious() {
-    return audioPlayer.seekToPrevious();
+  Future<void> onSkipToPrevious() async {
+    if(audioPlayer.position.inSeconds > audioPlayer.duration!.inSeconds / 20)
+    {
+      await AudioService.seekTo(Duration());
+    }
+    else
+    {
+      AudioServiceBackground.setState(
+          processingState: AudioProcessingState.skippingToPrevious,
+          position: Duration());
+      return audioPlayer.seekToPrevious();
+    }
   }
   @override
   Future<void> onPause() async {
     AudioServiceBackground.setState(
-        controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
+        controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext],
         playing: false,
         processingState: AudioProcessingState.ready);
     audioPlayer.pause();
@@ -88,22 +119,32 @@ class AudioPlayerTask extends BackgroundAudioTask {
       {
         List<AudioSource> playlist = [];
         arguments.forEach((element) {
-          playlist.add(AudioSource.uri(Uri.parse(element as String)));
+          playlist.add(AudioSource.uri(Uri.file(element as String)));
         });
-        ConcatenatingAudioSource audioSource = ConcatenatingAudioSource(children: playlist);
-        await audioPlayer.setAudioSource(audioSource);
+        ConcatenatingAudioSource audioSource = ConcatenatingAudioSource(children: playlist,);
+        await audioPlayer.setAudioSource(audioSource, initialIndex: startingIndex);
+        AudioServiceBackground.setState(
+            processingState: AudioProcessingState.ready,
+            position: Duration());
       }
-    if(name == "setUpNextSongs")
+    if(name == "setStartingIndex")
       {
-        print(arguments.toString());
-        List<String> arguementsAsString = [];
-        arguments.forEach((element) {
-          arguementsAsString.add(element as String);
-        });
-        print(arguementsAsString.toString());
-        //List<String> castedArguments = arguments as List<String>;
-      //List<String> castedArguments = arguments.cast<List<String>>();
-        //upNextSongPaths.addAll(castedArguments);
+        startingIndex = arguments;
+      }
+    if(name == "setLoopMode")
+      {
+        switch(arguments as String)
+        {
+          case "none":
+            audioPlayer.setLoopMode(LoopMode.off);
+            break;
+          case "loop":
+            audioPlayer.setLoopMode(LoopMode.all);
+            break;
+          case "singleSong":
+            audioPlayer.setLoopMode(LoopMode.one);
+            break;
+        }
       }
   }
 }

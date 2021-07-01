@@ -56,6 +56,8 @@ class DataModel extends ChangeNotifier {
 
   String errorMessage = "";
 
+  bool isPlaying = false;
+
   Random randomNumbers = new Random();
   getSearchResults(String searchText)
   {
@@ -285,10 +287,10 @@ class DataModel extends ChangeNotifier {
     //indicate that we are loading
     loading = true;
     notifyListeners(); //tell children to redraw, and they will see that the loading indicator is on
-    if(!AudioService.connected)
-      {
+    //if(!AudioService.connected)
+      //{
         await AudioService.connect();
-      }
+      //}
     await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
     //ReceivePort receivePort = ReceivePort();
     SendPort? blah = IsolateNameServer.lookupPortByName("audioServicePort");
@@ -467,18 +469,23 @@ class DataModel extends ChangeNotifier {
     });*/
     AudioService.playbackStateStream.listen((state) {
       print("Processing State: " + state.processingState.toString());
-      print(state);
       if(state.processingState == AudioProcessingState.completed)
       {
-        if(settings.loop == LoopType.singleSong)
-        {
-          AudioService.seekTo(Duration());
-        }
-        else
+        if(settings.loop != LoopType.singleSong)
         {
           playNextSong();
         }
       }
+      if(state.processingState == AudioProcessingState.skippingToNext)
+        {
+          playNextSong();
+        }
+      if(state.processingState == AudioProcessingState.skippingToPrevious)
+        {
+          playPreviousSong();
+        }
+      isPlaying = state.playing;
+      notifyListeners();
     });
 
     loading = false;
@@ -664,6 +671,7 @@ class DataModel extends ChangeNotifier {
     settings.playingIndex = settings.upNext.indexOf(song);
     settings.startingIndex = settings.playingIndex;
     //await AudioService.customAction("setFilePath", song.filePath);
+    await AudioService.customAction("setStartingIndex", settings.startingIndex);
     await AudioService.customAction("setPlaylist", settings.songPaths);
     AudioService.play();
     notifyListeners();
@@ -675,8 +683,8 @@ class DataModel extends ChangeNotifier {
     settings.playingIndex++;
     settings.playingIndex %= settings.upNext.length;
     settings.currentlyPlaying = settings.upNext[settings.playingIndex];
-    await AudioService.customAction("setFilePath", settings.currentlyPlaying!.filePath);
-    if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !AudioService.playbackState.playing)
+    //await AudioService.customAction("setFilePath", settings.currentlyPlaying!.filePath);
+    if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !isPlaying)
     {
       AudioService.pause();
     }
@@ -693,9 +701,9 @@ class DataModel extends ChangeNotifier {
     settings.playingIndex--;
     settings.playingIndex %= settings.upNext.length;
     settings.currentlyPlaying = settings.upNext[settings.playingIndex];
-    await AudioService.customAction("setFilePath", settings.currentlyPlaying!.filePath);
+    //await AudioService.customAction("setFilePath", settings.currentlyPlaying!.filePath);
     //bool isPlaying = await AudioService.customAction("isPlaying");
-    if(AudioService.playbackState.playing)
+    if(isPlaying)
       {
         AudioService.play();
       }
@@ -709,7 +717,7 @@ class DataModel extends ChangeNotifier {
   void playButton() async
   {
     //bool isPlaying = await AudioService.customAction("isPlaying");
-    AudioService.playbackState.playing ? await AudioService.pause() : await AudioService.play();
+    isPlaying ? await AudioService.pause() : await AudioService.play();
     notifyListeners();
   }
   //Toggles shuffle behaviour when the shuffle button is pressed
@@ -718,13 +726,13 @@ class DataModel extends ChangeNotifier {
     //Toggle the tracking variable
     settings.shuffle = !settings.shuffle;
     //If you are now shuffling, shuffle the upNext playlist
-    if(settings.shuffle)
+    /*if(settings.shuffle)//Happens in the setCurrentlyPlaying() now
       {
         settings.upNext.shuffle();
         settings.setSongPath();
       }
     //If you are not shuffling set the upNext playlist to the original unshuffled one
-    else
+    else*/if(!settings.shuffle)
       {
         List<Song> newUpNext = [];
         newUpNext.addAll(settings.originalUpNext);
@@ -738,6 +746,7 @@ class DataModel extends ChangeNotifier {
         //Set the starting index to this position
         settings.startingIndex = settings.playingIndex;
       }
+    setCurrentlyPlaying(settings.upNext[settings.playingIndex], settings.upNext);
     notifyListeners();
     saveSettings();
   }
@@ -760,12 +769,15 @@ class DataModel extends ChangeNotifier {
     {
       case LoopType.singleSong:
         settings.loop = LoopType.none;
+        AudioService.customAction("setLoopMode", "none");
         break;
       case LoopType.loop:
         settings.loop = LoopType.singleSong;
+        AudioService.customAction("setLoopMode", "singleSong");
         break;
       case LoopType.none:
         settings.loop = LoopType.loop;
+        AudioService.customAction("setLoopMode", "loop");
         break;
     }
       notifyListeners();
@@ -774,23 +786,23 @@ class DataModel extends ChangeNotifier {
   void nextButton()
   {
     //audioPlayer.seekToNext();
-    playNextSong();
+    AudioService.skipToNext();
+    //playNextSong();
   }
 
   void previousButton() async
   {
     //Duration position = await AudioService.customAction("getPosition");
     //Duration duration = await AudioService.customAction("getDuration");
-    print("Position: "  + AudioService.playbackState.position.inSeconds.toString());
-    print("Duration: " + Duration(milliseconds: settings.currentlyPlaying!.duration).inSeconds.toString());
-    if(AudioService.playbackState.position.inSeconds > Duration(milliseconds: settings.currentlyPlaying!.duration).inSeconds / 20)
+    AudioService.skipToPrevious();
+    /*if(AudioService.playbackState.position.inSeconds > Duration(milliseconds: settings.currentlyPlaying!.duration).inSeconds / 20)
       {
-        await AudioService.seekTo(Duration());
+        //await AudioService.seekTo(Duration());
       }
     else
       {
         playPreviousSong();
-      }
+      }*/
     notifyListeners();
   }
 

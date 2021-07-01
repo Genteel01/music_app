@@ -316,7 +316,7 @@ class _AudioControlsState extends State<AudioControls> {
         },)),
         Padding(
           padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          child: SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(AudioService.playbackState.playing ? Icons.pause : Icons.play_arrow, color: Colors.grey[50],), heroTag: null, onPressed: () async => {
+          child: SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(dataModel.isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.grey[50],), heroTag: null, onPressed: () async => {
             dataModel.playButton(),
           },)),
         ),
