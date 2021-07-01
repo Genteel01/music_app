@@ -241,22 +241,28 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
   }
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return InkWell(
-      //TODO make this look nicer
       child: Container(height: 65, decoration: BoxDecoration(
           border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
           child: dataModel.loading || dataModel.settings.currentlyPlaying == null ? Row(children: [
             SizedBox(width: 65, height: 65,child: Image.asset("assets/images/music_note.jpg")), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
-          ],) : Row(children: [
-            SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
-            Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-              child: Container(width: 125,
-                child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Container(height: 30, child: Text(dataModel.settings.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis,)),
-                  Container(height: 30, child: Text(dataModel.settings.currentlyPlaying!.artist, maxLines: 2, overflow: TextOverflow.ellipsis,)),
-                ],),
+          ],) : Row(mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
+                    Expanded(
+                      child: Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+                        child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, crossAxisAlignment: CrossAxisAlignment.start,children: [
+                          Container(height: 40, child: Text(dataModel.settings.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16),)),
+                          Expanded(child: Text(dataModel.settings.currentlyPlaying!.artist, maxLines: 1, overflow: TextOverflow.ellipsis,)),
+                        ],),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            AudioControls(buttonSizes: 35,),
+              Padding(padding: const EdgeInsets.only(right: 8.0), child: AudioControls(buttonSizes: 35,),),
           ],
           ),
       ),onTap: dataModel.loading || dataModel.settings.currentlyPlaying == null ? () => {} : () => {
@@ -399,7 +405,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
               if(snapshot.hasData)
                 {
                   final position = snapshot.data;
-                  return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, mainAxisSize: MainAxisSize.min,
                     children: [
                       //Current position
                       (position!.inSeconds % 60) < 10 ? Text(position.inMinutes.toString() + ":0" + (position.inSeconds % 60).toStringAsFixed(0)) :
