@@ -90,7 +90,7 @@ class _ArtistListItemState extends State<ArtistListItem> {
       child: Align(alignment: Alignment.center,
         child: ListTile(
           selected: dataModel.selectedIndices.contains(dataModel.artists.indexOf(widget.artist)),
-          title: Text(widget.artist.name),
+          title: Text(widget.artist.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
           trailing: Text(widget.artist.songs.length == 1 ? widget.artist.songs.length.toString() + " track" : widget.artist.songs.length.toString() + " tracks"),
           leading: SizedBox(width: 50, height: 50, child: !widget.artist.songs.any((element) => dataModel.getAlbumArt(element) != null) ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != null))!)),
           onTap: () async => {

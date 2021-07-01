@@ -88,9 +88,9 @@ class _AlbumListItemState extends State<AlbumListItem> {
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
         selected: dataModel.selectedIndices.contains(dataModel.albums.indexOf(widget.album)),
-        title: Text(widget.album.name),
+        title: Text(widget.album.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
         trailing: Text(widget.album.songs.length == 1 ? widget.album.songs.length.toString() + " track" : widget.album.songs.length.toString() + " tracks"),
-        subtitle: Text(widget.album.albumArtist),
+        subtitle: Text(widget.album.albumArtist, maxLines: 1, overflow: TextOverflow.ellipsis,),
         leading: SizedBox(width: 50, height: 50, child: widget.album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(widget.album.albumArt!)),
         onTap: () => {
           if(dataModel.selectedIndices.length == 0 && widget.goToDetails)

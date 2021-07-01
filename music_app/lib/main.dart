@@ -21,9 +21,9 @@ import 'SongList.dart';
 
 //TODO feedback (adding to playlists, removing from playlists, creating playlists, deleting playlists, adding file path, removing file path)
 //TODO Marquee on overflowing text
-//TODO make sure the titles and subtitles don't ever overflow on all the list items
 
 //TODO lock screen and notifications pulldown controls
+//TODO test blutooth buttons (may need to figure out a way to intercept the signals) (Seems like it's part of audio_service)
 void main() {
   runApp(MyApp());
 }
@@ -241,6 +241,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
   }
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return InkWell(
+      //TODO make this look nicer
       child: Container(height: 65, decoration: BoxDecoration(
           border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
           child: dataModel.loading || dataModel.settings.currentlyPlaying == null ? Row(children: [

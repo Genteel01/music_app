@@ -105,7 +105,7 @@ class PlaylistListBuilder extends StatelessWidget {
                   child: Center(
                     child: ListTile(
                       selected: !addingToPlaylist && dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)),
-                      title: Text(playlist.name),
+                      title: Text(playlist.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
                       trailing: Text(playlist.songs.length == 1 ? playlist.songs.length.toString() + " Track" : playlist.songs.length.toString() + " Tracks"),
                       onTap: () => {
                         if(addingToPlaylist)

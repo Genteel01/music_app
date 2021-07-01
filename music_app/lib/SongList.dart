@@ -122,8 +122,8 @@ class _SongListItemState extends State<SongListItem> {
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
         selected: dataModel.selectedIndices.contains(widget.index) || (dataModel.selectedIndices.length == 0 && dataModel.settings.currentlyPlaying == widget.song),
-        title: Text(widget.song.name),
-        subtitle: Text(widget.song.artist),
+        title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
+        subtitle: Text(widget.song.artist, maxLines: 1, overflow: TextOverflow.ellipsis,),
         trailing: dataModel.settings.currentlyPlaying == widget.song ? Row(mainAxisSize: MainAxisSize.min,
           children: [
             Text(widget.song.durationString()),
