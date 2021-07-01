@@ -211,9 +211,9 @@ class _AddToPlaylistState extends State<AddToPlaylist> {
         body: TabBarView(
           physics: dataModel.selectedIndices.length > 0 ? NeverScrollableScrollPhysics() : null,
           children: [
-            SongList(key: PageStorageKey("song_key"), playSongs: false,),
-            ArtistList(key: PageStorageKey("artist_key"), goToDetails: false,),
-            AlbumList(key: PageStorageKey("album_key"), goToDetails: false,),
+            SongList(/*key: PageStorageKey("song_key"), */playSongs: false,),
+            ArtistList(/*key: PageStorageKey("artist_key"), */goToDetails: false,),
+            AlbumList(/*key: PageStorageKey("album_key"), */goToDetails: false,),
           ],
         ),
       ),

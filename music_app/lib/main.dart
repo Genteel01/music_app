@@ -130,10 +130,10 @@ class MyTabBar extends StatelessWidget {
         body: dataModel.songs.length == 0 && dataModel.errorMessage != "" ? Padding(padding: const EdgeInsets.all(8.0), child: Text(dataModel.errorMessage),) : TabBarView(
           physics: dataModel.selectedIndices.length > 0 ? NeverScrollableScrollPhysics() : null,
           children: [
-            PlaylistList(key: PageStorageKey("playlist_key"),),
-            SongList(key: PageStorageKey("song_key"), playSongs: true,),
-            ArtistList(key: PageStorageKey("artist_key"), goToDetails: true,),
-            AlbumList(key: PageStorageKey("album_key"), goToDetails: true,),
+            PlaylistList(/*key: PageStorageKey("playlist_key"),*/),
+            SongList(/*key: PageStorageKey("song_key"), */playSongs: true,),
+            ArtistList(/*key: PageStorageKey("artist_key"), */goToDetails: true,),
+            AlbumList(/*key: PageStorageKey("album_key"), */goToDetails: true,),
           ],
         ),
       ),
