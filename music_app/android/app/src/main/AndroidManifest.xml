@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="au.com.genteel01.music_app">
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
    <application
         android:label="music_app"
         android:icon="@mipmap/ic_launcher">
@@ -37,5 +39,19 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-    </application>
+
+       <!-- ADD THIS "SERVICE" element -->
+       <service android:name="com.ryanheise.audioservice.AudioService">
+           <intent-filter>
+               <action android:name="android.media.browse.MediaBrowserService" />
+           </intent-filter>
+       </service>
+
+       <!-- ADD THIS "RECEIVER" element -->
+       <receiver android:name="com.ryanheise.audioservice.MediaButtonReceiver" >
+           <intent-filter>
+               <action android:name="android.intent.action.MEDIA_BUTTON" />
+           </intent-filter>
+       </receiver>
+   </application>
 </manifest>

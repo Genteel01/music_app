@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,15 +18,22 @@ import 'package:path_provider/path_provider.dart';
 
 import 'Album.dart';
 import 'Artist.dart';
+import 'BackgroundAudio.dart';
 import 'Playlist.dart';
 import 'Settings.dart';
 import 'Song.dart';
+import 'main.dart' as main;
 
 
 enum LoopType {
   none,
   loop,
   singleSong,
+}
+void _backgroundTaskEntrypoint() async {
+  print("in the top level function");
+  await AudioServiceBackground.run(() => AudioPlayerTask());
+  print("after the thing in the top level function");
 }
 class DataModel extends ChangeNotifier {
 
@@ -37,7 +47,7 @@ class DataModel extends ChangeNotifier {
 
   String appDocumentsDirectory = "";
 
-  final audioPlayer = AudioPlayer();
+  //final audioPlayer = AudioPlayer();
 
   List<int> selectedIndices = [];
   Type selectionType = Song;
@@ -267,6 +277,7 @@ class DataModel extends ChangeNotifier {
     savePlaylists();
     clearSelections();
   }
+
   Future<void> fetch() async
   {
     print("BREAK________________________________________________________________");
@@ -274,8 +285,20 @@ class DataModel extends ChangeNotifier {
     //indicate that we are loading
     loading = true;
     notifyListeners(); //tell children to redraw, and they will see that the loading indicator is on
-
+    if(!AudioService.connected)
+      {
+        await AudioService.connect();
+      }
+    await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
+    //ReceivePort receivePort = ReceivePort();
+    SendPort? blah = IsolateNameServer.lookupPortByName("audioServicePort");
+    if(blah != null)
+      {
+        print("IT'S WORKING _______________________________________________-");
+      }
+    print("after calling start");
     appDocumentsDirectory = await getAppDocumentsDirectory();
+    print("289");
     //clear any existing data we have gotten previously, to avoid duplicate data
     songs.clear();
     artists.clear();
@@ -316,6 +339,7 @@ class DataModel extends ChangeNotifier {
     }
     catch (error){}
     //Load your settings file
+    print("330");
     try
     {
       String settingsFile = await File(appDocumentsDirectory + "/settings.txt").readAsString();
@@ -324,8 +348,10 @@ class DataModel extends ChangeNotifier {
       settings.loadSongs(songs);
       if(settings.currentlyPlaying != null)
       {
-        await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
-        audioPlayer.pause();
+        print("339");
+        await AudioService.customAction("setFilePath", settings.currentlyPlaying!.filePath);
+        print("341");
+        AudioService.pause();
       }
     }
     catch(error){}
@@ -425,18 +451,34 @@ class DataModel extends ChangeNotifier {
       }
     }
     //Set up the listener to detect when songs finish
-    audioPlayer.playerStateStream.listen((state) {
+    /*Stream<PlayerState> playerStateStream = await AudioService.customAction("getPlayStreamState");
+    playerStateStream.listen((state) {
       if(state.processingState == ProcessingState.completed)
+      {
+        if(settings.loop == LoopType.singleSong)
         {
-          if(settings.loop == LoopType.singleSong)
-          {
-            audioPlayer.seek(Duration());
-          }
-          else
-            {
-              playNextSong();
-            }
+          AudioService.seekTo(Duration());
         }
+        else
+        {
+          playNextSong();
+        }
+      }
+    });*/
+    AudioService.playbackStateStream.listen((state) {
+      print("Processing State: " + state.processingState.toString());
+      print(state);
+      if(state.processingState == AudioProcessingState.completed)
+      {
+        if(settings.loop == LoopType.singleSong)
+        {
+          AudioService.seekTo(Duration());
+        }
+        else
+        {
+          playNextSong();
+        }
+      }
     });
 
     loading = false;
@@ -621,8 +663,9 @@ class DataModel extends ChangeNotifier {
     settings.setSongPath();
     settings.playingIndex = settings.upNext.indexOf(song);
     settings.startingIndex = settings.playingIndex;
-    await audioPlayer.setFilePath(song.filePath);
-    audioPlayer.play();
+    //await AudioService.customAction("setFilePath", song.filePath);
+    await AudioService.customAction("setPlaylist", settings.songPaths);
+    AudioService.play();
     notifyListeners();
     saveSettings();
   }
@@ -632,14 +675,14 @@ class DataModel extends ChangeNotifier {
     settings.playingIndex++;
     settings.playingIndex %= settings.upNext.length;
     settings.currentlyPlaying = settings.upNext[settings.playingIndex];
-    await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
-    if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !audioPlayer.playing)
+    await AudioService.customAction("setFilePath", settings.currentlyPlaying!.filePath);
+    if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !AudioService.playbackState.playing)
     {
-      audioPlayer.pause();
+      AudioService.pause();
     }
     else
     {
-      audioPlayer.play();
+      AudioService.play();
     }
     notifyListeners();
     saveSettings();
@@ -650,21 +693,23 @@ class DataModel extends ChangeNotifier {
     settings.playingIndex--;
     settings.playingIndex %= settings.upNext.length;
     settings.currentlyPlaying = settings.upNext[settings.playingIndex];
-    await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
-    if(audioPlayer.playing)
+    await AudioService.customAction("setFilePath", settings.currentlyPlaying!.filePath);
+    //bool isPlaying = await AudioService.customAction("isPlaying");
+    if(AudioService.playbackState.playing)
       {
-        audioPlayer.play();
+        AudioService.play();
       }
     else
       {
-        audioPlayer.pause();
+        AudioService.pause();
       }
     notifyListeners();
     saveSettings();
   }
-  void playButton()
+  void playButton() async
   {
-    audioPlayer.playing ? audioPlayer.pause() : audioPlayer.play();
+    //bool isPlaying = await AudioService.customAction("isPlaying");
+    AudioService.playbackState.playing ? await AudioService.pause() : await AudioService.play();
     notifyListeners();
   }
   //Toggles shuffle behaviour when the shuffle button is pressed
@@ -732,16 +777,21 @@ class DataModel extends ChangeNotifier {
     playNextSong();
   }
 
-  void previousButton()
+  void previousButton() async
   {
-    if(audioPlayer.position.inSeconds > audioPlayer.duration!.inSeconds / 20)
+    //Duration position = await AudioService.customAction("getPosition");
+    //Duration duration = await AudioService.customAction("getDuration");
+    print("Position: "  + AudioService.playbackState.position.inSeconds.toString());
+    print("Duration: " + Duration(milliseconds: settings.currentlyPlaying!.duration).inSeconds.toString());
+    if(AudioService.playbackState.position.inSeconds > Duration(milliseconds: settings.currentlyPlaying!.duration).inSeconds / 20)
       {
-        audioPlayer.seek(Duration());
+        await AudioService.seekTo(Duration());
       }
     else
       {
         playPreviousSong();
       }
+    notifyListeners();
   }
 
   Future<void> saveSettings() async

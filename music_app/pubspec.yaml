@@ -32,6 +32,7 @@ dependencies:
   draggable_scrollbar:
   auto_size_text: ^3.0.0-nullsafety.0
   marquee:
+  audio_service:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

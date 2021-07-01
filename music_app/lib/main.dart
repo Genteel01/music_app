@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
@@ -9,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'Album.dart';
 import 'AlbumList.dart';
 import 'Artist.dart';
+import 'BackgroundAudio.dart';
 import 'DataModel.dart';
 import 'Playlist.dart';
 import 'PlaylistList.dart';
@@ -27,6 +29,7 @@ import 'SongList.dart';
 //TODO test blutooth buttons (may need to figure out a way to intercept the signals) (Seems like it's part of audio_service)
 void main() {
   runApp(MyApp());
+
 }
 
 class MyApp extends StatelessWidget {
@@ -37,7 +40,7 @@ class MyApp extends StatelessWidget {
       create: (context) => DataModel(),
       child: MaterialApp(
         title: "Music Player",
-        home: MyTabBar(),
+        home: AudioServiceWidget(child: MyTabBar()),
         //home: MyHomePage(title: 'List Tutorial'),
       ),
     );
@@ -255,7 +258,6 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
                     Expanded(
                       child: Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0),
                         child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          //Container(height: 40, child: Text(dataModel.settings.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16),)),
                           Expanded(child: AutoSizeText(dataModel.settings.currentlyPlaying!.name, maxLines: 1, style: TextStyle(fontSize: 16), minFontSize: 16, overflowReplacement:
                           Marquee(style: TextStyle(fontSize: 16), crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.currentlyPlaying!.name, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
                           Expanded(child: AutoSizeText(dataModel.settings.currentlyPlaying!.artist, maxLines: 1, overflowReplacement:
@@ -314,7 +316,7 @@ class _AudioControlsState extends State<AudioControls> {
         },)),
         Padding(
           padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          child: SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(dataModel.audioPlayer.playing ? Icons.pause : Icons.play_arrow, color: Colors.grey[50],), heroTag: null, onPressed: () async => {
+          child: SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(AudioService.playbackState.playing ? Icons.pause : Icons.play_arrow, color: Colors.grey[50],), heroTag: null, onPressed: () async => {
             dataModel.playButton(),
           },)),
         ),
@@ -404,7 +406,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
           ),
           //Seekbar
           StreamBuilder<Duration> (
-            stream: dataModel.audioPlayer.positionStream,
+            stream: AudioService.positionStream,
               builder: (context, snapshot) {
               if(snapshot.hasData)
                 {
@@ -415,12 +417,12 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                       (position!.inSeconds % 60) < 10 ? Text(position.inMinutes.toString() + ":0" + (position.inSeconds % 60).toStringAsFixed(0)) :
                       Text(position.inMinutes.toString() + ":" + (position.inSeconds % 60).toStringAsFixed(0)),
                       //Position Slider
-                      Slider(value: position.inSeconds.toDouble(), max: dataModel.audioPlayer.duration!.inSeconds.toDouble(), onChanged: (value) => {
-                        dataModel.audioPlayer.seek(Duration(seconds: value.toInt()))
+                      Slider(value: position.inSeconds.toDouble(), max: Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inSeconds.toDouble(), onChanged: (value) => {
+                        AudioService.seekTo(Duration(seconds: value.toInt()))
                       },),
                       //Duration
-                      (dataModel.audioPlayer.duration!.inSeconds % 60) < 10 ? Text(dataModel.audioPlayer.duration!.inMinutes.toString() + ":0" + (dataModel.audioPlayer.duration!.inSeconds % 60).toStringAsFixed(0)) :
-                      Text(dataModel.audioPlayer.duration!.inMinutes.toString() + ":" + (dataModel.audioPlayer.duration!.inSeconds % 60).toStringAsFixed(0)),
+                      (Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inSeconds % 60) < 10 ? Text(Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inMinutes.toString() + ":0" + (Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inSeconds % 60).toStringAsFixed(0)) :
+                      Text(Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inMinutes.toString() + ":" + (Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inSeconds % 60).toStringAsFixed(0)),
                     ],
                   );
                 }
