@@ -11,6 +11,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
   final audioPlayer = AudioPlayer();
   int startingIndex = 0;
   List<MediaItem> futureMediaItems = [];
+
   @override
   Future<void> onTaskRemoved() async {
     await onStop();
@@ -57,9 +58,6 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
   @override
   Future<void> onSkipToNext() async {
-    AudioServiceBackground.setState(
-        processingState: AudioProcessingState.skippingToNext,
-        position: Duration());
     return audioPlayer.seekToNext();
   }
 
@@ -71,9 +69,6 @@ class AudioPlayerTask extends BackgroundAudioTask {
     }
     else
     {
-      AudioServiceBackground.setState(
-          processingState: AudioProcessingState.skippingToPrevious,
-          position: Duration());
       return audioPlayer.seekToPrevious();
     }
   }

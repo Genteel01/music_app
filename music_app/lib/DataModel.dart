@@ -686,20 +686,25 @@ class DataModel extends ChangeNotifier {
     settings.originalUpNext.clear();
     //Add all the future songs to originalUpNext
     settings.originalUpNext.addAll(settings.upNext);
-    //If shuffle is on shuffle upNext
-    if(settings.shuffle)
-      {
-        settings.upNext.shuffle();
-      }
-    //TODO shift the upNext list so that the currently playing song is the first one in the list
-    //TODO shift the originalUpNext list so that the currently playing song is the first one in the list
-    //Set the song paths so that upNext can be saved and loaded again when you open the app
-    settings.setSongPath();
-    //TODO after I am done with the shifting of playlists playingIndex and startingIndex should both be completely removable
     //Set playing index
     settings.playingIndex = settings.upNext.indexOf(song);
     //Set the starting index
     settings.startingIndex = settings.playingIndex;
+    //If shuffle is on shuffle upNext
+    if(settings.shuffle)
+      {
+        settings.upNext.shuffle();
+        //Shift the upNext list so that the currently playing song is the first one in the list
+        for(int i = 0; i < settings.startingIndex; i++)
+        {
+          Song movedSong = settings.upNext.removeAt(0);;
+          settings.upNext.add(movedSong);
+        }
+        settings.startingIndex = 0;
+        settings.playingIndex = 0;
+      }
+    //Set the song paths so that upNext can be saved and loaded again when you open the app
+    settings.setSongPath();
     //Create the map that will be passed into the background audio service with the needed song details
     List<Map<String, dynamic>> songsWithMetadata = [];
     settings.upNext.forEach((element) { 
@@ -710,7 +715,7 @@ class DataModel extends ChangeNotifier {
     });
     //Set the starting index in the background audio service
     await AudioService.customAction("setStartingIndex", settings.startingIndex);
-    //Set the playlist in the packground audio service
+    //Set the playlist in the background audio service
     await AudioService.customAction("setPlaylist", songsWithMetadata);
     //Play the music
     AudioService.play();
