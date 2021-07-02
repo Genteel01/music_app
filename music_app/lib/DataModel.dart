@@ -673,6 +673,7 @@ class DataModel extends ChangeNotifier {
       albums.add(newAlbum);
     }*/
   }
+  //TODO On first load it doesn't set the currently playing song in the AudioService
   //Function that sets the currently playing song
   void setCurrentlyPlaying(Song song, List<Song> futureSongs) async
   {
