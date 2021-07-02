@@ -781,6 +781,8 @@ class DataModel extends ChangeNotifier {
   {
     //Toggle the tracking variable
     settings.shuffle = !settings.shuffle;
+    //TODO set settings.shuffleHasChanged = true
+    //TODO in the AudioService custom event listener if settings.shuffleHasChanged deal with the lists based on shuffle
     //If you are now shuffling, shuffle the upNext playlist
     /*if(settings.shuffle)//Happens in the setCurrentlyPlaying() now
       {
@@ -788,7 +790,7 @@ class DataModel extends ChangeNotifier {
         settings.setSongPath();
       }
     //If you are not shuffling set the upNext playlist to the original unshuffled one
-    else*/if(!settings.shuffle)
+    else*//*if(!settings.shuffle)
       {
         List<Song> newUpNext = [];
         newUpNext.addAll(settings.originalUpNext);
@@ -802,7 +804,7 @@ class DataModel extends ChangeNotifier {
         //Set the starting index to this position
         settings.startingIndex = settings.playingIndex;
       }
-    setCurrentlyPlaying(settings.upNext[settings.playingIndex], settings.upNext);
+    setCurrentlyPlaying(settings.upNext[settings.playingIndex], settings.upNext);*/
     notifyListeners();
     saveSettings();
   }
