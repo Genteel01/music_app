@@ -24,9 +24,6 @@ import 'SongList.dart';
 //TODO https://pub.dev/packages/just_audio
 
 //TODO feedback (adding to playlists, removing from playlists, creating playlists, deleting playlists, adding file path, removing file path)
-
-//TODO lock screen and notifications pulldown controls
-//TODO test blutooth buttons (may need to figure out a way to intercept the signals) (Seems like it's part of audio_service)
 void main() {
   runApp(MyApp());
 

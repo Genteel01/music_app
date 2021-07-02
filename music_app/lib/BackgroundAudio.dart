@@ -9,6 +9,9 @@ import 'Song.dart';
 class AudioPlayerTask extends BackgroundAudioTask {
   final audioPlayer = AudioPlayer();
   int startingIndex = 0;
+  ConcatenatingAudioSource futurePlaylist = ConcatenatingAudioSource(children: []);
+  bool setUp = false;
+
 
   //DataModel dataModel;
   /*AudioPlayerTask(DataModel newDataModel)
@@ -35,20 +38,20 @@ class AudioPlayerTask extends BackgroundAudioTask {
               processingState: AudioProcessingState.ready);
         }
     });
-    /*audioPlayer.playerStateStream.listen((state) {
+    audioPlayer.playerStateStream.listen((state) {
       print("_____________________Isolate processing state: " + state.processingState.toString());
       if(state.processingState == ProcessingState.completed)
       {
         AudioServiceBackground.setState(
             position: Duration(),
             processingState: AudioProcessingState.completed);
+        if(setUp)
+          {
+            audioPlayer.setAudioSource(futurePlaylist, initialIndex: startingIndex + 1);
+            setUp = false;
+          }
       }
-      else if(state.processingState == ProcessingState.ready)
-        {
-          AudioServiceBackground.setState(
-              processingState: AudioProcessingState.ready);
-        }
-    });*/
+    });
     AudioServiceBackground.setState(
         /*controls: [MediaControl.pause, MediaControl.stop],
         playing: true,*/
@@ -117,12 +120,16 @@ class AudioPlayerTask extends BackgroundAudioTask {
       }
     if(name == "setPlaylist")
       {
+        setUp = true;
+        //Set the initial song to be playing
+        AudioSource firstSong = AudioSource.uri(Uri.file(arguments[startingIndex] as String));
+        await audioPlayer.setAudioSource(firstSong);
+        //Build the future playlist
         List<AudioSource> playlist = [];
         arguments.forEach((element) {
           playlist.add(AudioSource.uri(Uri.file(element as String)));
         });
-        ConcatenatingAudioSource audioSource = ConcatenatingAudioSource(children: playlist,);
-        await audioPlayer.setAudioSource(audioSource, initialIndex: startingIndex);
+        futurePlaylist = ConcatenatingAudioSource(children: playlist,);
         AudioServiceBackground.setState(
             processingState: AudioProcessingState.ready,
             position: Duration());
