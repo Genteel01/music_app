@@ -482,7 +482,10 @@ class DataModel extends ChangeNotifier {
         }
       if(state.processingState == AudioProcessingState.skippingToPrevious)
         {
-          playPreviousSong();
+          if(settings.loop != LoopType.singleSong && !(settings.loop == LoopType.none && settings.playingIndex == 0))
+            {
+              playPreviousSong();
+            }
         }
       if(state.processingState == AudioProcessingState.stopped)
         {
@@ -679,13 +682,17 @@ class DataModel extends ChangeNotifier {
     settings.setSongPath();
     settings.playingIndex = settings.upNext.indexOf(song);
     settings.startingIndex = settings.playingIndex;
-    /*List<Map<String, dynamic>> songsWithMetadata = [];
+    List<Map<String, dynamic>> songsWithMetadata = [];
     settings.upNext.forEach((element) { 
-      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "albumart" : getAlbumArt(element)};
-    });*/
+      //Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "albumart" : getAlbumArt(element) == null ? "" : getAlbumArt(element)};
+      Album album = element.album == "Unknown Album" ? albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == "Various Artists") :
+      albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == element.albumArtist);
+      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "albumart" : getAlbumArt(element) == null ? "" : appDocumentsDirectory + "/albumart/" + album.name.replaceAll("/", "_") + album.albumArtist.replaceAll("/", "_") + album.year.replaceAll("/", "_")};
+      songsWithMetadata.add(song);
+    });
     //await AudioService.customAction("setFilePath", song.filePath);
     await AudioService.customAction("setStartingIndex", settings.startingIndex);
-    await AudioService.customAction("setPlaylist", settings.songPaths);
+    await AudioService.customAction("setPlaylist", songsWithMetadata);
     AudioService.play();
     notifyListeners();
     saveSettings();
@@ -734,6 +741,7 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
   }
   //Toggles shuffle behaviour when the shuffle button is pressed
+  //TODO this is broken as hell
   void toggleShuffle()
   {
     //Toggle the tracking variable
@@ -801,6 +809,7 @@ class DataModel extends ChangeNotifier {
     //audioPlayer.seekToNext();
     AudioService.skipToNext();
     //playNextSong();
+    notifyListeners();
   }
 
   void previousButton() async

@@ -1,4 +1,5 @@
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
@@ -9,9 +10,10 @@ import 'Song.dart';
 class AudioPlayerTask extends BackgroundAudioTask {
   final audioPlayer = AudioPlayer();
   int startingIndex = 0;
-  ConcatenatingAudioSource futurePlaylist = ConcatenatingAudioSource(children: []);
-  bool setUp = false;
-
+  //ConcatenatingAudioSource futurePlaylist = ConcatenatingAudioSource(children: []);
+  List<MediaItem> futureMediaItems = [];
+  //bool setUp = false;
+  bool endOfSong = true;
 
   //DataModel dataModel;
   /*AudioPlayerTask(DataModel newDataModel)
@@ -29,14 +31,16 @@ class AudioPlayerTask extends BackgroundAudioTask {
     //print("DataModel info: " + dataModel.loading.toString());
     super.onStart(params);
     audioPlayer.currentIndexStream.listen((event) {
-      if(event != startingIndex)
+      if(/*event != startingIndex*/endOfSong)
         {
           AudioServiceBackground.setState(
               position: Duration(),
               processingState: AudioProcessingState.completed);
-          AudioServiceBackground.setState(
-              processingState: AudioProcessingState.ready);
+          /*AudioServiceBackground.setState(
+              processingState: AudioProcessingState.ready);*/
         }
+      AudioServiceBackground.setMediaItem(futureMediaItems[event!]);
+      endOfSong = true;
     });
     audioPlayer.playerStateStream.listen((state) {
       print("_____________________Isolate processing state: " + state.processingState.toString());
@@ -45,11 +49,12 @@ class AudioPlayerTask extends BackgroundAudioTask {
         AudioServiceBackground.setState(
             position: Duration(),
             processingState: AudioProcessingState.completed);
-        if(setUp)
+        /*if(setUp)
           {
             audioPlayer.setAudioSource(futurePlaylist, initialIndex: startingIndex + 1);
+            AudioServiceBackground.setMediaItem(futureMediaItems[startingIndex + 1]);
             setUp = false;
-          }
+          }*/
       }
     });
     AudioServiceBackground.setState(
@@ -60,12 +65,12 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   @override
   Future<void> onStop() async {
-    AudioServiceBackground.setState(
-        processingState: AudioProcessingState.stopped);
     // Stop playing audio
     await audioPlayer.stop();
     // Shut down this background task
     await super.onStop();
+    AudioServiceBackground.setState(
+        processingState: AudioProcessingState.stopped);
   }
 
   @override
@@ -78,15 +83,34 @@ class AudioPlayerTask extends BackgroundAudioTask {
     // Connect to the URL
   }
   @override
-  Future<void> onSkipToNext() {
+  Future<void> onSkipToNext() async {
+    print("If set up");
+    /*if (setUp)
+    {
+      print("In the if");
+      audioPlayer.setAudioSource(
+          futurePlaylist, initialIndex: startingIndex + 1);
+      print("After setAudioSource");
+      setUp = false;
+      print("End of if");
+    }*/
+    print("Before set state");
     AudioServiceBackground.setState(
         processingState: AudioProcessingState.skippingToNext,
         position: Duration());
+    print("Before return");
+    endOfSong = false;
     return audioPlayer.seekToNext();
   }
 
   @override
   Future<void> onSkipToPrevious() async {
+    /*if(setUp)
+    {
+      audioPlayer.setAudioSource(futurePlaylist, initialIndex: startingIndex + 1);
+      setUp = false;
+    }*/
+    endOfSong = false;
     if(audioPlayer.position.inSeconds > audioPlayer.duration!.inSeconds / 20)
     {
       await AudioService.seekTo(Duration());
@@ -122,16 +146,38 @@ class AudioPlayerTask extends BackgroundAudioTask {
       }
     if(name == "setPlaylist")
       {
-        setUp = true;
+        /*setUp = true;
         //Set the initial song to be playing
-        AudioSource firstSong = AudioSource.uri(Uri.file(arguments[startingIndex] as String));
-        await audioPlayer.setAudioSource(firstSong);
+        //AudioSource firstSong = AudioSource.uri(Uri.file((arguments[startingIndex] as Map)["path"]));
+        var firstSong = MediaItem(
+          id: (arguments[startingIndex] as Map)["path"],
+          artist: (arguments[startingIndex] as Map)["artist"],
+          title: (arguments[startingIndex] as Map)["name"],
+          album: "",
+          artUri: Uri.file((arguments[startingIndex] as Map)["albumart"]),
+          //artUri: (arguments[startingIndex] as Map)["albumart"] == "" ? null : Uri.dataFromBytes(((arguments[startingIndex] as Map)["albumart"] as Uint8List))
+        );
+        AudioServiceBackground.setMediaItem(firstSong);
+        await audioPlayer.setAudioSource(AudioSource.uri(Uri.file(firstSong.id)));*/
         //Build the future playlist
+        futureMediaItems.clear();
         List<AudioSource> playlist = [];
         arguments.forEach((element) {
-          playlist.add(AudioSource.uri(Uri.file(element as String)));
+          playlist.add(AudioSource.uri(Uri.file((element as Map)["path"])));
+          futureMediaItems.add(
+              MediaItem(
+          id: (element as Map)["path"],
+          artist: (element as Map)["artist"],
+          title: (element as Map)["name"],
+          album: "",
+          artUri: Uri.file((element as Map)["albumart"]),
+          //artUri: (arguments[startingIndex] as Map)["albumart"] == "" ? null : Uri.dataFromBytes(((arguments[startingIndex] as Map)["albumart"] as Uint8List))
+          )
+          );
         });
-        futurePlaylist = ConcatenatingAudioSource(children: playlist,);
+        //futurePlaylist = ConcatenatingAudioSource(children: playlist,);
+        audioPlayer.setAudioSource(ConcatenatingAudioSource(children: playlist,), initialIndex: startingIndex);
+        AudioServiceBackground.setMediaItem(futureMediaItems[startingIndex]);
         AudioServiceBackground.setState(
             processingState: AudioProcessingState.ready,
             position: Duration());
