@@ -469,7 +469,7 @@ class DataModel extends ChangeNotifier {
     });*/
     AudioService.playbackStateStream.listen((state) {
       print("Processing State: " + state.processingState.toString());
-      if(state.processingState == AudioProcessingState.completed)
+      /*if(state.processingState == AudioProcessingState.completed)
       {
         if(settings.loop != LoopType.singleSong)
         {
@@ -486,7 +486,7 @@ class DataModel extends ChangeNotifier {
             {
               playPreviousSong();
             }
-        }
+        }*/
       if(state.processingState == AudioProcessingState.stopped)
         {
           settings.currentlyPlaying = null;
@@ -498,6 +498,12 @@ class DataModel extends ChangeNotifier {
         }
       isPlaying = state.playing;
       notifyListeners();
+    });
+    AudioService.customEventStream.listen((event) {
+      if(event.runtimeType == int)
+        {
+          setUpNextIndex(event);
+        }
     });
 
     loading = false;
@@ -670,30 +676,52 @@ class DataModel extends ChangeNotifier {
   //Function that sets the currently playing song
   void setCurrentlyPlaying(Song song, List<Song> futureSongs) async
   {
+    //Set the currently playing song for the ui
     settings.currentlyPlaying = song;
+    //Clear the upNext list
     settings.upNext.clear();
+    //Add all the future songs to upNext
     settings.upNext.addAll(futureSongs);
+    //clear originalUpNext
     settings.originalUpNext.clear();
-    settings.originalUpNext.addAll(futureSongs);
+    //Add all the future songs to originalUpNext
+    settings.originalUpNext.addAll(settings.upNext);
+    //If shuffle is on shuffle upNext
     if(settings.shuffle)
       {
         settings.upNext.shuffle();
       }
+    //TODO shift the upNext list so that the currently playing song is the first one in the list
+    //TODO shift the originalUpNext list so that the currently playing song is the first one in the list
+    //Set the song paths so that upNext can be saved and loaded again when you open the app
     settings.setSongPath();
+    //TODO after I am done with the shifting of playlists playingIndex and startingIndex should both be completely removable
+    //Set playing index
     settings.playingIndex = settings.upNext.indexOf(song);
+    //Set the starting index
     settings.startingIndex = settings.playingIndex;
+    //Create the map that will be passed into the background audio service with the needed song details
     List<Map<String, dynamic>> songsWithMetadata = [];
     settings.upNext.forEach((element) { 
-      //Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "albumart" : getAlbumArt(element) == null ? "" : getAlbumArt(element)};
       Album album = element.album == "Unknown Album" ? albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == "Various Artists") :
       albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == element.albumArtist);
       Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "albumart" : getAlbumArt(element) == null ? "" : appDocumentsDirectory + "/albumart/" + album.name.replaceAll("/", "_") + album.albumArtist.replaceAll("/", "_") + album.year.replaceAll("/", "_")};
       songsWithMetadata.add(song);
     });
-    //await AudioService.customAction("setFilePath", song.filePath);
+    //Set the starting index in the background audio service
     await AudioService.customAction("setStartingIndex", settings.startingIndex);
+    //Set the playlist in the packground audio service
     await AudioService.customAction("setPlaylist", songsWithMetadata);
+    //Play the music
     AudioService.play();
+    notifyListeners();
+    saveSettings();
+  }
+  //Changes current song to the upnext song at the given index
+  void setUpNextIndex(int index)
+  {
+    settings.playingIndex = index;
+    settings.currentlyPlaying = settings.upNext[index];
     notifyListeners();
     saveSettings();
   }
