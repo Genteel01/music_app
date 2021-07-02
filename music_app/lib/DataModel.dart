@@ -484,6 +484,15 @@ class DataModel extends ChangeNotifier {
         {
           playPreviousSong();
         }
+      if(state.processingState == AudioProcessingState.stopped)
+        {
+          settings.currentlyPlaying = null;
+          settings.upNext.clear();
+          settings.originalUpNext.clear();
+          settings.songPaths.clear();
+          settings.originalSongPaths.clear();
+          saveSettings();
+        }
       isPlaying = state.playing;
       notifyListeners();
     });
@@ -670,6 +679,10 @@ class DataModel extends ChangeNotifier {
     settings.setSongPath();
     settings.playingIndex = settings.upNext.indexOf(song);
     settings.startingIndex = settings.playingIndex;
+    /*List<Map<String, dynamic>> songsWithMetadata = [];
+    settings.upNext.forEach((element) { 
+      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "albumart" : getAlbumArt(element)};
+    });*/
     //await AudioService.customAction("setFilePath", song.filePath);
     await AudioService.customAction("setStartingIndex", settings.startingIndex);
     await AudioService.customAction("setPlaylist", settings.songPaths);

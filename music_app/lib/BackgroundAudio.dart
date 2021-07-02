@@ -60,6 +60,8 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   @override
   Future<void> onStop() async {
+    AudioServiceBackground.setState(
+        processingState: AudioProcessingState.stopped);
     // Stop playing audio
     await audioPlayer.stop();
     // Shut down this background task
@@ -70,7 +72,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
   Future<void> onPlay() async {
     audioPlayer.play();
     AudioServiceBackground.setState(
-        controls: [MediaControl.skipToPrevious, MediaControl.pause, MediaControl.skipToNext],
+        controls: [MediaControl.skipToPrevious, MediaControl.pause, MediaControl.skipToNext, MediaControl.stop],
         playing: true,
         processingState: AudioProcessingState.ready,);
     // Connect to the URL
@@ -100,7 +102,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
   @override
   Future<void> onPause() async {
     AudioServiceBackground.setState(
-        controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext],
+        controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
         playing: false,
         processingState: AudioProcessingState.ready);
     audioPlayer.pause();
