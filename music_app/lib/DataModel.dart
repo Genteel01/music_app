@@ -695,6 +695,7 @@ class DataModel extends ChangeNotifier {
       {
         settings.upNext.shuffle();
         //Shift the upNext list so that the currently playing song is the first one in the list
+        settings.startingIndex = settings.upNext.indexOf(song);
         for(int i = 0; i < settings.startingIndex; i++)
         {
           Song movedSong = settings.upNext.removeAt(0);;
