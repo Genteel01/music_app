@@ -160,8 +160,7 @@ class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
                   //Menu
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
-                    //TODO replace this with an icon button
-                    child: InkWell(child: Icon(Icons.settings, color: dataModel.errorMessage == "" ? Colors.grey[50] : Colors.red), onTap: () => {
+                    child: IconButton(icon: Icon(Icons.settings), color: dataModel.errorMessage == "" ? Colors.grey[50] : Colors.red, onPressed: () => {
                       Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
                             return SettingsPage();
@@ -275,7 +274,6 @@ class NonTappableTabBar extends StatelessWidget implements PreferredSizeWidget {
   @override Size get preferredSize => this.tabBar.preferredSize;
 }
 //The bar that appears at the bottom of the screen giving basic details about the currently playing song and playback controls.
-//TODO try a hero between the image in the bottom bar and the image in the modal
 class CurrentlyPlayingBar extends StatefulWidget {
   const CurrentlyPlayingBar({Key? key}) : super(key: key);
 
@@ -295,13 +293,13 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
       child: Container(height: 65, decoration: BoxDecoration(
           border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
           child: dataModel.loading || dataModel.settings.currentlyPlaying == null ? Row(children: [
-            SizedBox(width: 65, height: 65,child: Image.asset("assets/images/music_note.jpg")), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
+            SizedBox(width: 65, height: 65,child: Hero(tag: "currently_playing_widget", child: Image.asset("assets/images/music_note.jpg"))), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
           ],) : Row(mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Expanded(
                 child: Row(
                   children: [
-                    SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
+                    SizedBox(width: 65, height: 65,child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!))),
                     Expanded(
                       child: Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0),
                         child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -397,7 +395,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           //Album art image
-          SizedBox(height: 200, width: 200, child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
+          SizedBox(height: 200, width: 200, child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!))),
           //Song name
           Padding(
             padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
