@@ -44,8 +44,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyTabBar extends StatelessWidget {
+class MyTabBar extends StatefulWidget {
   MyTabBar({Key? key}) : super(key: key);
+
+  @override
+  _MyTabBarState createState() => _MyTabBarState();
+}
+
+class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
   final List<Tab> myTabs = [
     Tab(child: Row(children: [Icon(Icons.library_music), Text(" Playlists")],mainAxisAlignment: MainAxisAlignment.center,),),
     Tab(child: Row(children: [Icon(Icons.music_note), Text(" Tracks")],mainAxisAlignment: MainAxisAlignment.center,),),
@@ -54,14 +60,56 @@ class MyTabBar extends StatelessWidget {
   ];
 
   final TextEditingController searchController = TextEditingController();
+  //Code to detect when you move between foreground and background
+  AppLifecycleState? _notification;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      _notification = state;
+    });
+    switch (_notification) {
+      case null:
+        print("notification is null");
+        break;
+      case AppLifecycleState.resumed:
+        print("app in resumed");
+        break;
+      case AppLifecycleState.inactive:
+        print("app in inactive");
+        break;
+      case AppLifecycleState.paused:
+        print("app in paused");
+        break;
+      case AppLifecycleState.detached:
+        print("app in detached");
+        break;
+    }
+  }
 
+  @override
+  initState() {
+    super.initState();
+    WidgetsBinding.instance!.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance!.removeObserver(this);
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(
         builder:buildWidget
     );
   }
+
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
+    if(_notification != null && _notification == AppLifecycleState.resumed)
+      {
+        dataModel.setUpNextIndexFromSongPath();
+        _notification = null;
+      }
     return DefaultTabController(
       length: myTabs.length,
       child: Scaffold(

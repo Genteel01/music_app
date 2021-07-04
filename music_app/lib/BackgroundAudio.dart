@@ -98,11 +98,11 @@ class AudioPlayerTask extends BackgroundAudioTask {
           playlist.add(AudioSource.uri(Uri.file((element as Map)["path"])));
           futureMediaItems.add(
               MediaItem(
-          id: (element as Map)["path"],
-          artist: (element as Map)["artist"],
-          title: (element as Map)["name"],
-          album: "",
-          artUri: Uri.file((element as Map)["albumart"]),
+          id: element["path"],
+          artist: element["artist"],
+          title: element["name"],
+          album: element["album"],
+          artUri: Uri.file(element["albumart"]),
           )
           );
         });

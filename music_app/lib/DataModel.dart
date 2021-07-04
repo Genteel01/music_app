@@ -712,7 +712,7 @@ class DataModel extends ChangeNotifier {
     settings.upNext.forEach((element) { 
       Album album = element.album == "Unknown Album" ? albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == "Various Artists") :
       albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == element.albumArtist);
-      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "albumart" : getAlbumArt(element) == null ? "" : appDocumentsDirectory + "/albumart/" + album.name.replaceAll("/", "_") + album.albumArtist.replaceAll("/", "_") + album.year.replaceAll("/", "_")};
+      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.album, "albumart" : getAlbumArt(element) == null ? "" : appDocumentsDirectory + "/albumart/" + album.name.replaceAll("/", "_") + album.albumArtist.replaceAll("/", "_") + album.year.replaceAll("/", "_")};
       songsWithMetadata.add(song);
     });
     //Set the starting index in the background audio service
@@ -724,7 +724,6 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
     saveSettings();
   }
-  //TODO when the app comes back into focus run this using the index that is currently playing in AudioService
   //Changes current song to the upnext song at the given index
   void setUpNextIndex(int index)
   {
@@ -732,6 +731,23 @@ class DataModel extends ChangeNotifier {
     settings.currentlyPlaying = settings.upNext[index];
     notifyListeners();
     saveSettings();
+  }
+  //Sets the up next index based on the passed in file path (used when resuming the application
+  void setUpNextIndexFromSongPath() async
+  {
+    //Since we are resuming I think it is possible for the app to lose some data as memory is cleared while it is in the background, so check if you need to reconnect
+    if(!AudioService.connected)
+    {
+      print("in the not connected");
+      await AudioService.connect();
+    }
+    MediaItem? currentMediaItem = AudioService.currentMediaItem;
+    if(AudioService.currentMediaItem != null)
+    {
+      Song currentSong = songs.firstWhere((element) => element.filePath == currentMediaItem!.id);
+      print(currentSong.name);
+      setUpNextIndex(settings.upNext.indexOf(currentSong));
+    }
   }
   //Plays the next song in the playlist
   void playNextSong() async
