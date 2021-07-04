@@ -112,6 +112,7 @@ class MyTabBar extends StatelessWidget {
                   //Menu
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
+                    //TODO replace this with an icon button
                     child: InkWell(child: Icon(Icons.settings, color: dataModel.errorMessage == "" ? Colors.grey[50] : Colors.red), onTap: () => {
                       Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
@@ -226,6 +227,7 @@ class NonTappableTabBar extends StatelessWidget implements PreferredSizeWidget {
   @override Size get preferredSize => this.tabBar.preferredSize;
 }
 //The bar that appears at the bottom of the screen giving basic details about the currently playing song and playback controls.
+//TODO try a hero between the image in the bottom bar and the image in the modal
 class CurrentlyPlayingBar extends StatefulWidget {
   const CurrentlyPlayingBar({Key? key}) : super(key: key);
 

@@ -724,6 +724,7 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
     saveSettings();
   }
+  //TODO when the app comes back into focus run this using the index that is currently playing in AudioService
   //Changes current song to the upnext song at the given index
   void setUpNextIndex(int index)
   {

@@ -11,7 +11,7 @@ class AlbumArtView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(backgroundColor: Colors.black,
         appBar: AppBar(title: Text("Album Art")),
-
+        //TODO wrap this with an interactive viewer
         body: Center(child: Hero(tag: "album_art", child: image == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(image!),))
     );
   }
