@@ -350,9 +350,11 @@ class DataModel extends ChangeNotifier {
       settings.loadSongs(songs);
       if(settings.currentlyPlaying != null)
       {
-        print("339");
-        await AudioService.customAction("setFilePath", settings.currentlyPlaying!.filePath);
-        print("341");
+        settings.startingIndex = settings.playingIndex;
+        //Set the starting index in the background audio service
+        await AudioService.customAction("setStartingIndex", settings.startingIndex);
+        //Set the playlist in the background audio service
+        await AudioService.customAction("setPlaylist", makeSongMap(settings.upNext));
         AudioService.pause();
       }
     }
@@ -673,7 +675,6 @@ class DataModel extends ChangeNotifier {
       albums.add(newAlbum);
     }*/
   }
-  //TODO On first load it doesn't set the currently playing song in the AudioService
   //Function that sets the currently playing song
   void setCurrentlyPlaying(Song song, List<Song> futureSongs) async
   {
@@ -707,22 +708,26 @@ class DataModel extends ChangeNotifier {
       }
     //Set the song paths so that upNext can be saved and loaded again when you open the app
     settings.setSongPath();
-    //Create the map that will be passed into the background audio service with the needed song details
-    List<Map<String, dynamic>> songsWithMetadata = [];
-    settings.upNext.forEach((element) { 
-      Album album = element.album == "Unknown Album" ? albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == "Various Artists") :
-      albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == element.albumArtist);
-      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.album, "albumart" : getAlbumArt(element) == null ? "" : appDocumentsDirectory + "/albumart/" + album.name.replaceAll("/", "_") + album.albumArtist.replaceAll("/", "_") + album.year.replaceAll("/", "_")};
-      songsWithMetadata.add(song);
-    });
     //Set the starting index in the background audio service
     await AudioService.customAction("setStartingIndex", settings.startingIndex);
     //Set the playlist in the background audio service
-    await AudioService.customAction("setPlaylist", songsWithMetadata);
+    await AudioService.customAction("setPlaylist", makeSongMap(settings.upNext));
     //Play the music
     AudioService.play();
     notifyListeners();
     saveSettings();
+  }
+  //Makes the map that is used to send song data to the isolate
+  List<Map<String, String>> makeSongMap(List<Song> songList)
+  {
+    List<Map<String, String>> songsWithMetadata = [];
+    songList.forEach((element) {
+      Album album = element.album == "Unknown Album" ? albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == "Various Artists") :
+      albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == element.albumArtist);
+      Map<String, String> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.album, "albumart" : getAlbumArt(element) == null ? "" : appDocumentsDirectory + "/albumart/" + album.name.replaceAll("/", "_") + album.albumArtist.replaceAll("/", "_") + album.year.replaceAll("/", "_")};
+      songsWithMetadata.add(song);
+    });
+    return songsWithMetadata;
   }
   //Changes current song to the upnext song at the given index
   void setUpNextIndex(int index)

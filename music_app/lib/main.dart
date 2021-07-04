@@ -451,7 +451,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
               ),
             ],
           ),
-          //Seekbar //TODO this is broken
+          //Seekbar
           StreamBuilder<Duration> (
             stream: AudioService.positionStream,
               builder: (context, snapshot) {
