@@ -58,7 +58,15 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
   @override
   Future<void> onSkipToNext() async {
-    return audioPlayer.seekToNext();
+    if(audioPlayer.currentIndex == futureMediaItems.length - 1 && audioPlayer.loopMode == LoopMode.off)
+      {
+        await audioPlayer.seek(null, index: 0);
+        AudioService.pause();
+      }
+    else
+      {
+        return audioPlayer.seekToNext();
+      }
   }
 
   @override
@@ -69,7 +77,14 @@ class AudioPlayerTask extends BackgroundAudioTask {
     }
     else
     {
-      return audioPlayer.seekToPrevious();
+      if(audioPlayer.currentIndex == 0 && audioPlayer.loopMode == LoopMode.off)
+        {
+          await audioPlayer.seek(null, index: futureMediaItems.length - 1);
+        }
+      else
+        {
+          return audioPlayer.seekToPrevious();
+        }
     }
   }
   @override
