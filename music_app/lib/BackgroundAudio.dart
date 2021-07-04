@@ -31,6 +31,13 @@ class AudioPlayerTask extends BackgroundAudioTask {
         AudioServiceBackground.setMediaItem(futureMediaItems[event]);
       }
     });
+    audioPlayer.playerStateStream.listen((state) {
+      if(state.processingState == ProcessingState.completed)
+        {
+          audioPlayer.seek(null, index: 0);
+          AudioService.pause();
+        }
+    });
     AudioServiceBackground.setState(
         controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
         /*playing: true,*/
