@@ -696,12 +696,12 @@ class DataModel extends ChangeNotifier {
     isPlaying ? await AudioService.pause() : await AudioService.play();
     notifyListeners();
   }
-  //TODO it almost works but not quite
   //Toggles shuffle behaviour when the shuffle button is pressed
   void toggleShuffle() async
   {
     //Toggle the tracking variable
     settings.shuffle = !settings.shuffle;
+    notifyListeners();
     //If you are currently playing some songs deal with the playlist
     if(settings.upNext.length != 0)
       {

@@ -289,19 +289,18 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
         builder:buildWidget
     );
   }
-  //TODO test the hero in a proper build (so it won't be too laggy to see if it actually works). If it doesn't work just remove it
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return InkWell(
       child: Container(height: 65, decoration: BoxDecoration(
           border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
           child: dataModel.loading || dataModel.settings.upNext.length == 0 ? Row(children: [
-            SizedBox(width: 65, height: 65,child: Hero(tag: "currently_playing_widget", child: Image.asset("assets/images/music_note.jpg"))), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
+            SizedBox(width: 65, height: 65,child: Image.asset("assets/images/music_note.jpg")), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
           ],) : Row(mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Expanded(
                 child: Row(
                   children: [
-                    SizedBox(width: 65, height: 65,child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]))))),
+                    SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex])))),
                     Expanded(
                       child: Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0),
                         child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
