@@ -287,6 +287,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
         builder:buildWidget
     );
   }
+  //TODO test the hero in a proper build (so it won't be too laggy to see if it actually works). If it doesn't work just remove it
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return InkWell(
       child: Container(height: 65, decoration: BoxDecoration(

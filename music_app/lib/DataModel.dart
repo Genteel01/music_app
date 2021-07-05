@@ -621,6 +621,11 @@ class DataModel extends ChangeNotifier {
   //Function that sets the currently playing song
   void setCurrentlyPlaying(int index, List<Song> futureSongs) async
   {
+    if(!AudioService.connected)
+    {
+      print("in the not connected");
+      await AudioService.connect();
+    }
     //Clear the upNext list
     settings.upNext.clear();
     //Add all the future songs to upNext
