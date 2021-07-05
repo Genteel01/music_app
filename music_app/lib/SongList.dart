@@ -123,10 +123,10 @@ class _SongListItemState extends State<SongListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.index) || (dataModel.selectedIndices.length == 0 && dataModel.settings.playingIndex == widget.index && dataModel.settings.upNext.length == widget.futureSongs.length),
+        selected: dataModel.selectedIndices.contains(widget.index) || (dataModel.selectedIndices.length == 0 && dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
         title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
         subtitle: Text(widget.song.artist, maxLines: 1, overflow: TextOverflow.ellipsis,),
-        trailing: dataModel.settings.playingIndex == widget.index && dataModel.settings.upNext.length == widget.futureSongs.length ? Row(mainAxisSize: MainAxisSize.min,
+        trailing: dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song ? Row(mainAxisSize: MainAxisSize.min,
           children: [
             Text(widget.song.durationString()),
             Icon(Icons.play_arrow)

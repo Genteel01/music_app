@@ -96,10 +96,10 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.artist.songs.indexOf(widget.song)) || (dataModel.selectedIndices.length == 0 && dataModel.settings.playingIndex == widget.index && dataModel.settings.upNext.length == widget.artist.songs.length),
+        selected: dataModel.selectedIndices.contains(widget.artist.songs.indexOf(widget.song)) || (dataModel.selectedIndices.length == 0 && dataModel.settings.upNext.length == widget.artist.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
         title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
         subtitle: Text(widget.song.album, maxLines: 1, overflow: TextOverflow.ellipsis,),
-        trailing: dataModel.settings.playingIndex == widget.index && dataModel.settings.upNext.length == widget.artist.songs.length ? Row(mainAxisSize: MainAxisSize.min,
+        trailing: dataModel.settings.upNext.length == widget.artist.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song ? Row(mainAxisSize: MainAxisSize.min,
           children: [
             Text(widget.song.durationString()),
             Icon(Icons.play_arrow)
