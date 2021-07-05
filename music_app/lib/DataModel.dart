@@ -11,7 +11,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
 
@@ -22,7 +21,6 @@ import 'BackgroundAudio.dart';
 import 'Playlist.dart';
 import 'Settings.dart';
 import 'Song.dart';
-import 'main.dart' as main;
 
 
 enum LoopType {
@@ -640,7 +638,7 @@ class DataModel extends ChangeNotifier {
         //Shift the upNext list so that the currently playing song is the first one in the list
         for(int i = 0; i < index; i++)
         {
-          Song movedSong = settings.upNext.removeAt(0);;
+          Song movedSong = settings.upNext.removeAt(0);
           settings.upNext.add(movedSong);
         }
         settings.playingIndex = 0;

@@ -1,11 +1,5 @@
-import 'dart:isolate';
-import 'dart:typed_data';
-
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
-
-import 'DataModel.dart';
-import 'Song.dart';
 
 class AudioPlayerTask extends BackgroundAudioTask {
   final audioPlayer = AudioPlayer();

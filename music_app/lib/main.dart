@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'Album.dart';
 import 'AlbumList.dart';
 import 'Artist.dart';
-import 'BackgroundAudio.dart';
 import 'DataModel.dart';
 import 'Playlist.dart';
 import 'PlaylistList.dart';
