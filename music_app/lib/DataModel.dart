@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:file_picker/file_picker.dart';
@@ -29,9 +27,7 @@ enum LoopType {
   singleSong,
 }
 void _backgroundTaskEntrypoint() async {
-  print("in the top level function");
   await AudioServiceBackground.run(() => AudioPlayerTask());
-  print("after the thing in the top level function");
 }
 class DataModel extends ChangeNotifier {
 
@@ -290,15 +286,7 @@ class DataModel extends ChangeNotifier {
         await AudioService.connect();
       //}
     await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
-    //ReceivePort receivePort = ReceivePort();
-    SendPort? blah = IsolateNameServer.lookupPortByName("audioServicePort");
-    if(blah != null)
-      {
-        print("IT'S WORKING _______________________________________________-");
-      }
-    print("after calling start");
     appDocumentsDirectory = await getAppDocumentsDirectory();
-    print("289");
     //clear any existing data we have gotten previously, to avoid duplicate data
     songs.clear();
     artists.clear();
@@ -339,7 +327,6 @@ class DataModel extends ChangeNotifier {
     }
     catch (error){}
     //Load your settings file
-    print("330");
     try
     {
       String settingsFile = await File(appDocumentsDirectory + "/settings.txt").readAsString();
@@ -647,9 +634,11 @@ class DataModel extends ChangeNotifier {
     //If shuffle is on shuffle upNext
     if(settings.shuffle)
       {
+        Song firstSong = settings.upNext[index];
         settings.upNext.shuffle();
+        int shiftIndex = settings.upNext.indexOf(firstSong);
         //Shift the upNext list so that the currently playing song is the first one in the list
-        for(int i = 0; i < index; i++)
+        for(int i = 0; i < shiftIndex; i++)
         {
           Song movedSong = settings.upNext.removeAt(0);
           settings.upNext.add(movedSong);
@@ -659,7 +648,7 @@ class DataModel extends ChangeNotifier {
     //Set the song paths so that upNext can be saved and loaded again when you open the app
     settings.setSongPath();
     //Set the starting index in the background audio service
-    await AudioService.customAction("setStartingIndex", index);
+    await AudioService.customAction("setStartingIndex", settings.playingIndex);
     //Set the playlist in the background audio service
     await AudioService.customAction("setPlaylist", makeSongMap(settings.upNext));
     //Play the music
@@ -701,79 +690,51 @@ class DataModel extends ChangeNotifier {
       await AudioService.customAction("getCurrentIndex");
     }
   }
-  //Plays the next song in the playlist
-  /*void playNextSong() async
-  {
-    settings.playingIndex++;
-    settings.playingIndex %= settings.upNext.length;
-    settings.currentlyPlaying = settings.upNext[settings.playingIndex];
-    //await AudioService.customAction("setFilePath", settings.currentlyPlaying!.filePath);
-    if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !isPlaying)
-    {
-      AudioService.pause();
-    }
-    else
-    {
-      AudioService.play();
-    }
-    notifyListeners();
-    saveSettings();
-  }
-  //Plays the previous song in the playlist
-  void playPreviousSong() async
-  {
-    settings.playingIndex--;
-    settings.playingIndex %= settings.upNext.length;
-    settings.currentlyPlaying = settings.upNext[settings.playingIndex];
-    //await AudioService.customAction("setFilePath", settings.currentlyPlaying!.filePath);
-    //bool isPlaying = await AudioService.customAction("isPlaying");
-    if(isPlaying)
-      {
-        AudioService.play();
-      }
-    else
-      {
-        AudioService.pause();
-      }
-    notifyListeners();
-    saveSettings();
-  }*/
   void playButton() async
   {
     //bool isPlaying = await AudioService.customAction("isPlaying");
     isPlaying ? await AudioService.pause() : await AudioService.play();
     notifyListeners();
   }
+  //TODO it almost works but not quite
   //Toggles shuffle behaviour when the shuffle button is pressed
-  //TODO this is broken as hell
-  void toggleShuffle()
+  void toggleShuffle() async
   {
     //Toggle the tracking variable
     settings.shuffle = !settings.shuffle;
-    //TODO set settings.shuffleHasChanged = true
-    //TODO in the AudioService custom event listener if settings.shuffleHasChanged deal with the lists based on shuffle
-    //If you are now shuffling, shuffle the upNext playlist
-    /*if(settings.shuffle)//Happens in the setCurrentlyPlaying() now
+    //If you are currently playing some songs deal with the playlist
+    if(settings.upNext.length != 0)
       {
-        settings.upNext.shuffle();
-        settings.setSongPath();
+        //If you are now shuffling, shuffle the upNext playlist
+        if(settings.shuffle)
+        {
+          Song firstSong = settings.upNext[settings.playingIndex];
+          settings.upNext.shuffle();
+          int shiftIndex = settings.upNext.indexOf(firstSong);
+          //Shift the upNext list so that the currently playing song is the first one in the list
+          for(int i = 0; i < shiftIndex; i++)
+          {
+            Song movedSong = settings.upNext.removeAt(0);
+            settings.upNext.add(movedSong);
+          }
+          settings.playingIndex = 0;
+          settings.setSongPath();
+        }
+        //If you are not shuffling set the upNext playlist to the original unshuffled one
+        else
+        {
+          Song currentlyPlayingSong = settings.upNext[settings.playingIndex];
+          List<Song> newUpNext = [];
+          newUpNext.addAll(settings.originalUpNext);
+          settings.upNext = newUpNext;
+          settings.setSongPath();
+          settings.playingIndex = settings.upNext.indexOf(currentlyPlayingSong);
+        }
+        //Set the starting index in the background audio service
+        await AudioService.customAction("setStartingIndex", settings.playingIndex);
+        //Set the playlist in the background audio service
+        await AudioService.customAction("updatePlaylist", makeSongMap(settings.upNext));
       }
-    //If you are not shuffling set the upNext playlist to the original unshuffled one
-    else*//*if(!settings.shuffle)
-      {
-        List<Song> newUpNext = [];
-        newUpNext.addAll(settings.originalUpNext);
-        settings.upNext = newUpNext;
-        settings.setSongPath();
-      }
-    //Set the currently playing index to the index of the currently playing song
-    if(settings.currentlyPlaying != null)
-      {
-        settings.playingIndex = settings.upNext.indexOf(settings.currentlyPlaying!);
-        //Set the starting index to this position
-        settings.startingIndex = settings.playingIndex;
-      }
-    setCurrentlyPlaying(settings.upNext[settings.playingIndex], settings.upNext);*/
     notifyListeners();
     saveSettings();
   }

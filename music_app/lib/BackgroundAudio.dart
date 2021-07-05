@@ -130,6 +130,31 @@ class AudioPlayerTask extends BackgroundAudioTask {
             processingState: AudioProcessingState.ready,
             position: Duration());
       }
+    if(name == "updatePlaylist")
+    {
+      //Build the future playlist
+      futureMediaItems.clear();
+      List<AudioSource> playlist = [];
+      arguments.forEach((element) {
+        playlist.add(AudioSource.uri(Uri.file((element as Map)["path"])));
+        futureMediaItems.add(
+            MediaItem(
+              id: element["path"],
+              artist: element["artist"],
+              title: element["name"],
+              album: element["album"],
+              artUri: Uri.file(element["albumart"]),
+            )
+        );
+      });
+      Duration currentPosition = audioPlayer.position;
+      await audioPlayer.setAudioSource(ConcatenatingAudioSource(children: playlist,), initialIndex: startingIndex);
+      await AudioService.seekTo(currentPosition);
+      AudioServiceBackground.setQueue(futureMediaItems);
+      AudioServiceBackground.setMediaItem(futureMediaItems[startingIndex]);
+      AudioServiceBackground.setState(
+          processingState: AudioProcessingState.ready,);
+    }
     if(name == "setStartingIndex")
       {
         startingIndex = arguments;
