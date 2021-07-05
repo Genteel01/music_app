@@ -121,10 +121,10 @@ class _SongListItemState extends State<SongListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.index) || (dataModel.selectedIndices.length == 0 && dataModel.settings.currentlyPlaying == widget.song),
+        selected: dataModel.selectedIndices.contains(widget.index) || (dataModel.selectedIndices.length == 0 && dataModel.settings.playingIndex == widget.index && dataModel.settings.upNext.length == widget.futureSongs.length),
         title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
         subtitle: Text(widget.song.artist, maxLines: 1, overflow: TextOverflow.ellipsis,),
-        trailing: dataModel.settings.currentlyPlaying == widget.song ? Row(mainAxisSize: MainAxisSize.min,
+        trailing: dataModel.settings.playingIndex == widget.index && dataModel.settings.upNext.length == widget.futureSongs.length ? Row(mainAxisSize: MainAxisSize.min,
           children: [
             Text(widget.song.durationString()),
             Icon(Icons.play_arrow)
@@ -134,7 +134,7 @@ class _SongListItemState extends State<SongListItem> {
         onTap: () => {
           if(dataModel.selectedIndices.length == 0 && widget.playSongs)
             {
-              dataModel.setCurrentlyPlaying(widget.song, widget.futureSongs),
+              dataModel.setCurrentlyPlaying(widget.index, widget.futureSongs),
             }
           else if(widget.allowSelection)
             {

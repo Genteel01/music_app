@@ -10,23 +10,20 @@ import 'Song.dart';
 class Settings{
   List<Song> upNext;
   List<Song> originalUpNext;
-  Song? currentlyPlaying;
   bool shuffle;
   LoopType loop;
   int playingIndex;
-  int startingIndex;
   List<String> songPaths;
   List<String> originalSongPaths;
   List<String> directoryPaths;
 
-  Settings({required this.upNext, this.currentlyPlaying, required this.shuffle, required this.loop, required this.playingIndex, required this.startingIndex, required this.songPaths, required this.originalUpNext, required this.originalSongPaths, required this.directoryPaths});
+  Settings({required this.upNext, required this.shuffle, required this.loop, required this.playingIndex, required this.songPaths, required this.originalUpNext, required this.originalSongPaths, required this.directoryPaths});
 
   Map<String, dynamic> toJson() =>
       {
         'shuffle': shuffle,
         'loop' : EnumToString.convertToString(loop),
         'playingIndex': playingIndex,
-        'startingIndex': startingIndex,
         'songPaths': songPaths,
         'originalSongPaths': originalSongPaths,
         'directoryPaths' : directoryPaths
@@ -37,7 +34,6 @@ class Settings{
         shuffle = json['shuffle'],
         loop = EnumToString.fromString(LoopType.values, json['loop'])!,
         playingIndex = json['playingIndex'],
-        startingIndex = json['startingIndex'],
         songPaths = json['songPaths'].cast<String>(),
         originalSongPaths = json['originalSongPaths'].cast<String>(),
         upNext = [],
@@ -64,10 +60,6 @@ class Settings{
 
       }
     });
-    if(upNext.length > 0)
-      {
-        currentlyPlaying = upNext[playingIndex];
-      }
   }
   setSongPath()
   {

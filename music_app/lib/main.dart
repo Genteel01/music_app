@@ -292,21 +292,21 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
     return InkWell(
       child: Container(height: 65, decoration: BoxDecoration(
           border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
-          child: dataModel.loading || dataModel.settings.currentlyPlaying == null ? Row(children: [
+          child: dataModel.loading || dataModel.settings.upNext.length == 0 ? Row(children: [
             SizedBox(width: 65, height: 65,child: Hero(tag: "currently_playing_widget", child: Image.asset("assets/images/music_note.jpg"))), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
           ],) : Row(mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Expanded(
                 child: Row(
                   children: [
-                    SizedBox(width: 65, height: 65,child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!))),
+                    SizedBox(width: 65, height: 65,child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex])!))),
                     Expanded(
                       child: Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0),
                         child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Expanded(child: AutoSizeText(dataModel.settings.currentlyPlaying!.name, maxLines: 1, style: TextStyle(fontSize: 16), minFontSize: 16, overflowReplacement:
-                          Marquee(style: TextStyle(fontSize: 16), crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.currentlyPlaying!.name, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
-                          Expanded(child: AutoSizeText(dataModel.settings.currentlyPlaying!.artist, maxLines: 1, overflowReplacement:
-                          Marquee(crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.currentlyPlaying!.artist, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
+                          Expanded(child: AutoSizeText(dataModel.settings.upNext[dataModel.settings.playingIndex].name, maxLines: 1, style: TextStyle(fontSize: 16), minFontSize: 16, overflowReplacement:
+                          Marquee(style: TextStyle(fontSize: 16), crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.upNext[dataModel.settings.playingIndex].name, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
+                          Expanded(child: AutoSizeText(dataModel.settings.upNext[dataModel.settings.playingIndex].artist, maxLines: 1, overflowReplacement:
+                          Marquee(crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.upNext[dataModel.settings.playingIndex].artist, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
                         ],),
                       ),
                     ),
@@ -316,7 +316,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
               Padding(padding: const EdgeInsets.only(right: 8.0), child: AudioControls(buttonSizes: 35,),),
           ],
           ),
-      ),onTap: dataModel.loading || dataModel.settings.currentlyPlaying == null ? () => {} : () => {
+      ),onTap: dataModel.loading || dataModel.settings.upNext.length == 0 ? () => {} : () => {
         showModalBottomSheet<void>(
           isScrollControlled: true,
           context: context,
@@ -395,18 +395,18 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           //Album art image
-          SizedBox(height: 200, width: 200, child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!))),
+          SizedBox(height: 200, width: 200, child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex])!))),
           //Song name
           Padding(
             padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
-            child: Text(dataModel.settings.currentlyPlaying!.name, overflow: TextOverflow.ellipsis,),
+            child: Text(dataModel.settings.upNext[dataModel.settings.playingIndex].name, overflow: TextOverflow.ellipsis,),
           ),
           //Song artist
-          Text(dataModel.settings.currentlyPlaying!.artist, overflow: TextOverflow.ellipsis,),
+          Text(dataModel.settings.upNext[dataModel.settings.playingIndex].artist, overflow: TextOverflow.ellipsis,),
           //Song album
           Padding(
             padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
-            child: Text(dataModel.settings.currentlyPlaying!.album, overflow: TextOverflow.ellipsis,),
+            child: Text(dataModel.settings.upNext[dataModel.settings.playingIndex].album, overflow: TextOverflow.ellipsis,),
           ),
           //shuffle, loop, and add to playlist row
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -423,7 +423,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                 dataModel.selectedIndices.forEach((element) { oldSelections.add(element);}),
                 dataModel.clearSelections(),
                 oldSelectionType = dataModel.selectionType,
-                dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.currentlyPlaying!), Song),
+                dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.upNext[dataModel.settings.playingIndex]), Song),
                   showModalBottomSheet<void>(
                     isScrollControlled: true,
                     context: context,
@@ -462,12 +462,12 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                       (position!.inSeconds % 60) < 10 ? Text(position.inMinutes.toString() + ":0" + (position.inSeconds % 60).toStringAsFixed(0)) :
                       Text(position.inMinutes.toString() + ":" + (position.inSeconds % 60).toStringAsFixed(0)),
                       //Position Slider
-                      Slider(value: position.inSeconds.toDouble(), max: Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inSeconds.toDouble(), onChanged: (value) => {
+                      Slider(value: position.inSeconds.toDouble(), max: Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds.toDouble(), onChanged: (value) => {
                         AudioService.seekTo(Duration(seconds: value.toInt()))
                       },),
                       //Duration
-                      (Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inSeconds % 60) < 10 ? Text(Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inMinutes.toString() + ":0" + (Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inSeconds % 60).toStringAsFixed(0)) :
-                      Text(Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inMinutes.toString() + ":" + (Duration(milliseconds: dataModel.settings.currentlyPlaying!.duration).inSeconds % 60).toStringAsFixed(0)),
+                      (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60) < 10 ? Text(Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inMinutes.toString() + ":0" + (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60).toStringAsFixed(0)) :
+                      Text(Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inMinutes.toString() + ":" + (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60).toStringAsFixed(0)),
                     ],
                   );
                 }

@@ -66,11 +66,11 @@ class AlbumDetails extends StatelessWidget {
                                     child: Text("Disc " + song.discNumber.toString()),
                                   ),
                                   //Song list tile
-                                  AlbumDetailsListItem(song: song, album: album,)
+                                  AlbumDetailsListItem(song: song, album: album, index: index - 1)
                                 ],
                               );
                             }
-                          return AlbumDetailsListItem(song: song, album: album,);
+                          return AlbumDetailsListItem(song: song, album: album, index: index - 1);
                         },
                         itemCount: album.songs.length + 1,
                     ),
@@ -84,9 +84,11 @@ class AlbumDetails extends StatelessWidget {
 }
 
 class AlbumDetailsListItem extends StatefulWidget {
-  const AlbumDetailsListItem({Key? key, required this.song, required this.album}) : super(key: key);
+  const AlbumDetailsListItem({Key? key, required this.song, required this.album, required this.index}) : super(key: key);
   final Song song;
   final Album album;
+  //The index of the song (not the index in the list
+  final int index;
 
   @override
   _AlbumDetailsListItemState createState() => _AlbumDetailsListItemState();
@@ -103,10 +105,10 @@ class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.album.songs.indexOf(widget.song)) || (dataModel.selectedIndices.length == 0 && dataModel.settings.currentlyPlaying == widget.song) ,
+        selected: dataModel.selectedIndices.contains(widget.album.songs.indexOf(widget.song)) || (dataModel.selectedIndices.length == 0 && dataModel.settings.playingIndex == widget.index && dataModel.settings.upNext.length == widget.album.songs.length) ,
         title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
         subtitle: Text(widget.song.artist, maxLines: 1, overflow: TextOverflow.ellipsis,),
-        trailing: dataModel.settings.currentlyPlaying == widget.song ? Row(mainAxisSize: MainAxisSize.min,
+        trailing: dataModel.settings.playingIndex == widget.index && dataModel.settings.upNext.length == widget.album.songs.length ? Row(mainAxisSize: MainAxisSize.min,
           children: [
             Text(widget.song.durationString()),
             Icon(Icons.play_arrow)
@@ -116,15 +118,15 @@ class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
         onTap: () => {
           if(dataModel.selectedIndices.length == 0)
             {
-              dataModel.setCurrentlyPlaying(widget.song, widget.album.songs),
+              dataModel.setCurrentlyPlaying(widget.index, widget.album.songs),
             }
           else
             {
-              dataModel.toggleSelection(widget.album.songs.indexOf(widget.song), Song)
+              dataModel.toggleSelection(widget.index, Song)
             }
         },
         onLongPress: () => {
-            dataModel.toggleSelection(widget.album.songs.indexOf(widget.song), Song)
+            dataModel.toggleSelection(widget.index, Song)
         },
       ),
     );

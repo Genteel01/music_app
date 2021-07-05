@@ -43,7 +43,7 @@ class DataModel extends ChangeNotifier {
   List<Album> albums = [];
   List<Playlist> playlists = [];
 
-  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, startingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: [], directoryPaths: []);
+  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: [], directoryPaths: []);
 
   String appDocumentsDirectory = "";
 
@@ -348,11 +348,10 @@ class DataModel extends ChangeNotifier {
       var jsonFile = jsonDecode(settingsFile);
       settings = Settings.fromJson(jsonFile);
       settings.loadSongs(songs);
-      if(settings.currentlyPlaying != null)
+      if(settings.upNext.length > 0)
       {
-        settings.startingIndex = settings.playingIndex;
         //Set the starting index in the background audio service
-        await AudioService.customAction("setStartingIndex", settings.startingIndex);
+        await AudioService.customAction("setStartingIndex", settings.playingIndex);
         //Set the playlist in the background audio service
         await AudioService.customAction("setPlaylist", makeSongMap(settings.upNext));
         AudioService.pause();
@@ -458,7 +457,6 @@ class DataModel extends ChangeNotifier {
     AudioService.playbackStateStream.listen((state) {
       if(state.processingState == AudioProcessingState.stopped)
         {
-          settings.currentlyPlaying = null;
           settings.upNext.clear();
           settings.originalUpNext.clear();
           settings.songPaths.clear();
@@ -623,10 +621,8 @@ class DataModel extends ChangeNotifier {
     }
   }
   //Function that sets the currently playing song
-  void setCurrentlyPlaying(Song song, List<Song> futureSongs) async
+  void setCurrentlyPlaying(int index, List<Song> futureSongs) async
   {
-    //Set the currently playing song for the ui
-    settings.currentlyPlaying = song;
     //Clear the upNext list
     settings.upNext.clear();
     //Add all the future songs to upNext
@@ -636,27 +632,23 @@ class DataModel extends ChangeNotifier {
     //Add all the future songs to originalUpNext
     settings.originalUpNext.addAll(settings.upNext);
     //Set playing index
-    settings.playingIndex = settings.upNext.indexOf(song);
-    //Set the starting index
-    settings.startingIndex = settings.playingIndex;
+    settings.playingIndex = index;
     //If shuffle is on shuffle upNext
     if(settings.shuffle)
       {
         settings.upNext.shuffle();
         //Shift the upNext list so that the currently playing song is the first one in the list
-        settings.startingIndex = settings.upNext.indexOf(song);
-        for(int i = 0; i < settings.startingIndex; i++)
+        for(int i = 0; i < index; i++)
         {
           Song movedSong = settings.upNext.removeAt(0);;
           settings.upNext.add(movedSong);
         }
-        settings.startingIndex = 0;
         settings.playingIndex = 0;
       }
     //Set the song paths so that upNext can be saved and loaded again when you open the app
     settings.setSongPath();
     //Set the starting index in the background audio service
-    await AudioService.customAction("setStartingIndex", settings.startingIndex);
+    await AudioService.customAction("setStartingIndex", index);
     //Set the playlist in the background audio service
     await AudioService.customAction("setPlaylist", makeSongMap(settings.upNext));
     //Play the music
@@ -680,7 +672,6 @@ class DataModel extends ChangeNotifier {
   void setUpNextIndex(int index)
   {
     settings.playingIndex = index;
-    settings.currentlyPlaying = settings.upNext[index];
     notifyListeners();
     saveSettings();
   }
@@ -696,7 +687,7 @@ class DataModel extends ChangeNotifier {
     await AudioService.customAction("getCurrentIndex");
   }
   //Plays the next song in the playlist
-  void playNextSong() async
+  /*void playNextSong() async
   {
     settings.playingIndex++;
     settings.playingIndex %= settings.upNext.length;
@@ -731,7 +722,7 @@ class DataModel extends ChangeNotifier {
       }
     notifyListeners();
     saveSettings();
-  }
+  }*/
   void playButton() async
   {
     //bool isPlaying = await AudioService.customAction("isPlaying");
@@ -778,7 +769,7 @@ class DataModel extends ChangeNotifier {
     settings.shuffle = true;
     if(futureSongs.length > 0)
       {
-        setCurrentlyPlaying(futureSongs[randomNumbers.nextInt(futureSongs.length)], futureSongs);
+        setCurrentlyPlaying(randomNumbers.nextInt(futureSongs.length), futureSongs);
       }
     saveSettings();
   }
