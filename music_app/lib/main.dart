@@ -25,6 +25,7 @@ import 'SongList.dart';
 //TODO https://pub.dev/packages/just_audio
 
 //TODO feedback (adding to playlists, removing from playlists, creating playlists, deleting playlists, adding file path, removing file path)
+//TODO Try different colour schemes
 void main() {
   runApp(MyApp());
 
