@@ -455,40 +455,7 @@ class DataModel extends ChangeNotifier {
       }
     }
     //Set up the listener to detect when songs finish
-    /*Stream<PlayerState> playerStateStream = await AudioService.customAction("getPlayStreamState");
-    playerStateStream.listen((state) {
-      if(state.processingState == ProcessingState.completed)
-      {
-        if(settings.loop == LoopType.singleSong)
-        {
-          AudioService.seekTo(Duration());
-        }
-        else
-        {
-          playNextSong();
-        }
-      }
-    });*/
     AudioService.playbackStateStream.listen((state) {
-      print("Processing State: " + state.processingState.toString());
-      /*if(state.processingState == AudioProcessingState.completed)
-      {
-        if(settings.loop != LoopType.singleSong)
-        {
-          playNextSong();
-        }
-      }
-      if(state.processingState == AudioProcessingState.skippingToNext)
-        {
-          playNextSong();
-        }
-      if(state.processingState == AudioProcessingState.skippingToPrevious)
-        {
-          if(settings.loop != LoopType.singleSong && !(settings.loop == LoopType.none && settings.playingIndex == 0))
-            {
-              playPreviousSong();
-            }
-        }*/
       if(state.processingState == AudioProcessingState.stopped)
         {
           settings.currentlyPlaying = null;
@@ -626,16 +593,6 @@ class DataModel extends ChangeNotifier {
 
   void addToArtistsAndAlbums(Song newSong, Uint8List? albumArt, String? albumYear)
   {
-    /*if(artists.any((element) => element.name == newSong.artist))
-    {
-      artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
-    }
-    else
-    {
-      Artist newArtist = Artist(songs: [], name: newSong.artist);
-      newArtist.songs.add(newSong);
-      artists.add(newArtist);
-    }*/
     try
     {
       artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
@@ -664,16 +621,6 @@ class DataModel extends ChangeNotifier {
       newAlbum.songs.add(newSong);
       albums.add(newAlbum);
     }
-    /*if(albums.any((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist))
-    {
-      albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist).songs.add(newSong);
-    }
-    else
-    {
-      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: albumYear == null ? "Unknown Year" : albumYear, lastModified: newSong.lastModified);
-      newAlbum.songs.add(newSong);
-      albums.add(newAlbum);
-    }*/
   }
   //Function that sets the currently playing song
   void setCurrentlyPlaying(Song song, List<Song> futureSongs) async
@@ -737,7 +684,7 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
     saveSettings();
   }
-  //Sets the up next index based on the passed in file path (used when resuming the application
+  //Sets the up next index based on the passed in file path (used when resuming the application)
   void setUpNextIndexFromSongPath() async
   {
     //Since we are resuming I think it is possible for the app to lose some data as memory is cleared while it is in the background, so check if you need to reconnect
@@ -746,13 +693,7 @@ class DataModel extends ChangeNotifier {
       print("in the not connected");
       await AudioService.connect();
     }
-    MediaItem? currentMediaItem = AudioService.currentMediaItem;
-    if(AudioService.currentMediaItem != null)
-    {
-      Song currentSong = songs.firstWhere((element) => element.filePath == currentMediaItem!.id);
-      print(currentSong.name);
-      setUpNextIndex(settings.upNext.indexOf(currentSong));
-    }
+    await AudioService.customAction("getCurrentIndex");
   }
   //Plays the next song in the playlist
   void playNextSong() async

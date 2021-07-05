@@ -140,6 +140,10 @@ class AudioPlayerTask extends BackgroundAudioTask {
       {
         startingIndex = arguments;
       }
+    if(name == "getCurrentIndex")
+      {
+        AudioServiceBackground.sendCustomEvent(audioPlayer.currentIndex);
+      }
     if(name == "setLoopMode")
       {
         switch(arguments as String)
