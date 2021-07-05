@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -91,7 +93,7 @@ class _AlbumListItemState extends State<AlbumListItem> {
         title: Text(widget.album.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
         trailing: Text(widget.album.songs.length == 1 ? widget.album.songs.length.toString() + " track" : widget.album.songs.length.toString() + " tracks"),
         subtitle: Text(widget.album.albumArtist, maxLines: 1, overflow: TextOverflow.ellipsis,),
-        leading: SizedBox(width: 50, height: 50, child: widget.album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(widget.album.albumArt!)),
+        leading: SizedBox(width: 50, height: 50, child: widget.album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(widget.album.albumArt))),
         onTap: () => {
           if(dataModel.selectedIndices.length == 0 && widget.goToDetails)
             {

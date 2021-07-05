@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
@@ -299,7 +301,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
               Expanded(
                 child: Row(
                   children: [
-                    SizedBox(width: 65, height: 65,child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex])!))),
+                    SizedBox(width: 65, height: 65,child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]))))),
                     Expanded(
                       child: Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0),
                         child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -395,7 +397,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           //Album art image
-          SizedBox(height: 200, width: 200, child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex])!))),
+          SizedBox(height: 200, width: 200, child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]))))),
           //Song name
           Padding(
             padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),

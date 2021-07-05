@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/SongList.dart';
@@ -103,7 +105,7 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
             Icon(Icons.play_arrow)
           ],
         ) : Text(widget.song.durationString()),
-        leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.song)!)),
+        leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song)))),
         onTap: () => {
           if(dataModel.selectedIndices.length == 0)
             {

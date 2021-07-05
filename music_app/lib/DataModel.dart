@@ -522,16 +522,16 @@ class DataModel extends ChangeNotifier {
     playlistList.sort((a, b) => a.name.compareTo(b.name));
   }
 
-
-  Uint8List? getAlbumArt(Song song)
+  String getAlbumArt(Song song)
   {
     try
     {
-      return albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.album == element.name).albumArt;
+      Album songAlbum = albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.album == element.name);
+      return appDocumentsDirectory + "/albumart/" + songAlbum.name.replaceAll("/", "_") + songAlbum.albumArtist.replaceAll("/", "_") + songAlbum.year.replaceAll("/", "_");
     }
     catch(error)
     {
-      return null;
+      return "";
     }
   }
   //Function to clear out all the local files I am creating for this app
@@ -613,7 +613,15 @@ class DataModel extends ChangeNotifier {
     }
     catch(error)
     {
-      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.album == "Unknown Album" ? "Various Artists" : newSong.albumArtist, albumArt: albumArt, year: albumYear == null ? "Unknown Year" : albumYear, lastModified: newSong.lastModified);
+      String albumArtLocation = "";
+      String albumArtist =  newSong.album == "Unknown Album" ? "Various Artists" : newSong.albumArtist;
+      String albumYearString = albumYear == null ? "Unknown Year" : albumYear;
+      if(albumArt != null)
+        {
+          File(appDocumentsDirectory + "/albumart/" + newSong.album.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + albumYearString.replaceAll("/", "_")).writeAsBytes(albumArt);
+          albumArtLocation = appDocumentsDirectory + "/albumart/" + newSong.album.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + albumYearString.replaceAll("/", "_");
+        }
+      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: albumArtist, albumArt: albumArtLocation, year: albumYearString, lastModified: newSong.lastModified);
       newAlbum.songs.add(newSong);
       albums.add(newAlbum);
     }
@@ -664,9 +672,7 @@ class DataModel extends ChangeNotifier {
   {
     List<Map<String, String>> songsWithMetadata = [];
     songList.forEach((element) {
-      Album album = element.album == "Unknown Album" ? albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == "Various Artists") :
-      albums.firstWhere((albumElement) => albumElement.name == element.album && albumElement.albumArtist == element.albumArtist);
-      Map<String, String> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.album, "albumart" : getAlbumArt(element) == null ? "" : appDocumentsDirectory + "/albumart/" + album.name.replaceAll("/", "_") + album.albumArtist.replaceAll("/", "_") + album.year.replaceAll("/", "_")};
+      Map<String, String> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.album, "albumart" : getAlbumArt(element) };
       songsWithMetadata.add(song);
     });
     return songsWithMetadata;
@@ -674,20 +680,26 @@ class DataModel extends ChangeNotifier {
   //Changes current song to the upnext song at the given index
   void setUpNextIndex(int index)
   {
-    settings.playingIndex = index;
-    notifyListeners();
-    saveSettings();
+    if(settings.upNext.length != 0)
+      {
+        settings.playingIndex = index;
+        notifyListeners();
+        saveSettings();
+      }
   }
   //Sets the up next index based on the passed in file path (used when resuming the application)
   void setUpNextIndexFromSongPath() async
   {
-    //Since we are resuming I think it is possible for the app to lose some data as memory is cleared while it is in the background, so check if you need to reconnect
-    if(!AudioService.connected)
+    if(settings.upNext.length != 0)
     {
-      print("in the not connected");
-      await AudioService.connect();
+      //Since we are resuming I think it is possible for the app to lose some data as memory is cleared while it is in the background, so check if you need to reconnect
+      if(!AudioService.connected)
+      {
+        print("in the not connected");
+        await AudioService.connect();
+      }
+      await AudioService.customAction("getCurrentIndex");
     }
-    await AudioService.customAction("getCurrentIndex");
   }
   //Plays the next song in the playlist
   /*void playNextSong() async

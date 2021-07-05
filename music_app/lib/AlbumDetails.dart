@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/SongList.dart';
@@ -45,7 +47,7 @@ class AlbumDetails extends StatelessWidget {
                           if(index == 0)
                             {
                               return Column(children: [
-                                InkWell(child: Hero(tag: "album_art", child: album.albumArt == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(album.albumArt!)), onTap: () =>
+                                InkWell(child: Hero(tag: "album_art", child: album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(album.albumArt))), onTap: () =>
                                     Navigator.push(context, MaterialPageRoute(
                                         builder: (context) {
                                           return AlbumArtView(image: album.albumArt);

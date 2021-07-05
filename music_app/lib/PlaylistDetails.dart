@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/SongList.dart';
@@ -134,7 +136,7 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                           title: Text(song.name),
                           subtitle: Text(song.artist),
                           trailing: Icon(Icons.menu),
-                          leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
+                          leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(song)))),
                         ),
                       );
                     },

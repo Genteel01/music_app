@@ -6,22 +6,26 @@ import 'Song.dart';
 class Album{
   List<Song> songs;
 
-  Uint8List? albumArt;
   String name;
   String albumArtist;
   String year;
   DateTime lastModified;
-  Album({required this.songs, required this.name, required this.albumArtist, this.albumArt, required this.year, required this.lastModified});
+  String albumArt;
+  Album({required this.songs, required this.name, required this.albumArtist, required this.year, required this.lastModified, required this.albumArt});
 
   void updateAlbum(String newYear, Uint8List? newAlbumArt, DateTime newLastModified, String directoryPath)
   {
     try
       {
         File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).delete();
+        if(newAlbumArt != null)
+          {
+            File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).writeAsBytes(newAlbumArt);
+            albumArt = directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_");
+          }
       }
     catch(error){}
     year = newYear;
-    albumArt = newAlbumArt;
     lastModified = newLastModified;
   }
   Map<String, dynamic> toJson() =>
@@ -30,6 +34,7 @@ class Album{
         'albumArtist': albumArtist,
         'year': year,
         'lastModified' : lastModified.millisecondsSinceEpoch,
+        'albumArt' : albumArt
         //'albumArt': albumArt,
       };
 
@@ -38,32 +43,10 @@ class Album{
         name = json['name'],
         albumArtist = json['albumArtist'],
         year = json['year'],
+        albumArt = json['albumArt'],
         songs = [],
-        albumArt = Album.loadAlbumArt(json['name'], json['albumArtist'], json['year'], directoryPath),
         lastModified = DateTime.fromMillisecondsSinceEpoch(json['lastModified']);
 
-  static Uint8List? loadAlbumArt(String name, String albumArtist, String year, String directoryPath)
-  {
-    try
-    {
-      return File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).readAsBytesSync();
-    }
-    catch(error)
-    {
-      return null;
-    }
-  }
-  /*static Uint8List? convertImage(List<dynamic>? source)
-  {
-    if(source == null)
-      {
-        return null;
-      }
-    List<int> list = source.cast();
-    //List<int> list = utf8.encode(source[0].toString());
-    Uint8List bytes = Uint8List.fromList(list);
-    return bytes;
-  }*/
   //Function to turn a json file of several albums into a list of albums
   static List<Album> loadAlbumFile(List<dynamic> data, String directoryPath)
   {
@@ -79,10 +62,6 @@ class Album{
     List<Map<String, dynamic>> newAlbums = List<Map<String, dynamic>>.empty(growable: true);
     albumList.forEach((element) {
       newAlbums.add(element.toJson());
-      if(element.albumArt != null)
-        {
-          File(directoryPath + "/albumart/" + element.name.replaceAll("/", "_") + element.albumArtist.replaceAll("/", "_") + element.year.replaceAll("/", "_")).writeAsBytes(element.albumArt!);
-        }
     });
     return newAlbums;
   }
