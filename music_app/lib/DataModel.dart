@@ -406,6 +406,12 @@ class DataModel extends ChangeNotifier {
       {
         if(albums[i - 1].songs.length == 0)
           {
+            //Delete the album art if it exists
+            try
+            {
+              File(albums[i - 1].albumArt).delete();
+            }
+            catch(e){}
             albums.removeAt(i - 1);
             notifyListeners();
           }
