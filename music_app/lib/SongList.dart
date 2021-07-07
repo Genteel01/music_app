@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/Settings.dart';
@@ -121,20 +123,20 @@ class _SongListItemState extends State<SongListItem> {
     return Container(height: 70, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.index) || (dataModel.selectedIndices.length == 0 && dataModel.settings.currentlyPlaying == widget.song),
+        selected: dataModel.selectedIndices.contains(widget.index) || (dataModel.selectedIndices.length == 0 && dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
         title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
         subtitle: Text(widget.song.artist, maxLines: 1, overflow: TextOverflow.ellipsis,),
-        trailing: dataModel.settings.currentlyPlaying == widget.song ? Row(mainAxisSize: MainAxisSize.min,
+        trailing: dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song ? Row(mainAxisSize: MainAxisSize.min,
           children: [
             Text(widget.song.durationString()),
             Icon(Icons.play_arrow)
           ],
         ) : Text(widget.song.durationString()),
-        leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(widget.song)!)),
+        leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song)))),
         onTap: () => {
           if(dataModel.selectedIndices.length == 0 && widget.playSongs)
             {
-              dataModel.setCurrentlyPlaying(widget.song, widget.futureSongs),
+              dataModel.setCurrentlyPlaying(widget.index, widget.futureSongs),
             }
           else if(widget.allowSelection)
             {

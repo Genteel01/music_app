@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/SongList.dart';
@@ -66,7 +68,10 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
           {
             if(value != null && value)
               {
-                dataModel.renamePlaylist(playlist, playlistNameController.text)
+                dataModel.renamePlaylist(playlist, playlistNameController.text),
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("Playlist Renamed"),
+                )),
               }
           });
           break;
@@ -78,6 +83,10 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
         case "Delete":
           dataModel.removePlaylist(playlist);
           Navigator.pop(context);
+          final snackBarMessage = SnackBar(
+            content: Text("Playlist Deleted"),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBarMessage);
           break;
         case "Add to Playlist":
           Navigator.push(context, MaterialPageRoute(
@@ -87,6 +96,9 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
             if(value != null && value)
             {
               dataModel.addToPlaylist(playlist);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Songs Added to Playlist"),
+              ));
             }
             dataModel.clearSelections();
           });
@@ -104,6 +116,9 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                 setState(() {
                   reordering = false;
                 }),
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("Playlist Reordered"),
+                )),
               }, child: Text("End")) :
               PopupMenuButton<String>(
                 onSelected: selectMenuButton,
@@ -134,7 +149,7 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                           title: Text(song.name),
                           subtitle: Text(song.artist),
                           trailing: Icon(Icons.menu),
-                          leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(song)!)),
+                          leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(song)))),
                         ),
                       );
                     },

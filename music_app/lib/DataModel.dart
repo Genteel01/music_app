@@ -3,18 +3,19 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
 
 
 import 'Album.dart';
 import 'Artist.dart';
+import 'BackgroundAudio.dart';
 import 'Playlist.dart';
 import 'Settings.dart';
 import 'Song.dart';
@@ -25,6 +26,9 @@ enum LoopType {
   loop,
   singleSong,
 }
+void _backgroundTaskEntrypoint() async {
+  await AudioServiceBackground.run(() => AudioPlayerTask());
+}
 class DataModel extends ChangeNotifier {
 
   bool loading = false;
@@ -33,11 +37,11 @@ class DataModel extends ChangeNotifier {
   List<Album> albums = [];
   List<Playlist> playlists = [];
 
-  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, startingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: [], directoryPaths: []);
+  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: [], directoryPaths: []);
 
   String appDocumentsDirectory = "";
 
-  final audioPlayer = AudioPlayer();
+  //final audioPlayer = AudioPlayer();
 
   List<int> selectedIndices = [];
   Type selectionType = Song;
@@ -45,6 +49,8 @@ class DataModel extends ChangeNotifier {
   List<Object> searchResults = [];
 
   String errorMessage = "";
+
+  bool isPlaying = false;
 
   Random randomNumbers = new Random();
   getSearchResults(String searchText)
@@ -205,7 +211,6 @@ class DataModel extends ChangeNotifier {
       settings.directoryPaths.add(newDirectoryPath);
     }
     await saveSettings();
-    await fetch();
     notifyListeners();
   }
 
@@ -214,7 +219,6 @@ class DataModel extends ChangeNotifier {
     settings.directoryPaths.remove(path);
     await saveSettings();
     await deleteSongList();
-    await fetch();
     notifyListeners();
   }
   void createPlaylist(String playlistName)
@@ -267,6 +271,7 @@ class DataModel extends ChangeNotifier {
     savePlaylists();
     clearSelections();
   }
+
   Future<void> fetch() async
   {
     print("BREAK________________________________________________________________");
@@ -274,7 +279,11 @@ class DataModel extends ChangeNotifier {
     //indicate that we are loading
     loading = true;
     notifyListeners(); //tell children to redraw, and they will see that the loading indicator is on
-
+    //if(!AudioService.connected)
+      //{
+        await AudioService.connect();
+      //}
+    await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
     appDocumentsDirectory = await getAppDocumentsDirectory();
     //clear any existing data we have gotten previously, to avoid duplicate data
     songs.clear();
@@ -322,10 +331,13 @@ class DataModel extends ChangeNotifier {
       var jsonFile = jsonDecode(settingsFile);
       settings = Settings.fromJson(jsonFile);
       settings.loadSongs(songs);
-      if(settings.currentlyPlaying != null)
+      if(settings.upNext.length > 0)
       {
-        await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
-        audioPlayer.pause();
+        //Set the starting index in the background audio service
+        await AudioService.customAction("setStartingIndex", settings.playingIndex);
+        //Set the playlist in the background audio service
+        await AudioService.customAction("setPlaylist", makeSongMap(settings.upNext));
+        AudioService.pause();
       }
     }
     catch(error){}
@@ -392,6 +404,12 @@ class DataModel extends ChangeNotifier {
       {
         if(albums[i - 1].songs.length == 0)
           {
+            //Delete the album art if it exists
+            try
+            {
+              File(albums[i - 1].albumArt).delete();
+            }
+            catch(e){}
             albums.removeAt(i - 1);
             notifyListeners();
           }
@@ -425,17 +443,22 @@ class DataModel extends ChangeNotifier {
       }
     }
     //Set up the listener to detect when songs finish
-    audioPlayer.playerStateStream.listen((state) {
-      if(state.processingState == ProcessingState.completed)
+    AudioService.playbackStateStream.listen((state) {
+      if(state.processingState == AudioProcessingState.stopped)
         {
-          if(settings.loop == LoopType.singleSong)
-          {
-            audioPlayer.seek(Duration());
-          }
-          else
-            {
-              playNextSong();
-            }
+          settings.upNext.clear();
+          settings.originalUpNext.clear();
+          settings.songPaths.clear();
+          settings.originalSongPaths.clear();
+          saveSettings();
+        }
+      isPlaying = state.playing;
+      notifyListeners();
+    });
+    AudioService.customEventStream.listen((event) {
+      if(event.runtimeType == int)
+        {
+          setUpNextIndex(event);
         }
     });
 
@@ -490,16 +513,16 @@ class DataModel extends ChangeNotifier {
     playlistList.sort((a, b) => a.name.compareTo(b.name));
   }
 
-
-  Uint8List? getAlbumArt(Song song)
+  String getAlbumArt(Song song)
   {
     try
     {
-      return albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.album == element.name).albumArt;
+      Album songAlbum = albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.album == element.name);
+      return appDocumentsDirectory + "/albumart/" + songAlbum.name.replaceAll("/", "_") + songAlbum.albumArtist.replaceAll("/", "_") + songAlbum.year.replaceAll("/", "_");
     }
     catch(error)
     {
-      return null;
+      return "";
     }
   }
   //Function to clear out all the local files I am creating for this app
@@ -557,16 +580,6 @@ class DataModel extends ChangeNotifier {
 
   void addToArtistsAndAlbums(Song newSong, Uint8List? albumArt, String? albumYear)
   {
-    /*if(artists.any((element) => element.name == newSong.artist))
-    {
-      artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
-    }
-    else
-    {
-      Artist newArtist = Artist(songs: [], name: newSong.artist);
-      newArtist.songs.add(newSong);
-      artists.add(newArtist);
-    }*/
     try
     {
       artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
@@ -591,107 +604,140 @@ class DataModel extends ChangeNotifier {
     }
     catch(error)
     {
-      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.album == "Unknown Album" ? "Various Artists" : newSong.albumArtist, albumArt: albumArt, year: albumYear == null ? "Unknown Year" : albumYear, lastModified: newSong.lastModified);
+      String albumArtLocation = "";
+      String albumArtist =  newSong.album == "Unknown Album" ? "Various Artists" : newSong.albumArtist;
+      String albumYearString = albumYear == null ? "Unknown Year" : albumYear;
+      if(albumArt != null)
+        {
+          File(appDocumentsDirectory + "/albumart/" + newSong.album.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + albumYearString.replaceAll("/", "_")).writeAsBytes(albumArt);
+          albumArtLocation = appDocumentsDirectory + "/albumart/" + newSong.album.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + albumYearString.replaceAll("/", "_");
+        }
+      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: albumArtist, albumArt: albumArtLocation, year: albumYearString, lastModified: newSong.lastModified);
       newAlbum.songs.add(newSong);
       albums.add(newAlbum);
     }
-    /*if(albums.any((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist))
-    {
-      albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist).songs.add(newSong);
-    }
-    else
-    {
-      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: newSong.albumArtist, albumArt: albumArt, year: albumYear == null ? "Unknown Year" : albumYear, lastModified: newSong.lastModified);
-      newAlbum.songs.add(newSong);
-      albums.add(newAlbum);
-    }*/
   }
   //Function that sets the currently playing song
-  void setCurrentlyPlaying(Song song, List<Song> futureSongs) async
+  void setCurrentlyPlaying(int index, List<Song> futureSongs) async
   {
-    settings.currentlyPlaying = song;
+    if(!AudioService.connected)
+    {
+      print("in the not connected");
+      await AudioService.connect();
+    }
+    //Clear the upNext list
     settings.upNext.clear();
+    //Add all the future songs to upNext
     settings.upNext.addAll(futureSongs);
+    //clear originalUpNext
     settings.originalUpNext.clear();
-    settings.originalUpNext.addAll(futureSongs);
+    //Add all the future songs to originalUpNext
+    settings.originalUpNext.addAll(settings.upNext);
+    //Set playing index
+    settings.playingIndex = index;
+    //If shuffle is on shuffle upNext
     if(settings.shuffle)
       {
+        Song firstSong = settings.upNext[index];
         settings.upNext.shuffle();
+        int shiftIndex = settings.upNext.indexOf(firstSong);
+        //Shift the upNext list so that the currently playing song is the first one in the list
+        for(int i = 0; i < shiftIndex; i++)
+        {
+          Song movedSong = settings.upNext.removeAt(0);
+          settings.upNext.add(movedSong);
+        }
+        settings.playingIndex = 0;
       }
+    //Set the song paths so that upNext can be saved and loaded again when you open the app
     settings.setSongPath();
-    settings.playingIndex = settings.upNext.indexOf(song);
-    settings.startingIndex = settings.playingIndex;
-    await audioPlayer.setFilePath(song.filePath);
-    audioPlayer.play();
+    //Set the starting index in the background audio service
+    await AudioService.customAction("setStartingIndex", settings.playingIndex);
+    //Set the playlist in the background audio service
+    await AudioService.customAction("setPlaylist", makeSongMap(settings.upNext));
+    //Play the music
+    AudioService.play();
     notifyListeners();
     saveSettings();
   }
-  //Plays the next song in the playlist
-  void playNextSong() async
+  //Makes the map that is used to send song data to the isolate
+  List<Map<String, String>> makeSongMap(List<Song> songList)
   {
-    settings.playingIndex++;
-    settings.playingIndex %= settings.upNext.length;
-    settings.currentlyPlaying = settings.upNext[settings.playingIndex];
-    await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
-    if((settings.playingIndex == settings.startingIndex && settings.loop == LoopType.none && settings.shuffle) || (settings.playingIndex == 0 && settings.loop == LoopType.none && !settings.shuffle) || !audioPlayer.playing)
-    {
-      audioPlayer.pause();
-    }
-    else
-    {
-      audioPlayer.play();
-    }
-    notifyListeners();
-    saveSettings();
+    List<Map<String, String>> songsWithMetadata = [];
+    songList.forEach((element) {
+      Map<String, String> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.album, "albumart" : getAlbumArt(element) };
+      songsWithMetadata.add(song);
+    });
+    return songsWithMetadata;
   }
-  //Plays the previous song in the playlist
-  void playPreviousSong() async
+  //Changes current song to the upnext song at the given index
+  void setUpNextIndex(int index)
   {
-    settings.playingIndex--;
-    settings.playingIndex %= settings.upNext.length;
-    settings.currentlyPlaying = settings.upNext[settings.playingIndex];
-    await audioPlayer.setFilePath(settings.currentlyPlaying!.filePath);
-    if(audioPlayer.playing)
+    if(settings.upNext.length != 0)
       {
-        audioPlayer.play();
+        settings.playingIndex = index;
+        notifyListeners();
+        saveSettings();
       }
-    else
-      {
-        audioPlayer.pause();
-      }
-    notifyListeners();
-    saveSettings();
   }
-  void playButton()
+  //Sets the up next index based on the passed in file path (used when resuming the application)
+  void setUpNextIndexFromSongPath() async
   {
-    audioPlayer.playing ? audioPlayer.pause() : audioPlayer.play();
+    if(settings.upNext.length != 0)
+    {
+      //Since we are resuming I think it is possible for the app to lose some data as memory is cleared while it is in the background, so check if you need to reconnect
+      if(!AudioService.connected)
+      {
+        print("in the not connected");
+        await AudioService.connect();
+      }
+      await AudioService.customAction("getCurrentIndex");
+    }
+  }
+  void playButton() async
+  {
+    //bool isPlaying = await AudioService.customAction("isPlaying");
+    isPlaying ? await AudioService.pause() : await AudioService.play();
     notifyListeners();
   }
   //Toggles shuffle behaviour when the shuffle button is pressed
-  void toggleShuffle()
+  void toggleShuffle() async
   {
     //Toggle the tracking variable
     settings.shuffle = !settings.shuffle;
-    //If you are now shuffling, shuffle the upNext playlist
-    if(settings.shuffle)
+    notifyListeners();
+    //If you are currently playing some songs deal with the playlist
+    if(settings.upNext.length != 0)
       {
-        settings.upNext.shuffle();
-        settings.setSongPath();
-      }
-    //If you are not shuffling set the upNext playlist to the original unshuffled one
-    else
-      {
-        List<Song> newUpNext = [];
-        newUpNext.addAll(settings.originalUpNext);
-        settings.upNext = newUpNext;
-        settings.setSongPath();
-      }
-    //Set the currently playing index to the index of the currently playing song
-    if(settings.currentlyPlaying != null)
-      {
-        settings.playingIndex = settings.upNext.indexOf(settings.currentlyPlaying!);
-        //Set the starting index to this position
-        settings.startingIndex = settings.playingIndex;
+        //If you are now shuffling, shuffle the upNext playlist
+        if(settings.shuffle)
+        {
+          Song firstSong = settings.upNext[settings.playingIndex];
+          settings.upNext.shuffle();
+          int shiftIndex = settings.upNext.indexOf(firstSong);
+          //Shift the upNext list so that the currently playing song is the first one in the list
+          for(int i = 0; i < shiftIndex; i++)
+          {
+            Song movedSong = settings.upNext.removeAt(0);
+            settings.upNext.add(movedSong);
+          }
+          settings.playingIndex = 0;
+          settings.setSongPath();
+        }
+        //If you are not shuffling set the upNext playlist to the original unshuffled one
+        else
+        {
+          Song currentlyPlayingSong = settings.upNext[settings.playingIndex];
+          List<Song> newUpNext = [];
+          newUpNext.addAll(settings.originalUpNext);
+          settings.upNext = newUpNext;
+          settings.setSongPath();
+          settings.playingIndex = settings.upNext.indexOf(currentlyPlayingSong);
+        }
+        //Set the starting index in the background audio service
+        await AudioService.customAction("setStartingIndex", settings.playingIndex);
+        //Set the playlist in the background audio service
+        await AudioService.customAction("updatePlaylist", makeSongMap(settings.upNext));
       }
     notifyListeners();
     saveSettings();
@@ -703,7 +749,7 @@ class DataModel extends ChangeNotifier {
     settings.shuffle = true;
     if(futureSongs.length > 0)
       {
-        setCurrentlyPlaying(futureSongs[randomNumbers.nextInt(futureSongs.length)], futureSongs);
+        setCurrentlyPlaying(randomNumbers.nextInt(futureSongs.length), futureSongs);
       }
     saveSettings();
   }
@@ -715,12 +761,15 @@ class DataModel extends ChangeNotifier {
     {
       case LoopType.singleSong:
         settings.loop = LoopType.none;
+        AudioService.customAction("setLoopMode", "none");
         break;
       case LoopType.loop:
         settings.loop = LoopType.singleSong;
+        AudioService.customAction("setLoopMode", "singleSong");
         break;
       case LoopType.none:
         settings.loop = LoopType.loop;
+        AudioService.customAction("setLoopMode", "loop");
         break;
     }
       notifyListeners();
@@ -729,19 +778,25 @@ class DataModel extends ChangeNotifier {
   void nextButton()
   {
     //audioPlayer.seekToNext();
-    playNextSong();
+    AudioService.skipToNext();
+    //playNextSong();
+    notifyListeners();
   }
 
-  void previousButton()
+  void previousButton() async
   {
-    if(audioPlayer.position.inSeconds > audioPlayer.duration!.inSeconds / 20)
+    //Duration position = await AudioService.customAction("getPosition");
+    //Duration duration = await AudioService.customAction("getDuration");
+    AudioService.skipToPrevious();
+    /*if(AudioService.playbackState.position.inSeconds > Duration(milliseconds: settings.currentlyPlaying!.duration).inSeconds / 20)
       {
-        audioPlayer.seek(Duration());
+        //await AudioService.seekTo(Duration());
       }
     else
       {
         playPreviousSong();
-      }
+      }*/
+    notifyListeners();
   }
 
   Future<void> saveSettings() async

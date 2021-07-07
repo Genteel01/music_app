@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:audio_service/audio_service.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
@@ -16,36 +19,65 @@ import 'Song.dart';
 import 'SongList.dart';
 //Saving/loading from json
 //TODO https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
-//TODO https://pub.dev/packages/path_provider/example
-
-//TODO https://pub.dev/packages/audio_service
-//TODO https://pub.dev/packages/just_audio
-
-//TODO feedback (adding to playlists, removing from playlists, creating playlists, deleting playlists, adding file path, removing file path)
-
-//TODO lock screen and notifications pulldown controls
-//TODO test blutooth buttons (may need to figure out a way to intercept the signals) (Seems like it's part of audio_service)
 void main() {
   runApp(MyApp());
+
 }
 
 class MyApp extends StatelessWidget {
+  final ColorScheme crabColorScheme = ColorScheme(
+      primary: Color.fromARGB(255, 221, 68, 68),
+      primaryVariant: Color.fromARGB(255, 221, 68, 68),
+      secondary: Color.fromARGB(255, 246, 160, 157),
+      secondaryVariant: Color.fromARGB(255, 246, 160, 157),
+      surface: Color.fromARGB(255, 246, 160, 157),
+      background: Colors.white,
+      error: Color.fromARGB(255, 255, 0, 0),
+      onPrimary: Colors.white,
+      onSecondary: Colors.black,
+      onSurface: Colors.black,
+      onBackground: Colors.black,
+      onError: Colors.black,
+      brightness: Brightness.light);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => DataModel(),
       child: MaterialApp(
+        theme: ThemeData(
+          //primarySwatch: Colors.red,
+          colorScheme: crabColorScheme,
+          primaryColor: crabColorScheme.primary,
+          //accentTextTheme: TextTheme(bodyText2: TextStyle(color: Colors.blue)),
+          //primaryColor: Color.fromARGB(255, 246, 160, 157),
+          snackBarTheme: SnackBarThemeData(
+              backgroundColor: crabColorScheme.secondary,
+              contentTextStyle: TextStyle(color: Colors.black),
+              actionTextColor: Colors.black,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(15)))
+          ),
+          floatingActionButtonTheme: FloatingActionButtonThemeData(foregroundColor: Colors.white, backgroundColor: crabColorScheme.primary),
+          //dialogBackgroundColor: Color.fromARGB(255, 255, 240, 201),
+          scaffoldBackgroundColor: Colors.grey[50],
+        ),
         title: "Music Player",
-        home: MyTabBar(),
+        home: AudioServiceWidget(child: MyTabBar()),
         //home: MyHomePage(title: 'List Tutorial'),
       ),
     );
   }
 }
 
-class MyTabBar extends StatelessWidget {
+class MyTabBar extends StatefulWidget {
   MyTabBar({Key? key}) : super(key: key);
+
+  @override
+  _MyTabBarState createState() => _MyTabBarState();
+}
+
+class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
   final List<Tab> myTabs = [
     Tab(child: Row(children: [Icon(Icons.library_music), Text(" Playlists")],mainAxisAlignment: MainAxisAlignment.center,),),
     Tab(child: Row(children: [Icon(Icons.music_note), Text(" Tracks")],mainAxisAlignment: MainAxisAlignment.center,),),
@@ -54,21 +86,63 @@ class MyTabBar extends StatelessWidget {
   ];
 
   final TextEditingController searchController = TextEditingController();
+  //Code to detect when you move between foreground and background
+  AppLifecycleState? _notification;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      _notification = state;
+    });
+    switch (_notification) {
+      case null:
+        print("notification is null");
+        break;
+      case AppLifecycleState.resumed:
+        print("app in resumed");
+        break;
+      case AppLifecycleState.inactive:
+        print("app in inactive");
+        break;
+      case AppLifecycleState.paused:
+        print("app in paused");
+        break;
+      case AppLifecycleState.detached:
+        print("app in detached");
+        break;
+    }
+  }
 
+  @override
+  initState() {
+    super.initState();
+    WidgetsBinding.instance!.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance!.removeObserver(this);
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(
         builder:buildWidget
     );
   }
+
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
+    if(_notification != null && _notification == AppLifecycleState.resumed)
+      {
+        dataModel.setUpNextIndexFromSongPath();
+        _notification = null;
+      }
     return DefaultTabController(
       length: myTabs.length,
       child: Scaffold(
         bottomNavigationBar: CurrentlyPlayingBar(),
         appBar: dataModel.selectedIndices.length > 0 ? AppBar(
             title: SelectingAppBarTitle(),
-            bottom: NonTappableTabBar(tabBar: TabBar(tabs: myTabs, isScrollable: true,),)
+            bottom: NonTappableTabBar(tabBar: TabBar(indicatorColor: Theme.of(context).primaryColor, tabs: myTabs, isScrollable: true,),)
         ) : AppBar(
           title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -112,7 +186,7 @@ class MyTabBar extends StatelessWidget {
                   //Menu
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
-                    child: InkWell(child: Icon(Icons.settings, color: dataModel.errorMessage == "" ? Colors.grey[50] : Colors.red), onTap: () => {
+                    child: IconButton(icon: Icon(Icons.settings), color: dataModel.errorMessage == "" ? Colors.grey[50] : Colors.red, onPressed: () => {
                       Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
                             return SettingsPage();
@@ -123,7 +197,7 @@ class MyTabBar extends StatelessWidget {
               ),
             ],
           ),
-          bottom: TabBar(
+          bottom: TabBar(indicatorColor: Theme.of(context).primaryColor,
             isScrollable: true,
             tabs: myTabs,
           ),
@@ -176,11 +250,17 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
         ElevatedButton(child: Text(dataModel.selectionType == Playlist || widget.playlist != null ? "Remove" : "Add To"), onPressed: () => {
           if(dataModel.selectionType == Playlist)
             {
-              dataModel.deletePlaylists()
+              dataModel.deletePlaylists(),
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Playlists Deleted"),
+              )),
             }
           else if(widget.playlist != null)
             {
-              dataModel.removeFromPlaylist(widget.playlist!)
+              dataModel.removeFromPlaylist(widget.playlist!),
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Songs Removed From Playlist"),
+              )),
             }
           else
             {
@@ -244,22 +324,21 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
     return InkWell(
       child: Container(height: 65, decoration: BoxDecoration(
           border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
-          child: dataModel.loading || dataModel.settings.currentlyPlaying == null ? Row(children: [
+          child: dataModel.loading || dataModel.settings.upNext.length == 0 ? Row(children: [
             SizedBox(width: 65, height: 65,child: Image.asset("assets/images/music_note.jpg")), Padding(padding: const EdgeInsets.only(left: 8.0), child: Text("No Song Playing"),),
           ],) : Row(mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Expanded(
                 child: Row(
                   children: [
-                    SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
+                    SizedBox(width: 65, height: 65,child: dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex])))),
                     Expanded(
                       child: Padding(padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 4.0),
                         child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          //Container(height: 40, child: Text(dataModel.settings.currentlyPlaying!.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 16),)),
-                          Expanded(child: AutoSizeText(dataModel.settings.currentlyPlaying!.name, maxLines: 1, style: TextStyle(fontSize: 16), minFontSize: 16, overflowReplacement:
-                          Marquee(style: TextStyle(fontSize: 16), crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.currentlyPlaying!.name, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
-                          Expanded(child: AutoSizeText(dataModel.settings.currentlyPlaying!.artist, maxLines: 1, overflowReplacement:
-                          Marquee(crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.currentlyPlaying!.artist, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
+                          Expanded(child: AutoSizeText(dataModel.settings.upNext[dataModel.settings.playingIndex].name, maxLines: 1, style: TextStyle(fontSize: 16), minFontSize: 16, overflowReplacement:
+                          Marquee(style: TextStyle(fontSize: 16), crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.upNext[dataModel.settings.playingIndex].name, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
+                          Expanded(child: AutoSizeText(dataModel.settings.upNext[dataModel.settings.playingIndex].artist, maxLines: 1, overflowReplacement:
+                          Marquee(crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.upNext[dataModel.settings.playingIndex].artist, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
                         ],),
                       ),
                     ),
@@ -269,7 +348,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
               Padding(padding: const EdgeInsets.only(right: 8.0), child: AudioControls(buttonSizes: 35,),),
           ],
           ),
-      ),onTap: dataModel.loading || dataModel.settings.currentlyPlaying == null ? () => {} : () => {
+      ),onTap: dataModel.loading || dataModel.settings.upNext.length == 0 ? () => {} : () => {
         showModalBottomSheet<void>(
           isScrollControlled: true,
           context: context,
@@ -314,7 +393,7 @@ class _AudioControlsState extends State<AudioControls> {
         },)),
         Padding(
           padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-          child: SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(dataModel.audioPlayer.playing ? Icons.pause : Icons.play_arrow, color: Colors.grey[50],), heroTag: null, onPressed: () async => {
+          child: SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(dataModel.isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.grey[50],), heroTag: null, onPressed: () async => {
             dataModel.playButton(),
           },)),
         ),
@@ -348,18 +427,18 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           //Album art image
-          SizedBox(height: 200, width: 200, child: dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!) == null ? Image.asset("assets/images/music_note.jpg") : Image.memory(dataModel.getAlbumArt(dataModel.settings.currentlyPlaying!)!)),
+          SizedBox(height: 200, width: 200, child: Hero(tag: "currently_playing_widget", child: dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(dataModel.settings.upNext[dataModel.settings.playingIndex]))))),
           //Song name
           Padding(
             padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
-            child: Text(dataModel.settings.currentlyPlaying!.name, overflow: TextOverflow.ellipsis,),
+            child: Text(dataModel.settings.upNext[dataModel.settings.playingIndex].name, overflow: TextOverflow.ellipsis,),
           ),
           //Song artist
-          Text(dataModel.settings.currentlyPlaying!.artist, overflow: TextOverflow.ellipsis,),
+          Text(dataModel.settings.upNext[dataModel.settings.playingIndex].artist, overflow: TextOverflow.ellipsis,),
           //Song album
           Padding(
             padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
-            child: Text(dataModel.settings.currentlyPlaying!.album, overflow: TextOverflow.ellipsis,),
+            child: Text(dataModel.settings.upNext[dataModel.settings.playingIndex].album, overflow: TextOverflow.ellipsis,),
           ),
           //shuffle, loop, and add to playlist row
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -376,7 +455,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                 dataModel.selectedIndices.forEach((element) { oldSelections.add(element);}),
                 dataModel.clearSelections(),
                 oldSelectionType = dataModel.selectionType,
-                dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.currentlyPlaying!), Song),
+                dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.upNext[dataModel.settings.playingIndex]), Song),
                   showModalBottomSheet<void>(
                     isScrollControlled: true,
                     context: context,
@@ -404,7 +483,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
           ),
           //Seekbar
           StreamBuilder<Duration> (
-            stream: dataModel.audioPlayer.positionStream,
+            stream: AudioService.positionStream,
               builder: (context, snapshot) {
               if(snapshot.hasData)
                 {
@@ -415,12 +494,12 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                       (position!.inSeconds % 60) < 10 ? Text(position.inMinutes.toString() + ":0" + (position.inSeconds % 60).toStringAsFixed(0)) :
                       Text(position.inMinutes.toString() + ":" + (position.inSeconds % 60).toStringAsFixed(0)),
                       //Position Slider
-                      Slider(value: position.inSeconds.toDouble(), max: dataModel.audioPlayer.duration!.inSeconds.toDouble(), onChanged: (value) => {
-                        dataModel.audioPlayer.seek(Duration(seconds: value.toInt()))
+                      Slider(value: position.inSeconds.toDouble(), max: Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds.toDouble(), onChanged: (value) => {
+                        AudioService.seekTo(Duration(seconds: value.toInt()))
                       },),
                       //Duration
-                      (dataModel.audioPlayer.duration!.inSeconds % 60) < 10 ? Text(dataModel.audioPlayer.duration!.inMinutes.toString() + ":0" + (dataModel.audioPlayer.duration!.inSeconds % 60).toStringAsFixed(0)) :
-                      Text(dataModel.audioPlayer.duration!.inMinutes.toString() + ":" + (dataModel.audioPlayer.duration!.inSeconds % 60).toStringAsFixed(0)),
+                      (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60) < 10 ? Text(Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inMinutes.toString() + ":0" + (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60).toStringAsFixed(0)) :
+                      Text(Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inMinutes.toString() + ":" + (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60).toStringAsFixed(0)),
                     ],
                   );
                 }
