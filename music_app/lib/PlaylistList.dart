@@ -90,7 +90,10 @@ class PlaylistListBuilder extends StatelessWidget {
                             {
                                 if(value != null && value)
                                   {
-                                    dataModel.createPlaylist(playlistNameController.text)
+                                    dataModel.createPlaylist(playlistNameController.text),
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                      content: Text("Playlist Created"),
+                                    )),
                                   }
                             }),
                           },
@@ -111,6 +114,9 @@ class PlaylistListBuilder extends StatelessWidget {
                         if(addingToPlaylist)
                           {
                             dataModel.addToPlaylist(playlist),
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text("Songs Added to Playlist"),
+                            )),
                             Navigator.pop(context)
                           }
                         else

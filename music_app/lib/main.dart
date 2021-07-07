@@ -19,12 +19,7 @@ import 'Song.dart';
 import 'SongList.dart';
 //Saving/loading from json
 //TODO https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
-//TODO https://pub.dev/packages/path_provider/example
 
-//TODO https://pub.dev/packages/audio_service
-//TODO https://pub.dev/packages/just_audio
-
-//TODO feedback (adding to playlists, removing from playlists, creating playlists, deleting playlists, adding file path, removing file path)
 //TODO Try different colour schemes
 void main() {
   runApp(MyApp());
@@ -226,11 +221,17 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
         ElevatedButton(child: Text(dataModel.selectionType == Playlist || widget.playlist != null ? "Remove" : "Add To"), onPressed: () => {
           if(dataModel.selectionType == Playlist)
             {
-              dataModel.deletePlaylists()
+              dataModel.deletePlaylists(),
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Playlists Deleted"),
+              )),
             }
           else if(widget.playlist != null)
             {
-              dataModel.removeFromPlaylist(widget.playlist!)
+              dataModel.removeFromPlaylist(widget.playlist!),
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Songs Removed From Playlist"),
+              )),
             }
           else
             {

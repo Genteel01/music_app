@@ -68,7 +68,10 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
           {
             if(value != null && value)
               {
-                dataModel.renamePlaylist(playlist, playlistNameController.text)
+                dataModel.renamePlaylist(playlist, playlistNameController.text),
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("Playlist Renamed"),
+                )),
               }
           });
           break;
@@ -80,6 +83,10 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
         case "Delete":
           dataModel.removePlaylist(playlist);
           Navigator.pop(context);
+          final snackBarMessage = SnackBar(
+            content: Text("Playlist Deleted"),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBarMessage);
           break;
         case "Add to Playlist":
           Navigator.push(context, MaterialPageRoute(
@@ -89,6 +96,9 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
             if(value != null && value)
             {
               dataModel.addToPlaylist(playlist);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Songs Added to Playlist"),
+              ));
             }
             dataModel.clearSelections();
           });
@@ -106,6 +116,9 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                 setState(() {
                   reordering = false;
                 }),
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("Playlist Reordered"),
+                )),
               }, child: Text("End")) :
               PopupMenuButton<String>(
                 onSelected: selectMenuButton,

@@ -114,13 +114,24 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-class DirectoriesMenuListItem extends StatelessWidget {
+class DirectoriesMenuListItem extends StatefulWidget {
   const DirectoriesMenuListItem({
     Key? key,
   }) : super(key: key);
 
   @override
+  _DirectoriesMenuListItemState createState() => _DirectoriesMenuListItemState();
+}
+
+class _DirectoriesMenuListItemState extends State<DirectoriesMenuListItem> {
+  @override
   Widget build(BuildContext context) {
+    return Consumer<DataModel>(
+        builder: buildWidget
+    );
+  }
+
+  Widget buildWidget(BuildContext context, DataModel dataModel, _) {
     return ListTile(
         title: Text("Music Directories"),
       subtitle: Text("Choose where to look for music on this device"),
@@ -145,7 +156,13 @@ class DirectoriesMenuListItem extends StatelessWidget {
               ),
             );
           },
-        )
+        ).then((value) {
+          final snackBarMessage = SnackBar(
+            content: Text("Song Locations Updated"),
+          );
+          ScaffoldMessenger.of(context).showSnackBar(snackBarMessage);
+          dataModel.fetch();
+        })
       },
     );
   }

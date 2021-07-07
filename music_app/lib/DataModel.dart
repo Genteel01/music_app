@@ -211,7 +211,6 @@ class DataModel extends ChangeNotifier {
       settings.directoryPaths.add(newDirectoryPath);
     }
     await saveSettings();
-    await fetch();
     notifyListeners();
   }
 
@@ -220,7 +219,6 @@ class DataModel extends ChangeNotifier {
     settings.directoryPaths.remove(path);
     await saveSettings();
     await deleteSongList();
-    await fetch();
     notifyListeners();
   }
   void createPlaylist(String playlistName)
