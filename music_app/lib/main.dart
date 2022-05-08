@@ -244,7 +244,7 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
                 context: context,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(30))),
+                        top: Radius.circular(0))),
                 builder: (BuildContext context) {
                   return Padding(
                     padding: MediaQuery
@@ -253,12 +253,9 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
                     child: Container(
                       height: 400,
                       //color: Colors.amber,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        child: Flex(direction: Axis.vertical, children: [
-                          PlaylistListBuilder(addingToPlaylist: true,)
-                        ]),
-                      ),
+                      child: Flex(direction: Axis.vertical, children: [
+                        PlaylistListBuilder(addingToPlaylist: true,)
+                      ]),
                     ),
                   );
                 },
@@ -335,7 +332,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
                   .of(context)
                   .viewInsets,
               child: Container(
-                height: 430,
+                height: 450,
                 //color: Colors.amber,
                 child: PlayingSongDetails(),
               ),
@@ -435,7 +432,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                     isScrollControlled: true,
                     context: context,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(30))),
+                        top: Radius.circular(0))),
                     builder: (BuildContext context) {
                       return Padding(
                         padding: MediaQuery
@@ -444,10 +441,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                         child: Container(
                           height: 400,
                           //color: Colors.amber,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 16.0),
-                            child: Flex(direction: Axis.vertical, children: [PlaylistListBuilder(addingToPlaylist: true,)]),
-                          ),
+                          child: Flex(direction: Axis.vertical, children: [PlaylistListBuilder(addingToPlaylist: true,)]),
                         ),
                       );
                     },
