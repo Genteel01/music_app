@@ -85,7 +85,6 @@ class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
     Tab(child: Row(children: [Icon(Icons.album), Text(" Albums")],mainAxisAlignment: MainAxisAlignment.center,),),
   ];
 
-  final TextEditingController searchController = TextEditingController();
   //Code to detect when you move between foreground and background
   AppLifecycleState? _notification;
   @override
@@ -152,34 +151,10 @@ class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
               Row(
                 children: [
                   ElevatedButton.icon(onPressed: () => {
-                    showModalBottomSheet<void>(
-                      isScrollControlled: true,
-                      context: context,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(30))),
-                      builder: (BuildContext context) {
-                        return Padding(
-                          padding: MediaQuery
-                              .of(context)
-                              .viewInsets,
-                          child: Container(
-                            height: 500,
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: TextField(controller: searchController, decoration: InputDecoration(hintText: "Search"), onChanged: (s) => {
-                                    dataModel.getSearchResults(s)
-                                  },)
-                                ),
-                                SearchResults(),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ).then((value) => {
-                      searchController.text = "",
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (context) {
+                          return SearchResults();
+                        })).then((value) => {
                       dataModel.searchResults.clear()
                     })
                   }, icon: Icon(Icons.search), label: Text("Search")),
