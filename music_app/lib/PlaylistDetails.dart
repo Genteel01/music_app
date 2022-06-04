@@ -144,7 +144,6 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                     itemBuilder: (_, index) {
                       var song = playlist.songs[index];
 
-                      //return SongListItem(key: Key(index.toString()), song: song, allowSelection: false, futureSongs: playlist.songs, index: index, playSongs: false,);
                       return Container(key: Key(index.toString()), height: 70, decoration: BoxDecoration(
                           border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                         child: ListTile(

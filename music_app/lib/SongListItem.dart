@@ -4,18 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
-import 'Playlist.dart';
 import 'Song.dart';
 
 class SongListItem extends StatefulWidget {
-  const SongListItem({Key? key, required this.song, required this.allowSelection, required this.futureSongs, this.playlist, required this.index, required this.playSongs}) : super(key: key);
+  const SongListItem({Key? key, required this.song, required this.allowSelection, required this.futureSongs, required this.index, required this.playSongs}) : super(key: key);
   final Song song;
   //Selection will be disabled if the item is being shown in search results
   final bool allowSelection;
   //Which songs will be added to up next when you play a song
   final List<Song> futureSongs;
-  //Need this for the selection graphic
-  final Playlist? playlist;
   //Need this because there might be several copies of the same song in a playlist
   final int index;
   //When adding to a playlist from the playlist details screen we don't want to be able to play songs
