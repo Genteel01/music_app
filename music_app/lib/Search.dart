@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 
@@ -21,6 +22,12 @@ class SearchResults extends StatelessWidget {
   }
   final TextEditingController searchController = TextEditingController();
   Widget buildWidget(BuildContext context, DataModel dataModel, _) {
+    dataModel.searchResults.forEach((element) {
+      
+    });
+    int artistCount = dataModel.searchResults.lastIndexWhere((element) => element.runtimeType == Artist) + 1;
+    int albumCount = dataModel.searchResults.lastIndexWhere((element) => element.runtimeType == Album) - artistCount + 1;
+    int songCount = dataModel.searchResults.lastIndexWhere((element) => element.runtimeType == Song) - albumCount - artistCount + 1;
     return Scaffold(
           appBar: AppBar(title: Text("Search"), actions: [
             SizedBox(width: 200,
@@ -52,8 +59,8 @@ class SearchResults extends StatelessWidget {
                         return Column(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(top: 2.0, bottom: 2),
-                              child: Text("Songs"),
+                              padding: const EdgeInsets.only(top: 16, bottom: 16),
+                              child: Text("Songs ($songCount)", style: TextStyle(fontSize: Dimens.searchHeaderFontSize, color: Colours.searchHeaderTextColour),),
                             ),
                             SongListItem(song: song, allowSelection: false, futureSongs: dataModel.buildUpNext(), index: index - counter, playSongs: true,),
                           ],
@@ -66,8 +73,8 @@ class SearchResults extends StatelessWidget {
                         return Column(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(top: 2.0, bottom: 2),
-                              child: Text("Albums"),
+                              padding: const EdgeInsets.only(top: 16, bottom: 16),
+                              child: Text("Albums ($albumCount)", style: TextStyle(fontSize: Dimens.searchHeaderFontSize, color: Colours.searchHeaderTextColour),),
                             ),
                             AlbumListItem(album: album, allowSelection: false, goToDetails: true,),
                           ],
@@ -77,11 +84,12 @@ class SearchResults extends StatelessWidget {
                       else
                       {
                         Artist artist = item as Artist;
+                        //Count how many artists there are
                         return Column(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(top: 2.0, bottom: 2),
-                              child: Text("Artists"),
+                              padding: const EdgeInsets.only(top: 16, bottom: 16),
+                              child: Text("Artists ($artistCount)", style: TextStyle(fontSize: Dimens.searchHeaderFontSize, color: Colours.searchHeaderTextColour),),
                             ),
                             ArtistListItem(artist: artist, allowSelection: false, goToDetails: true,),
                           ],
