@@ -16,17 +16,11 @@ import 'package:path_provider/path_provider.dart';
 import 'Album.dart';
 import 'Artist.dart';
 import 'BackgroundAudio.dart';
+import 'Looping.dart';
 import 'Playlist.dart';
 import 'Settings.dart';
 import 'Song.dart';
 import 'Sorting.dart';
-
-
-enum LoopType {
-  none,
-  loop,
-  singleSong,
-}
 
 void _backgroundTaskEntrypoint() async {
   await AudioServiceBackground.run(() => AudioPlayerTask());
@@ -293,7 +287,6 @@ class DataModel extends ChangeNotifier {
     albums.clear();
     playlists.clear();
     errorMessage = "";
-
 
     var retriever = new MetadataRetriever();
     //If the album art directory doesn't exist create it

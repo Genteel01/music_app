@@ -1,9 +1,8 @@
-
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
+import 'Looping.dart';
 import 'Song.dart';
 import 'Sorting.dart';
 
@@ -24,7 +23,7 @@ class Settings{
   Map<String, dynamic> toJson() =>
       {
         'shuffle': shuffle,
-        'loop' : EnumToString.convertToString(loop),
+        'loop' : loopingToString(loop),
         'sort' : sortingToString(sort),
         'playingIndex': playingIndex,
         'songPaths': songPaths,
@@ -35,7 +34,7 @@ class Settings{
   Settings.fromJson(Map<String, dynamic> json)
       :
         shuffle = json['shuffle'],
-        loop = EnumToString.fromString(LoopType.values, json['loop'])!,
+        loop = stringToLooping(json['loop']),
         sort = stringToSorting(json['sort']),
         playingIndex = json['playingIndex'],
         songPaths = json['songPaths'].cast<String>(),

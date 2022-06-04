@@ -13,12 +13,13 @@ import 'Album.dart';
 import 'AlbumList.dart';
 import 'Artist.dart';
 import 'DataModel.dart';
+import 'Looping.dart';
 import 'Playlist.dart';
 import 'PlaylistList.dart';
 import 'Song.dart';
 import 'SongList.dart';
 //Saving/loading from json
-//TODO https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
+//https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
 void main() {
   runApp(MyApp());
 
