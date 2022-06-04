@@ -48,6 +48,7 @@ class MyApp extends StatelessWidget {
           floatingActionButtonTheme: FloatingActionButtonThemeData(foregroundColor: Colors.white, backgroundColor: crabColorScheme.primary),
           //dialogBackgroundColor: Color.fromARGB(255, 255, 240, 201),
           scaffoldBackgroundColor: Colors.grey[50],
+          textSelectionTheme: TextSelectionThemeData(selectionHandleColor: crabColorScheme.secondary, selectionColor: crabColorScheme.secondary, cursorColor: crabColorScheme.secondary),
         ),
         title: "Music Player",
         home: AudioServiceWidget(child: MyTabBar()),

@@ -24,7 +24,7 @@ class SearchResults extends StatelessWidget {
     return Scaffold(
           appBar: AppBar(title: Text("Search"), actions: [
             SizedBox(width: 200,
-              child: TextField(cursorColor: Colors.white,controller: searchController, decoration: InputDecoration(hintText: "Search"), onChanged: (s) => {
+              child: TextField(controller: searchController, decoration: InputDecoration(hintText: "Search",), onChanged: (s) => {
               dataModel.getSearchResults(s)
           },),
             )
