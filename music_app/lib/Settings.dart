@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
 import 'Song.dart';
+import 'Sorting.dart';
 
 
 class Settings{
@@ -12,17 +13,19 @@ class Settings{
   List<Song> originalUpNext;
   bool shuffle;
   LoopType loop;
+  SortType sort;
   int playingIndex;
   List<String> songPaths;
   List<String> originalSongPaths;
   List<String> directoryPaths;
 
-  Settings({required this.upNext, required this.shuffle, required this.loop, required this.playingIndex, required this.songPaths, required this.originalUpNext, required this.originalSongPaths, required this.directoryPaths});
+  Settings({required this.upNext, required this.shuffle, required this.loop, required this.sort, required this.playingIndex, required this.songPaths, required this.originalUpNext, required this.originalSongPaths, required this.directoryPaths});
 
   Map<String, dynamic> toJson() =>
       {
         'shuffle': shuffle,
         'loop' : EnumToString.convertToString(loop),
+        'sort' : sortingToString(sort),
         'playingIndex': playingIndex,
         'songPaths': songPaths,
         'originalSongPaths': originalSongPaths,
@@ -33,6 +36,7 @@ class Settings{
       :
         shuffle = json['shuffle'],
         loop = EnumToString.fromString(LoopType.values, json['loop'])!,
+        sort = stringToSorting(json['sort']),
         playingIndex = json['playingIndex'],
         songPaths = json['songPaths'].cast<String>(),
         originalSongPaths = json['originalSongPaths'].cast<String>(),

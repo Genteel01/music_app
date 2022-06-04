@@ -19,6 +19,7 @@ import 'BackgroundAudio.dart';
 import 'Playlist.dart';
 import 'Settings.dart';
 import 'Song.dart';
+import 'Sorting.dart';
 
 
 enum LoopType {
@@ -26,6 +27,7 @@ enum LoopType {
   loop,
   singleSong,
 }
+
 void _backgroundTaskEntrypoint() async {
   await AudioServiceBackground.run(() => AudioPlayerTask());
 }
@@ -37,7 +39,7 @@ class DataModel extends ChangeNotifier {
   List<Album> albums = [];
   List<Playlist> playlists = [];
 
-  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, playingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: [], directoryPaths: []);
+  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, sort: SortType.AZ, playingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: [], directoryPaths: []);
 
   String appDocumentsDirectory = "";
 
@@ -389,7 +391,7 @@ class DataModel extends ChangeNotifier {
     }
     catch (error){}
     //Sort the song and album lists
-    sortByTrackName(songs);
+    sortSongs(settings.sort);
     //sortByDuration(songs);
     sortByAlbumName(albums);
     sortByArtistName(artists);
@@ -477,7 +479,28 @@ class DataModel extends ChangeNotifier {
     saveSettings();
     print("End: " + DateTime.now().toString());
   }
-  
+  //Sorts songs depending on the sort setting
+  void sortSongs(SortType newSort)
+  {
+    settings.sort = newSort;
+    switch(settings.sort)
+    {
+      case SortType.AZ:
+        sortByTrackName(songs, false);
+        break;
+      case SortType.ZA:
+        sortByTrackName(songs, true);
+        break;
+      case SortType.ShortestFirst:
+        sortByDuration(songs, false);
+        break;
+      case SortType.LongestFirst:
+        sortByDuration(songs, true);
+        break;
+    }
+    saveSettings();
+    notifyListeners();
+  }
   //Sorts a list of songs by the disc and track numbers
   void sortByNumber(List<Song> songList)
   {
@@ -489,9 +512,17 @@ class DataModel extends ChangeNotifier {
     songList.sort((a, b) => a.album.compareTo(b.album) == 0 ? (a.discNumber.compareTo(b.discNumber) == 0 ? (a.trackNumber.compareTo(b.trackNumber)) : a.discNumber.compareTo(b.discNumber)): a.album.compareTo(b.album));
   }
   //Sorts a list of songs by the track name
-  void sortByTrackName(List<Song> songList)
+  void sortByTrackName(List<Song> songList, bool descending)
   {
-    songList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
+    if(descending)
+      {
+        songList.sort((a, b) => b.name.toUpperCase().compareTo(a.name.toUpperCase()));
+      }
+    else
+      {
+        songList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
+      }
+
   }
   //Sorts a list of albums by name
   void sortByAlbumName (List<Album> albumList)
@@ -504,9 +535,16 @@ class DataModel extends ChangeNotifier {
     artistList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
   }
   //Sorts a list of songs for duration
-  void sortByDuration(List<Song> songList)
+  void sortByDuration(List<Song> songList, bool descending)
   {
-    songList.sort((a, b) => a.duration.compareTo(b.duration));
+    if(descending)
+    {
+        songList.sort((a, b) => b.duration.compareTo(a.duration));
+    }
+    else
+    {
+      songList.sort((a, b) => a.duration.compareTo(b.duration));
+    }
   }
   void sortPlaylists(List<Playlist> playlistList)
   {

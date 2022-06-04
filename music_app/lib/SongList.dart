@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/Settings.dart';
+import 'package:music_app/SortDropdown.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
@@ -46,7 +47,12 @@ class _SongListState extends State<SongList> {
                             }
                           if(widget.playSongs)
                             {
-                              return ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,);
+                              return Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,),
+                                  SortDropdown(),
+                                ],
+                              );
                             }
                           else
                             {
