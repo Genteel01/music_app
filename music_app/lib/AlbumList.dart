@@ -1,5 +1,6 @@
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'AlbumListItem.dart';
@@ -43,8 +44,8 @@ class _AlbumListState extends State<AlbumList> {
                             return DirectoriesMenuListItem();
                           }
                           return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.albums.length == 1 ? dataModel.albums.length.toString() + " Album" : dataModel.albums.length.toString() + " Albums", style: TextStyle(fontSize: 16,),)),
+                            padding: const EdgeInsets.all(Dimens.xSmall),
+                            child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.albums.length == 1 ? "${dataModel.albums.length} Album" : "${dataModel.albums.length} Albums", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
                           );
                         }
                         var album = dataModel.albums[index - 1];
@@ -55,7 +56,7 @@ class _AlbumListState extends State<AlbumList> {
                         return AlbumListItem(album: album, allowSelection: true, goToDetails: widget.goToDetails,);
                       },
                       itemCount: dataModel.albums.length + 1,
-                    itemExtent: 70,
+                    itemExtent: Dimens.listItemSize,
                   ),
                 ),
               ),

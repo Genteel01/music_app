@@ -1,6 +1,7 @@
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/SortDropdown.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
@@ -56,9 +57,14 @@ class _SongListState extends State<SongList> {
                             }
                           else
                             {
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.songs.length == 1 ? dataModel.songs.length.toString() + " Song" : dataModel.songs.length.toString() + " Songs", style: TextStyle(fontSize: 16,),)),
+                              return Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(Dimens.xSmall),
+                                    child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.songs.length == 1 ? "${dataModel.songs.length} Song" : "${dataModel.songs.length} Songs", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
+                                  ),
+                                  SortDropdown(),
+                                ],
                               );
                             }
                         }
@@ -66,7 +72,7 @@ class _SongListState extends State<SongList> {
                         return SongListItem(song: song, allowSelection: true, futureSongs: dataModel.songs, index: index - 1, playSongs: widget.playSongs,);
                       },
                       itemCount: dataModel.songs.length + 1,
-                      itemExtent: 70,
+                      itemExtent: Dimens.listItemSize,
                   ),
                 ),
               ),

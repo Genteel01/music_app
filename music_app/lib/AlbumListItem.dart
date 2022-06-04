@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'Album.dart';
@@ -26,14 +27,14 @@ class _AlbumListItemState extends State<AlbumListItem> {
     );
   }
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
-    return Container(height: 70, decoration: BoxDecoration(
+    return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
         selected: dataModel.selectedIndices.contains(dataModel.albums.indexOf(widget.album)),
         title: Text(widget.album.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
-        trailing: Text(widget.album.songs.length == 1 ? widget.album.songs.length.toString() + " track" : widget.album.songs.length.toString() + " tracks"),
+        trailing: Text(widget.album.songs.length == 1 ? "${widget.album.songs.length} track" : "${widget.album.songs.length} tracks"),
         subtitle: Text(widget.album.albumArtist, maxLines: 1, overflow: TextOverflow.ellipsis,),
-        leading: SizedBox(width: 50, height: 50, child: widget.album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(widget.album.albumArt))),
+        leading: widget.album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(widget.album.albumArt)),
         onTap: () => {
           if(dataModel.selectedIndices.length == 0 && widget.goToDetails)
             {

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'Artist.dart';
@@ -26,7 +27,7 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
     );
   }
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
-    return Container(height: 70, decoration: BoxDecoration(
+    return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
         selected: dataModel.selectedIndices.contains(widget.artist.songs.indexOf(widget.song)) || (dataModel.selectedIndices.length == 0 && dataModel.settings.upNext.length == widget.artist.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
@@ -38,7 +39,7 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
             Icon(Icons.play_arrow)
           ],
         ) : Text(widget.song.durationString()),
-        leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song)))),
+        leading: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song))),
         onTap: () => {
           if(dataModel.selectedIndices.length == 0)
             {

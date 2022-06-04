@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
+import 'package:music_app/ListHeader.dart';
 import 'package:provider/provider.dart';
 
 import 'Album.dart';
 import 'AlbumArtView.dart';
 import 'AlbumDetailsListItem.dart';
-import 'CurrentlyPlaying.dart';
+import 'CurrentlyPlayingBar.dart';
 import 'DataModel.dart';
 import 'AppBarTitle.dart';
 import 'ShuffleButton.dart';
@@ -64,10 +65,7 @@ class AlbumDetails extends StatelessWidget {
                               return Column(
                                 children: [
                                   //Disc number
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 2.0, bottom: 2),
-                                    child: Text("Disc " + song.discNumber.toString()),
-                                  ),
+                                  ListHeader(text: "Disc ${song.discNumber}"),
                                   //Song list tile
                                   AlbumDetailsListItem(song: song, album: album, index: index - 1)
                                 ],

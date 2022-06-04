@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
@@ -30,7 +31,7 @@ class _SongListItemState extends State<SongListItem> {
     );
   }
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
-    return Container(height: 70, decoration: BoxDecoration(
+    return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
       child: ListTile(
         selected: dataModel.selectedIndices.contains(widget.index) || (dataModel.selectedIndices.length == 0 && dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
@@ -42,7 +43,7 @@ class _SongListItemState extends State<SongListItem> {
             Icon(Icons.play_arrow)
           ],
         ) : Text(widget.song.durationString()),
-        leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song)))),
+        leading: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song))),
         onTap: () => {
           if(dataModel.selectedIndices.length == 0 && widget.playSongs)
             {

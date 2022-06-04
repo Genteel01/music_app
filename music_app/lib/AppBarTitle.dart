@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'Album.dart';
@@ -33,7 +34,7 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
               dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist) ? dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist, widget.playlist)
             },),
             Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+              padding: const EdgeInsets.only(left: Dimens.small, right: Dimens.small),
               child: Text(dataModel.selectedIndices.length.toString() + " Selected"),
             ),
           ],
@@ -61,14 +62,14 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
                 context: context,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(0))),
+                        top: Radius.circular(Dimens.playlistModalBorderRadius))),
                 builder: (BuildContext context) {
                   return Padding(
                     padding: MediaQuery
                         .of(context)
                         .viewInsets,
                     child: Container(
-                      height: 400,
+                      height: Dimens.playlistModalHeight,
                       //color: Colors.amber,
                       child: Flex(direction: Axis.vertical, children: [
                         PlaylistListBuilder(addingToPlaylist: true,)

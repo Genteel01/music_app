@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
@@ -31,16 +32,16 @@ class _DirectoriesMenuListItemState extends State<DirectoriesMenuListItem> {
           context: context,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(30))),
+                  top: Radius.circular(Dimens.directoryPickerModalBorderRadius))),
           builder: (BuildContext context) {
             return Padding(
               padding: MediaQuery
                   .of(context)
                   .viewInsets,
               child: Container(
-                height: 400,
+                height: Dimens.directoryPickerModalHeight,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
+                  padding: const EdgeInsets.only(top: Dimens.small),
                   child: PathsList(),
                 ),
               ),

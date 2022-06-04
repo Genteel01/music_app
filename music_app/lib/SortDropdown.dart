@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
@@ -18,12 +19,13 @@ class _SortDropdownState extends State<SortDropdown> {
       currentSort = Provider.of<DataModel>(context, listen:false).settings.sort;
     });
     return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
+      padding: const EdgeInsets.only(right: Dimens.xSmall),
       child: DropdownButton<String>(
         value: sortingToString(currentSort),
         icon: const Icon(Icons.arrow_downward),
         iconSize: 24,
         elevation: 16,
+        iconEnabledColor: Colours.secondaryColour,
         underline: Container(
           height: 2,
           color: Theme.of(context).colorScheme.secondary,

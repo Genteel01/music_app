@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'AppBarTitle.dart';
 import 'Artist.dart';
 import 'ArtistDetailsListItem.dart';
-import 'CurrentlyPlaying.dart';
+import 'CurrentlyPlayingBar.dart';
 import 'DataModel.dart';
+import 'ListHeader.dart';
 import 'ShuffleButton.dart';
 
 class ArtistDetails extends StatelessWidget {
@@ -51,10 +52,7 @@ class ArtistDetails extends StatelessWidget {
                           {
                             return Column(
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 2.0, bottom: 2),
-                                  child: Text(song.album),
-                                ),
+                                ListHeader(text: song.album),
                                 ArtistDetailsListItem(song: song, artist: artist, index: index - 1),
                               ],
                             );

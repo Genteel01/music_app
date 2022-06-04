@@ -1,6 +1,7 @@
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/PlaylistDetails.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
@@ -59,20 +60,20 @@ class PlaylistListBuilder extends StatelessWidget {
                 if(index == 0)
                   {
                     final playlistNameController = TextEditingController();
-                    return Container(height: 70, decoration: BoxDecoration(
+                    return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
                         border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                       child: Center(
                         child: ListTile(
                           leading: Icon(Icons.add_box),
                           title: Text("Create new Playlist"),
-                          subtitle: Text(dataModel.playlists.length == 1 ? dataModel.playlists.length.toString() + " Playlist" : dataModel.playlists.length.toString() + " Playlists"),
+                          subtitle: Text(dataModel.playlists.length == 1 ? "${dataModel.playlists.length} Playlist" : "${dataModel.playlists.length} Playlists"),
                           onTap: () => {
                             showDialog<bool>(
                                 context: context,
                                 builder: (BuildContext context) =>
                                     AlertDialog(
                                       title: const Text("New Playlist"),
-                                      content: TextField(controller: playlistNameController, textCapitalization: TextCapitalization.sentences, decoration: InputDecoration(hintText: "Playlist " + (dataModel.playlists.length + 1).toString()),),
+                                      content: TextField(controller: playlistNameController, textCapitalization: TextCapitalization.sentences, decoration: InputDecoration(hintText: "Playlist ${(dataModel.playlists.length + 1)}"),),
                                       actions: <Widget>[
                                         TextButton(
                                           onPressed: () =>
@@ -103,13 +104,13 @@ class PlaylistListBuilder extends StatelessWidget {
                   }
                 var playlist = dataModel.playlists[index - 1];
 
-                return Container(height: 70, decoration: BoxDecoration(
+                return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
                     border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                   child: Center(
                     child: ListTile(
                       selected: !addingToPlaylist && dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)),
                       title: Text(playlist.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
-                      trailing: Text(playlist.songs.length == 1 ? playlist.songs.length.toString() + " Track" : playlist.songs.length.toString() + " Tracks"),
+                      trailing: Text(playlist.songs.length == 1 ? "${playlist.songs.length} Track" : "${playlist.songs.length} Tracks"),
                       onTap: () => {
                         if(addingToPlaylist)
                           {
@@ -147,7 +148,7 @@ class PlaylistListBuilder extends StatelessWidget {
                 );
               },
               itemCount: dataModel.playlists.length + 1,
-            itemExtent: 70,
+            itemExtent: Dimens.listItemSize,
           ),
         ),
       ),

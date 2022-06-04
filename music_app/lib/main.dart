@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
 import 'TabBar.dart';
+import 'Values.dart';
 //Saving/loading from json
 //https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
 void main() {
@@ -13,13 +14,13 @@ void main() {
 
 class MyApp extends StatelessWidget {
   final ColorScheme crabColorScheme = ColorScheme(
-      primary: Color.fromARGB(255, 221, 68, 68),
-      primaryVariant: Color.fromARGB(255, 221, 68, 68),
-      secondary: Color.fromARGB(255, 246, 160, 157),
-      secondaryVariant: Color.fromARGB(255, 246, 160, 157),
-      surface: Color.fromARGB(255, 246, 160, 157),
-      background: Colors.white,
-      error: Color.fromARGB(255, 255, 0, 0),
+      primary: Colours.primaryColour,
+      primaryVariant: Colours.primaryColour,
+      secondary: Colours.secondaryColour,
+      secondaryVariant: Colours.secondaryColour,
+      surface: Colours.secondaryColour,
+      background: Colours.backgroundColour,
+      error: Colors.red,
       onPrimary: Colors.white,
       onSecondary: Colors.black,
       onSurface: Colors.black,
@@ -38,7 +39,6 @@ class MyApp extends StatelessWidget {
           colorScheme: crabColorScheme,
           primaryColor: crabColorScheme.primary,
           //accentTextTheme: TextTheme(bodyText2: TextStyle(color: Colors.blue)),
-          //primaryColor: Color.fromARGB(255, 246, 160, 157),
           snackBarTheme: SnackBarThemeData(
               backgroundColor: crabColorScheme.secondary,
               contentTextStyle: TextStyle(color: Colors.black),
@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
           ),
           floatingActionButtonTheme: FloatingActionButtonThemeData(foregroundColor: Colors.white, backgroundColor: crabColorScheme.primary),
           //dialogBackgroundColor: Color.fromARGB(255, 255, 240, 201),
-          scaffoldBackgroundColor: Colors.grey[50],
+          scaffoldBackgroundColor: Colours.backgroundColour,
           textSelectionTheme: TextSelectionThemeData(selectionHandleColor: crabColorScheme.secondary, selectionColor: crabColorScheme.secondary, cursorColor: crabColorScheme.secondary),
         ),
         title: "Music Player",

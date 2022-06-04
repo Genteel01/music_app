@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
@@ -31,7 +32,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
                     child: ListView(
                       children: [
-                        if(dataModel.errorMessage != "") Padding(padding: const EdgeInsets.all(8.0), child: Text(dataModel.errorMessage),),
+                        if(dataModel.errorMessage != "") Padding(padding: const EdgeInsets.all(Dimens.xSmall), child: Text(dataModel.errorMessage),),
                         DirectoriesMenuListItem(),
                       ],
                     )

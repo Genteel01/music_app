@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'AlbumList.dart';
 import 'AppBarTitle.dart';
 import 'ArtistList.dart';
-import 'CurrentlyPlaying.dart';
+import 'CurrentlyPlayingBar.dart';
 import 'DataModel.dart';
 import 'PlaylistList.dart';
 import 'Search.dart';
@@ -84,8 +85,8 @@ class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
                   }, icon: Icon(Icons.search), label: Text("Search")),
                   //Menu
                   Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: IconButton(icon: Icon(Icons.settings), color: dataModel.errorMessage == "" ? Colors.grey[50] : Colors.red, onPressed: () => {
+                    padding: const EdgeInsets.only(left: Dimens.xSmall),
+                    child: IconButton(icon: Icon(Icons.settings), color: dataModel.errorMessage == "" ? Colours.buttonIconColour : Colors.red, onPressed: () => {
                       Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
                             return SettingsPage();
@@ -101,7 +102,7 @@ class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
             tabs: myTabs,
           ),
         ),
-        body: dataModel.songs.length == 0 && dataModel.errorMessage != "" ? Padding(padding: const EdgeInsets.all(8.0), child: Text(dataModel.errorMessage),) : TabBarView(
+        body: dataModel.songs.length == 0 && dataModel.errorMessage != "" ? Padding(padding: const EdgeInsets.all(Dimens.xSmall), child: Text(dataModel.errorMessage),) : TabBarView(
           physics: dataModel.selectedIndices.length > 0 ? NeverScrollableScrollPhysics() : null,
           children: [
             PlaylistList(/*key: PageStorageKey("playlist_key"),*/),

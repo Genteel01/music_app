@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 
 import 'AddToPlaylistScreen.dart';
 import 'AppBarTitle.dart';
-import 'CurrentlyPlaying.dart';
+import 'CurrentlyPlayingBar.dart';
 import 'DataModel.dart';
 import 'Playlist.dart';
 import 'ShuffleButton.dart';
@@ -144,13 +145,13 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                     itemBuilder: (_, index) {
                       var song = playlist.songs[index];
 
-                      return Container(key: Key(index.toString()), height: 70, decoration: BoxDecoration(
+                      return Container(key: Key(index.toString()), height: Dimens.listItemSize, decoration: BoxDecoration(
                           border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
                         child: ListTile(
                           title: Text(song.name),
                           subtitle: Text(song.artist),
                           trailing: Icon(Icons.menu),
-                          leading: SizedBox(width: 50, height: 50,child: dataModel.getAlbumArt(song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(song)))),
+                          leading: dataModel.getAlbumArt(song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(song))),
                         ),
                       );
                     },
@@ -176,7 +177,7 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                           return SongListItem(song: song, allowSelection: true, futureSongs: playlist.songs, index: index - 1, playSongs: true,);
                         },
                         itemCount: playlist.songs.length + 1,
-                      itemExtent: 70,
+                      itemExtent: Dimens.listItemSize,
                     ),
                   ),
                 ),
