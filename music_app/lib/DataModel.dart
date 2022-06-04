@@ -708,7 +708,7 @@ class DataModel extends ChangeNotifier {
     });
     return songsWithMetadata;
   }
-  //Changes current song to the upnext song at the given index
+  //Changes current song to the up next song at the given index
   void setUpNextIndex(int index)
   {
     if(settings.upNext.length != 0)
@@ -762,7 +762,7 @@ class DataModel extends ChangeNotifier {
           settings.playingIndex = 0;
           settings.setSongPath();
         }
-        //If you are not shuffling set the upNext playlist to the original unshuffled one
+        //If you are not shuffling set the upNext playlist to the original un-shuffled one
         else
         {
           Song currentlyPlayingSong = settings.upNext[settings.playingIndex];

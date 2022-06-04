@@ -12,20 +12,8 @@ class Song {
   int discNumber;
   int trackNumber;
   DateTime lastModified;
-  //String year;
 
-  /*Song({required this.file,
-    required this.name,
-    this.artist = "Unknown Artist",
-    this.album = "Unknown Album",
-    required this.duration,
-    this.albumArtist = "Unknown Artist",
-    this.discNumber = 1,
-    this.trackNumber = 1,
-    this.year = "Unknown Year",
-    this.durationNumber = 1,
-  });*/
-  Song(Metadata metadata, String songFilePath, DateTime modified/*, Uint8List? songAlbumArt*/)
+  Song(Metadata metadata, String songFilePath, DateTime modified)
   :
     name = metadata.trackName == null ? songFilePath.split("/").last.split(".").first : metadata.trackName!,
     artist = metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!),

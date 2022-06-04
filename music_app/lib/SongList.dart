@@ -105,7 +105,7 @@ class SongListItem extends StatefulWidget {
   final Song song;
   //Selection will be disabled if the item is being shown in search results
   final bool allowSelection;
-  //Which songs will be added to upnext when you play a song
+  //Which songs will be added to up next when you play a song
   final List<Song> futureSongs;
   //Need this for the selection graphic
   final Playlist? playlist;

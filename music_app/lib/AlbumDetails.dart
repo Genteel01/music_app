@@ -57,7 +57,7 @@ class AlbumDetails extends StatelessWidget {
                               ],);
                             }
                           var song = album.songs[index - 1];
-                          //print the discnumber as a heading if you are at the start of the new disc
+                          //print the disc number as a heading if you are at the start of the new disc
                           if(index == 1 || song.discNumber != album.songs[index - 2].discNumber)
                             {
                               return Column(
