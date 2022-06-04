@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:music_app/AlbumList.dart';
-import 'package:music_app/ArtistList.dart';
-import 'package:music_app/SongList.dart';
 import 'package:provider/provider.dart';
 
 
 import 'Album.dart';
+import 'AlbumListItem.dart';
 import 'Artist.dart';
+import 'ArtistListItem.dart';
 import 'DataModel.dart';
 import 'Song.dart';
+import 'SongListItem.dart';
 
 class SearchResults extends StatelessWidget {
 
