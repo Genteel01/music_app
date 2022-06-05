@@ -28,6 +28,7 @@ class Dimens{
 
   static const double currentlyPlayingBarSize = 65;
   static const double currentlyPlayingSongFontSize = 16;
+  static const double currentlyPlayingArtistFontSize = 14;
   static const double currentlyPlayingBarButtonSize = 35;
 
   static const double currentlyPlayingModalHeight = 450;

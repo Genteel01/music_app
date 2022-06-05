@@ -1,14 +1,13 @@
 import 'dart:io';
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:marquee/marquee.dart';
 import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'AudioControls.dart';
 import 'CurrentlyPlayingDetails.dart';
 import 'DataModel.dart';
+import 'OverflowMarqueeText.dart';
 
 //The bar that appears at the bottom of the screen giving basic details about the currently playing song and playback controls.
 class CurrentlyPlayingBar extends StatefulWidget {
@@ -40,10 +39,8 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
                   Expanded(
                     child: Padding(padding: const EdgeInsets.only(left: Dimens.xSmall, right: Dimens.xSmall, top: Dimens.xXSmall),
                       child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Expanded(child: AutoSizeText(dataModel.settings.upNext[dataModel.settings.playingIndex].name, maxLines: 1, style: TextStyle(fontSize: Dimens.currentlyPlayingSongFontSize), minFontSize: Dimens.currentlyPlayingSongFontSize, overflowReplacement:
-                        Marquee(style: TextStyle(fontSize: Dimens.currentlyPlayingSongFontSize), crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.upNext[dataModel.settings.playingIndex].name, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
-                        Expanded(child: AutoSizeText(dataModel.settings.upNext[dataModel.settings.playingIndex].artist, maxLines: 1, overflowReplacement:
-                        Marquee(crossAxisAlignment: CrossAxisAlignment.start, text: dataModel.settings.upNext[dataModel.settings.playingIndex].artist, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,),)),
+                        OverflowMarqueeText(text: dataModel.settings.upNext[dataModel.settings.playingIndex].name, textSize: Dimens.currentlyPlayingSongFontSize,),
+                        OverflowMarqueeText(text:dataModel.settings.upNext[dataModel.settings.playingIndex].artist, textSize: Dimens.currentlyPlayingArtistFontSize,)
                       ],),
                     ),
                   ),
