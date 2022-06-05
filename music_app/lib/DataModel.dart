@@ -49,6 +49,7 @@ class DataModel extends ChangeNotifier {
   String errorMessage = "";
 
   bool isPlaying = false;
+  bool wasPlaying = false;
 
   Random randomNumbers = new Random();
   getSearchResults(String searchText)
@@ -748,6 +749,22 @@ class DataModel extends ChangeNotifier {
     //bool isPlaying = await AudioService.customAction("isPlaying");
     isPlaying ? await _audioHandler.pause() : await _audioHandler.play();
     notifyListeners();
+  }
+
+  void startSeek() async
+  {
+    wasPlaying = isPlaying;
+    if(isPlaying) await _audioHandler.pause();
+  }
+
+  void stopSeek() async
+  {
+    if(wasPlaying) await _audioHandler.play();
+  }
+
+  void seek(Duration position) async
+  {
+    await _audioHandler.seek(position);
   }
   //Toggles shuffle behaviour when the shuffle button is pressed
   void toggleShuffle() async

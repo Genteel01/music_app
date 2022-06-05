@@ -87,7 +87,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
           ),
           //Seekbar
           StreamBuilder<Duration> (
-              stream: AudioService.positionStream,
+              stream: AudioService.position,
               builder: (context, snapshot) {
                 if(snapshot.hasData)
                 {
@@ -98,9 +98,10 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                       (position!.inSeconds % 60) < 10 ? Text("${position.inMinutes}:0${(position.inSeconds % 60).toStringAsFixed(0)}") :
                       Text("${position.inMinutes}:${(position.inSeconds % 60).toStringAsFixed(0)}"),
                       //Position Slider
-                      Slider(value: position.inSeconds.toDouble(), max: Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds.toDouble(), onChanged: (value) => {
-                        AudioService.seekTo(Duration(seconds: value.toInt()))
-                      },),
+                      Slider(value: position.inMilliseconds.toDouble(), max: dataModel.settings.upNext[dataModel.settings.playingIndex].duration.toDouble(), onChanged: (value) => {
+                        dataModel.seek(Duration(milliseconds: value.toInt()))
+                      },onChangeStart: (value) => {dataModel.startSeek()},
+                      onChangeEnd: (value) => {dataModel.stopSeek()},),
                       //Duration
                       (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60) < 10 ? Text("${Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inMinutes}:0" + (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60).toStringAsFixed(0)) :
                       Text("${Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inMinutes}:" + (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60).toStringAsFixed(0)),
