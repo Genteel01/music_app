@@ -1,68 +1,80 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 
-class AudioPlayerTask extends BackgroundAudioTask {
+class AudioPlayerTask extends BaseAudioHandler {
   final audioPlayer = AudioPlayer();
   int startingIndex = 0;
   List<MediaItem> futureMediaItems = [];
 
   @override
   Future<void> onTaskRemoved() async {
-    await onStop();
+    await stop();
   }
-  @override
-  Future<void> onStart(Map<String, dynamic>? params) async {
-    print("onStart");
+
+
+  void onStart()
+  {
+    playbackState.add(
+        PlaybackState(controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
+            systemActions: const {
+              MediaAction.seek,
+            },
+            processingState: AudioProcessingState.loading)
+    );
     //print("DataModel info: " + dataModel.loading.toString());
-    super.onStart(params);
     audioPlayer.currentIndexStream.listen((event) {
-      AudioServiceBackground.setState(
-          position: Duration(),
+      playbackState.add(
+          playbackState.valueOrNull!.copyWith(updatePosition: Duration())
       );
-      AudioServiceBackground.sendCustomEvent(event);
+      customEvent.add(event);
       if(event != null)
       {
-        AudioServiceBackground.setMediaItem(futureMediaItems[event]);
+        mediaItem.add(futureMediaItems[event]);
       }
     });
     audioPlayer.playerStateStream.listen((state) {
       if(state.processingState == ProcessingState.completed)
-        {
-          audioPlayer.seek(null, index: 0);
-          AudioService.pause();
-        }
+      {
+        audioPlayer.seek(null, index: 0);
+        pause();
+      }
     });
-    AudioServiceBackground.setState(
-        controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
-        /*playing: true,*/
-        processingState: AudioProcessingState.connecting);
+  }
+  AudioPlayerTask()
+  {
+    onStart();
   }
 
   @override
-  Future<void> onStop() async {
+  Future<void> stop() async {
     // Stop playing audio
     await audioPlayer.stop();
     // Shut down this background task
-    await super.onStop();
-    AudioServiceBackground.setState(
-        processingState: AudioProcessingState.stopped);
+    await super.stop();
+    playbackState.add(
+        playbackState.valueOrNull!.copyWith(
+        playing: false,
+        processingState: AudioProcessingState.idle)
+    );
   }
 
   @override
-  Future<void> onPlay() async {
+  Future<void> play() async {
     audioPlayer.play();
-    AudioServiceBackground.setState(
+    playbackState.add(
+        playbackState.valueOrNull!.copyWith(
         controls: [MediaControl.skipToPrevious, MediaControl.pause, MediaControl.skipToNext, MediaControl.stop],
         playing: true,
-        processingState: AudioProcessingState.ready,);
+        processingState: AudioProcessingState.ready,)
+    );
     // Connect to the URL
   }
   @override
-  Future<void> onSkipToNext() async {
+  Future<void> skipToNext() async {
     if(audioPlayer.currentIndex == futureMediaItems.length - 1 && audioPlayer.loopMode == LoopMode.off)
       {
         await audioPlayer.seek(null, index: 0);
-        AudioService.pause();
+        pause();
       }
     else
       {
@@ -71,10 +83,10 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
 
   @override
-  Future<void> onSkipToPrevious() async {
+  Future<void> skipToPrevious() async {
     if(audioPlayer.position.inSeconds > audioPlayer.duration!.inSeconds / 20)
     {
-      await AudioService.seekTo(Duration());
+      await seek(Duration());
     }
     else
     {
@@ -89,28 +101,33 @@ class AudioPlayerTask extends BackgroundAudioTask {
     }
   }
   @override
-  Future<void> onPause() async {
-    AudioServiceBackground.setState(
+  Future<void> pause() async {
+    playbackState.add(
+        playbackState.valueOrNull!.copyWith(
         controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
         playing: false,
-        processingState: AudioProcessingState.ready);
+        processingState: AudioProcessingState.ready,
+        )
+    );
     audioPlayer.pause();
   }
   @override
-  Future<void> onSeekTo(Duration position) async {
+  Future<void> seek(Duration position) async {
     //super.onSeekTo(position);
     await audioPlayer.seek(position);
-    AudioServiceBackground.setState(
-        position: position);
+    playbackState.add(
+        playbackState.valueOrNull!.copyWith(
+          updatePosition: position)
+      );
   }
   @override
-  Future onCustomAction(String name, dynamic arguments) async {
+  Future customAction(String name, [Map<String, dynamic>? arguments]) async {
     if(name == "setPlaylist")
       {
         //Build the future playlist
         futureMediaItems.clear();
         List<AudioSource> playlist = [];
-        arguments.forEach((element) {
+        arguments!["playlist"].forEach((element) {
           playlist.add(AudioSource.uri(Uri.file((element as Map)["path"])));
           futureMediaItems.add(
               MediaItem(
@@ -124,18 +141,19 @@ class AudioPlayerTask extends BackgroundAudioTask {
         });
         //futurePlaylist = ConcatenatingAudioSource(children: playlist,);
         audioPlayer.setAudioSource(ConcatenatingAudioSource(children: playlist,), initialIndex: startingIndex);
-        AudioServiceBackground.setQueue(futureMediaItems);
-        AudioServiceBackground.setMediaItem(futureMediaItems[startingIndex]);
-        AudioServiceBackground.setState(
-            processingState: AudioProcessingState.ready,
-            position: Duration());
+        queue.add(futureMediaItems);
+        playbackState.add(
+            playbackState.valueOrNull!.copyWith(
+              processingState: AudioProcessingState.ready,
+              updatePosition: Duration())
+        );
       }
     if(name == "updatePlaylist")
     {
       //Build the future playlist
       futureMediaItems.clear();
       List<AudioSource> playlist = [];
-      arguments.forEach((element) {
+      arguments!["playlist"].forEach((element) {
         playlist.add(AudioSource.uri(Uri.file((element as Map)["path"])));
         futureMediaItems.add(
             MediaItem(
@@ -149,23 +167,26 @@ class AudioPlayerTask extends BackgroundAudioTask {
       });
       Duration currentPosition = audioPlayer.position;
       await audioPlayer.setAudioSource(ConcatenatingAudioSource(children: playlist,), initialIndex: startingIndex);
-      await AudioService.seekTo(currentPosition);
-      AudioServiceBackground.setQueue(futureMediaItems);
-      AudioServiceBackground.setMediaItem(futureMediaItems[startingIndex]);
-      AudioServiceBackground.setState(
-          processingState: AudioProcessingState.ready,);
+      await seek(currentPosition);
+      queue.add(futureMediaItems);
+      mediaItem.add(futureMediaItems[startingIndex]);
+      playbackState.add(
+          playbackState.valueOrNull!.copyWith(
+              processingState: AudioProcessingState.ready,
+              playing: audioPlayer.playing,)
+      );
     }
     if(name == "setStartingIndex")
       {
-        startingIndex = arguments;
+        startingIndex = arguments!["index"];
       }
     if(name == "getCurrentIndex")
       {
-        AudioServiceBackground.sendCustomEvent(audioPlayer.currentIndex);
+        customEvent.add(audioPlayer.currentIndex);
       }
     if(name == "setLoopMode")
       {
-        switch(arguments as String)
+        switch(arguments!["loopMode"] as String)
         {
           case "none":
             audioPlayer.setLoopMode(LoopMode.off);

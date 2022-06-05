@@ -22,9 +22,11 @@ import 'Settings.dart';
 import 'Song.dart';
 import 'Sorting.dart';
 
-void _backgroundTaskEntrypoint() async {
+/*void _backgroundTaskEntrypoint() async {
   await AudioServiceBackground.run(() => AudioPlayerTask());
-}
+}*/
+late AudioHandler _audioHandler;
+
 class DataModel extends ChangeNotifier {
 
   bool loading = false;
@@ -277,9 +279,19 @@ class DataModel extends ChangeNotifier {
     notifyListeners(); //tell children to redraw, and they will see that the loading indicator is on
     //if(!AudioService.connected)
       //{
-        await AudioService.connect();
+
+        //await AudioService.connect();
       //}
-    await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
+    //await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
+    _audioHandler = await AudioService.init(
+      builder: () => AudioPlayerTask(),
+      config: AudioServiceConfig(
+        androidNotificationChannelId: 'au.com.genteel01.music_app.channel.audio',
+        androidNotificationChannelName: 'Music playback',
+      ),
+    );
+
+    //_audioHandler.customAction("onStart");
     appDocumentsDirectory = await getAppDocumentsDirectory();
     //clear any existing data we have gotten previously, to avoid duplicate data
     songs.clear();
@@ -329,10 +341,10 @@ class DataModel extends ChangeNotifier {
       if(settings.upNext.length > 0)
       {
         //Set the starting index in the background audio service
-        await AudioService.customAction("setStartingIndex", settings.playingIndex);
+        await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
         //Set the playlist in the background audio service
-        await AudioService.customAction("setPlaylist", makeSongMap(settings.upNext));
-        AudioService.pause();
+        await _audioHandler.customAction("setPlaylist", {"playlist" : makeSongMap(settings.upNext) });
+        _audioHandler.pause();
       }
     }
     catch(error){}
@@ -438,25 +450,24 @@ class DataModel extends ChangeNotifier {
       }
     }
     //Set up the listener to detect when songs finish
-    AudioService.playbackStateStream.listen((state) {
-      if(state.processingState == AudioProcessingState.stopped)
+    _audioHandler.playbackState.listen((state) {
+      /*if(state.processingState == AudioProcessingState.idle)
         {
           settings.upNext.clear();
           settings.originalUpNext.clear();
           settings.songPaths.clear();
           settings.originalSongPaths.clear();
           saveSettings();
-        }
+        }*/
       isPlaying = state.playing;
       notifyListeners();
     });
-    AudioService.customEventStream.listen((event) {
+    _audioHandler.customEvent.listen((event) {
       if(event.runtimeType == int)
         {
           setUpNextIndex(event);
         }
     });
-
     loading = false;
     notifyListeners();
     //Save the songs, playlists, albums, and artist lists
@@ -651,15 +662,16 @@ class DataModel extends ChangeNotifier {
   //Function that sets the currently playing song
   void setCurrentlyPlaying(int index, List<Song> futureSongs) async
   {
-    if(!AudioService.connected)
-    {
-      print("in the not connected");
-      await AudioService.connect();
-    }
+    //if(!AudioService.connected)
+    //{
+      //print("in the not connected");
+      //await AudioService.connect();
+    //}
     //Clear the upNext list
     settings.upNext.clear();
     //Add all the future songs to upNext
     settings.upNext.addAll(futureSongs);
+    print("Logging: 1 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     //clear originalUpNext
     settings.originalUpNext.clear();
     //Add all the future songs to originalUpNext
@@ -680,14 +692,19 @@ class DataModel extends ChangeNotifier {
         }
         settings.playingIndex = 0;
       }
+    print("Logging: 2 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     //Set the song paths so that upNext can be saved and loaded again when you open the app
     settings.setSongPath();
+    print("Logging: 3 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     //Set the starting index in the background audio service
-    await AudioService.customAction("setStartingIndex", settings.playingIndex);
+    await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
+    print("Logging: 4 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     //Set the playlist in the background audio service
-    await AudioService.customAction("setPlaylist", makeSongMap(settings.upNext));
+    await _audioHandler.customAction("setPlaylist", {"playlist" : makeSongMap(settings.upNext) });
+    print("Logging: 5 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     //Play the music
-    AudioService.play();
+    _audioHandler.play();
+    print("Logging: 6 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     notifyListeners();
     saveSettings();
   }
@@ -706,6 +723,7 @@ class DataModel extends ChangeNotifier {
   {
     if(settings.upNext.length != 0)
       {
+        print("RECEIVED_EVENT_IN_SECOND_IF");
         settings.playingIndex = index;
         notifyListeners();
         saveSettings();
@@ -717,18 +735,18 @@ class DataModel extends ChangeNotifier {
     if(settings.upNext.length != 0)
     {
       //Since we are resuming I think it is possible for the app to lose some data as memory is cleared while it is in the background, so check if you need to reconnect
-      if(!AudioService.connected)
-      {
-        print("in the not connected");
-        await AudioService.connect();
-      }
-      await AudioService.customAction("getCurrentIndex");
+      //if(!AudioService.connected)
+      //{
+        //print("in the not connected");
+        //await AudioService.connect();
+      //}
+      await _audioHandler.customAction("getCurrentIndex");
     }
   }
   void playButton() async
   {
     //bool isPlaying = await AudioService.customAction("isPlaying");
-    isPlaying ? await AudioService.pause() : await AudioService.play();
+    isPlaying ? await _audioHandler.pause() : await _audioHandler.play();
     notifyListeners();
   }
   //Toggles shuffle behaviour when the shuffle button is pressed
@@ -766,9 +784,9 @@ class DataModel extends ChangeNotifier {
           settings.playingIndex = settings.upNext.indexOf(currentlyPlayingSong);
         }
         //Set the starting index in the background audio service
-        await AudioService.customAction("setStartingIndex", settings.playingIndex);
+        await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
         //Set the playlist in the background audio service
-        await AudioService.customAction("updatePlaylist", makeSongMap(settings.upNext));
+        await _audioHandler.customAction("updatePlaylist", {"playlist" : makeSongMap(settings.upNext)});
       }
     notifyListeners();
     saveSettings();
@@ -792,15 +810,15 @@ class DataModel extends ChangeNotifier {
     {
       case LoopType.singleSong:
         settings.loop = LoopType.none;
-        AudioService.customAction("setLoopMode", "none");
+        _audioHandler.customAction("setLoopMode", {"loopMode":"none"});
         break;
       case LoopType.loop:
         settings.loop = LoopType.singleSong;
-        AudioService.customAction("setLoopMode", "singleSong");
+        _audioHandler.customAction("setLoopMode", {"loopMode":"singleSong"});
         break;
       case LoopType.none:
         settings.loop = LoopType.loop;
-        AudioService.customAction("setLoopMode", "loop");
+        _audioHandler.customAction("setLoopMode", {"loopMode":"loop"});
         break;
     }
       notifyListeners();
@@ -809,7 +827,7 @@ class DataModel extends ChangeNotifier {
   void nextButton()
   {
     //audioPlayer.seekToNext();
-    AudioService.skipToNext();
+    _audioHandler.skipToNext();
     //playNextSong();
     notifyListeners();
   }
@@ -818,7 +836,7 @@ class DataModel extends ChangeNotifier {
   {
     //Duration position = await AudioService.customAction("getPosition");
     //Duration duration = await AudioService.customAction("getDuration");
-    AudioService.skipToPrevious();
+    _audioHandler.skipToPrevious();
     /*if(AudioService.playbackState.position.inSeconds > Duration(milliseconds: settings.currentlyPlaying!.duration).inSeconds / 20)
       {
         //await AudioService.seekTo(Duration());

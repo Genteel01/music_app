@@ -1,4 +1,3 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,9 +6,10 @@ import 'TabBar.dart';
 import 'Values.dart';
 //Saving/loading from json
 //https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
-void main() {
-  runApp(MyApp());
 
+
+void main()  {
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
           indicatorColor: crabColorScheme.primary
         ),
         title: "Music Player",
-        home: AudioServiceWidget(child: MyTabBar()),
+        home: MyTabBar(),
         //home: MyHomePage(title: 'List Tutorial'),
       ),
     );
