@@ -30,7 +30,7 @@ class _AlbumListState extends State<AlbumList> {
           children: <Widget>[if(dataModel.loading) CircularProgressIndicator() else
             Expanded(
               child: Container(decoration: BoxDecoration(
-                  border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
+                  border: Border(bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour),)),
                 child: DraggableScrollbar.arrows(
                   backgroundColor: Theme.of(context).primaryColor,
                   controller: myScrollController,

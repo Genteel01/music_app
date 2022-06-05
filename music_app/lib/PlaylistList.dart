@@ -50,7 +50,7 @@ class PlaylistListBuilder extends StatelessWidget {
     ScrollController myScrollController = ScrollController();
     return Expanded(
       child: Container(decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
+          border: Border(bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour),)),
         child: DraggableScrollbar.arrows(
           backgroundColor: Theme.of(context).primaryColor,
           controller: myScrollController,
@@ -61,7 +61,7 @@ class PlaylistListBuilder extends StatelessWidget {
                   {
                     final playlistNameController = TextEditingController();
                     return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
-                        border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+                        border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
                       child: Center(
                         child: ListTile(
                           leading: Icon(Icons.add_box),
@@ -105,7 +105,7 @@ class PlaylistListBuilder extends StatelessWidget {
                 var playlist = dataModel.playlists[index - 1];
 
                 return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
-                    border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+                    border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
                   child: Center(
                     child: ListTile(
                       selected: !addingToPlaylist && dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)),

@@ -9,6 +9,7 @@ import 'CurrentlyPlayingBar.dart';
 import 'DataModel.dart';
 import 'ListHeader.dart';
 import 'ShuffleButton.dart';
+import 'Values.dart';
 
 class ArtistDetails extends StatelessWidget {
   final int index;
@@ -35,7 +36,7 @@ class ArtistDetails extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Container(decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
+                    border: Border(bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour),)),
                   child: DraggableScrollbar.arrows(
                     backgroundColor: Theme.of(context).primaryColor,
                     controller: myScrollController,

@@ -28,7 +28,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return InkWell(
       child: Container(height: Dimens.currentlyPlayingBarSize, decoration: BoxDecoration(
-          border: Border(top: BorderSide(width: 0.5, color: Colors.black), bottom: BorderSide(width: 0.5, color: Colors.black), left: BorderSide(width: 0.5, color: Colors.black), right: BorderSide(width: 0.5, color: Colors.black))),
+          border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.currentlyPlayingBarBorderColour), bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.currentlyPlayingBarBorderColour), left: BorderSide(width: Dimens.mediumBorderSize, color: Colours.currentlyPlayingBarBorderColour), right: BorderSide(width: Dimens.mediumBorderSize, color: Colours.currentlyPlayingBarBorderColour))),
         child: dataModel.loading || dataModel.settings.upNext.length == 0 ? Row(children: [
           SizedBox(width: Dimens.currentlyPlayingBarSize, height: Dimens.currentlyPlayingBarSize,child: Image.asset("assets/images/music_note.jpg")), Padding(padding: const EdgeInsets.only(left: Dimens.xSmall), child: Text("No Song Playing"),),
         ],) : Row(mainAxisAlignment: MainAxisAlignment.end,

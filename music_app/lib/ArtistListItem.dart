@@ -27,7 +27,7 @@ class _ArtistListItemState extends State<ArtistListItem> {
   }
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
-        border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+        border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
       child: Align(alignment: Alignment.center,
         child: ListTile(
           selected: dataModel.selectedIndices.contains(dataModel.artists.indexOf(widget.artist)),

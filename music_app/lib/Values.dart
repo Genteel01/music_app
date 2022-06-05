@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 class Dimens{
   static const double tiny = 2;
   static const double xXSmall = 4;
@@ -18,6 +20,8 @@ class Dimens{
   static const double directoryPickerModalHeight = 400;
   static const double directoryPickerModalBorderRadius = 30;
 
+  static const double thinBorderSize = 0.25;
+  static const double mediumBorderSize = 0.5;
 
   static const double listHeaderFontSize = 18;
   static const double searchTextFieldWidth = 200;
@@ -41,4 +45,6 @@ class Colours{
   static const Color searchHeaderTextColour = Color.fromARGB(255, 90, 90, 90);
   static const Color buttonIconColour = Color.fromARGB(255, 250, 250, 250);
   static const Color disabledButtonColour = Color.fromARGB(255, 158, 158, 158);
+  static const Color listDividerColour = Color.fromARGB(255, 158, 158, 158);
+  static const Color currentlyPlayingBarBorderColour = Color.fromARGB(255, 0, 0, 0);
 }

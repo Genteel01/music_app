@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
 import 'package:music_app/ListHeader.dart';
+import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'Album.dart';
@@ -38,7 +39,7 @@ class AlbumDetails extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Container(decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
+                    border: Border(bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour),)),
                   child: DraggableScrollbar.arrows(
                     backgroundColor: Theme.of(context).primaryColor,
                     controller: myScrollController,

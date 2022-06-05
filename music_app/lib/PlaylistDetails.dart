@@ -146,7 +146,7 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                       var song = playlist.songs[index];
 
                       return Container(key: Key(index.toString()), height: Dimens.listItemSize, decoration: BoxDecoration(
-                          border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+                          border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
                         child: ListTile(
                           title: Text(song.name),
                           subtitle: Text(song.artist),
@@ -161,7 +161,7 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                   },
                 )
                 : Container(decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(width: 0.5, color: Colors.grey), top: BorderSide(width: 0.5, color: Colors.grey),)),
+                    border: Border(bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour),)),
                   child: DraggableScrollbar.arrows(
                     backgroundColor: Theme.of(context).primaryColor,
                     controller: myScrollController,

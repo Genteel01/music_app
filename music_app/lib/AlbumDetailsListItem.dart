@@ -26,7 +26,7 @@ class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
   }
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
-        border: Border(top: BorderSide(width: 0.5, color: Colors.grey), bottom: BorderSide(width: 0.25, color: Colors.grey))),
+        border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
       child: ListTile(
         selected: dataModel.selectedIndices.contains(widget.album.songs.indexOf(widget.song)) || (dataModel.selectedIndices.length == 0 && dataModel.settings.upNext.length == widget.album.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song) ,
         title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
