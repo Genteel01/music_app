@@ -97,7 +97,7 @@ class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
               ),
             ],
           ),
-          bottom: TabBar(indicatorColor: Theme.of(context).primaryColor,
+          bottom: TabBar(
             isScrollable: true,
             tabs: myTabs,
           ),

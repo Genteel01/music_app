@@ -49,6 +49,7 @@ class MyApp extends StatelessWidget {
           //dialogBackgroundColor: Color.fromARGB(255, 255, 240, 201),
           scaffoldBackgroundColor: Colours.backgroundColour,
           textSelectionTheme: TextSelectionThemeData(selectionHandleColor: crabColorScheme.secondary, selectionColor: crabColorScheme.secondary, cursorColor: crabColorScheme.secondary),
+          indicatorColor: crabColorScheme.primary
         ),
         title: "Music Player",
         home: AudioServiceWidget(child: MyTabBar()),
