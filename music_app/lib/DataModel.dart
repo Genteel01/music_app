@@ -672,7 +672,6 @@ class DataModel extends ChangeNotifier {
     settings.upNext.clear();
     //Add all the future songs to upNext
     settings.upNext.addAll(futureSongs);
-    print("Logging: 1 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     //clear originalUpNext
     settings.originalUpNext.clear();
     //Add all the future songs to originalUpNext
@@ -693,19 +692,14 @@ class DataModel extends ChangeNotifier {
         }
         settings.playingIndex = 0;
       }
-    print("Logging: 2 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     //Set the song paths so that upNext can be saved and loaded again when you open the app
     settings.setSongPath();
-    print("Logging: 3 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     //Set the starting index in the background audio service
     await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
-    print("Logging: 4 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     //Set the playlist in the background audio service
     await _audioHandler.customAction("setPlaylist", {"playlist" : makeSongMap(settings.upNext) });
-    print("Logging: 5 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     //Play the music
     _audioHandler.play();
-    print("Logging: 6 SET CURRENTLY PLAYING: " + settings.upNext.length.toString());
     notifyListeners();
     saveSettings();
   }

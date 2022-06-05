@@ -87,7 +87,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
           ),
           //Seekbar
           StreamBuilder<Duration> (
-              stream: AudioService.position,
+              stream: AudioService.positionStream,
               builder: (context, snapshot) {
                 if(snapshot.hasData)
                 {

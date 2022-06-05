@@ -21,7 +21,6 @@ class AudioPlayerTask extends BaseAudioHandler {
             },
             processingState: AudioProcessingState.loading)
     );
-    //print("DataModel info: " + dataModel.loading.toString());
     audioPlayer.currentIndexStream.listen((event) {
       playbackState.add(
           playbackState.valueOrNull!.copyWith(updatePosition: Duration())
@@ -104,9 +103,10 @@ class AudioPlayerTask extends BaseAudioHandler {
   Future<void> pause() async {
     playbackState.add(
         playbackState.valueOrNull!.copyWith(
-        controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
-        playing: false,
-        processingState: AudioProcessingState.ready,
+            controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
+            playing: false,
+            processingState: AudioProcessingState.ready,
+            updatePosition: audioPlayer.position
         )
     );
     audioPlayer.pause();
@@ -146,7 +146,7 @@ class AudioPlayerTask extends BaseAudioHandler {
         playbackState.add(
             playbackState.valueOrNull!.copyWith(
               processingState: AudioProcessingState.ready,
-              updatePosition: Duration())
+            updatePosition: Duration())
         );
       }
     if(name == "updatePlaylist")
