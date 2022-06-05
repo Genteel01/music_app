@@ -131,11 +131,12 @@ class AudioPlayerTask extends BaseAudioHandler {
           playlist.add(AudioSource.uri(Uri.file((element as Map)["path"])));
           futureMediaItems.add(
               MediaItem(
-          id: element["path"],
-          artist: element["artist"],
-          title: element["name"],
-          album: element["album"],
-          artUri: Uri.file(element["albumart"]),
+                  id: element["path"],
+                  artist: element["artist"],
+                  title: element["name"],
+                  album: element["album"],
+                  artUri: Uri.file(element["albumart"]),
+                  duration: Duration(milliseconds: element["milliseconds"])
           )
           );
         });
@@ -162,6 +163,7 @@ class AudioPlayerTask extends BaseAudioHandler {
               title: element["name"],
               album: element["album"],
               artUri: Uri.file(element["albumart"]),
+              duration: Duration(milliseconds: element["milliseconds"])
             )
         );
       });

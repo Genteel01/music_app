@@ -710,11 +710,11 @@ class DataModel extends ChangeNotifier {
     saveSettings();
   }
   //Makes the map that is used to send song data to the isolate
-  List<Map<String, String>> makeSongMap(List<Song> songList)
+  List<Map<String, dynamic>> makeSongMap(List<Song> songList)
   {
-    List<Map<String, String>> songsWithMetadata = [];
+    List<Map<String, dynamic>> songsWithMetadata = [];
     songList.forEach((element) {
-      Map<String, String> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.album, "albumart" : getAlbumArt(element) };
+      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.album, "albumart" : getAlbumArt(element), "milliseconds" : element.duration };
       songsWithMetadata.add(song);
     });
     return songsWithMetadata;
