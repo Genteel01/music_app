@@ -109,7 +109,7 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
       }
     }
     return Scaffold(
-        appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
+        appBar: dataModel.isSelecting() ? AppBar(automaticallyImplyLeading: false,
           title: SelectingAppBarTitle(playlist: playlist,),
         ) : AppBar(automaticallyImplyLeading: !reordering!,
           title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,

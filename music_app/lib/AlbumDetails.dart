@@ -29,7 +29,7 @@ class AlbumDetails extends StatelessWidget {
     ScrollController myScrollController = ScrollController();
     Album album = dataModel.albums[index];
     return Scaffold(
-        appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
+        appBar: dataModel.isSelecting() ? AppBar(automaticallyImplyLeading: false,
           title: SelectingAppBarTitle(album: album,),
         ) : AppBar(
           title: Text(album.name),

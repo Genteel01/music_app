@@ -35,7 +35,7 @@ class _ArtistListItemState extends State<ArtistListItem> {
         trailing: Text(widget.artist.songs.length == 1 ? "${widget.artist.songs.length} track" : "${widget.artist.songs.length} tracks"),
         leading: !widget.artist.songs.any((element) => dataModel.getAlbumArt(element) != "") ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != "")))),
         onTap: () async => {
-          if(dataModel.selectedIndices.length == 0 && widget.goToDetails)
+          if(!dataModel.isSelecting() && widget.goToDetails)
             {
               Navigator.push(context, MaterialPageRoute(
                   builder: (context) {

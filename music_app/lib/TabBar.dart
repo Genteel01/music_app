@@ -64,7 +64,7 @@ class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
       length: myTabs.length,
       child: Scaffold(
         bottomNavigationBar: CurrentlyPlayingBar(),
-        appBar: dataModel.selectedIndices.length > 0 ? AppBar(
+        appBar: dataModel.isSelecting() ? AppBar(
             title: SelectingAppBarTitle(),
             bottom: NonTappableTabBar(tabBar: TabBar(indicatorColor: Theme.of(context).primaryColor, tabs: myTabs, isScrollable: true,),)
         ) : AppBar(
@@ -103,7 +103,7 @@ class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
           ),
         ),
         body: dataModel.songs.length == 0 && dataModel.errorMessage != "" ? Padding(padding: const EdgeInsets.all(Dimens.xSmall), child: Text(dataModel.errorMessage),) : TabBarView(
-          physics: dataModel.selectedIndices.length > 0 ? NeverScrollableScrollPhysics() : null,
+          physics: dataModel.isSelecting() ? NeverScrollableScrollPhysics() : null,
           children: [
             PlaylistList(/*key: PageStorageKey("playlist_key"),*/),
             SongList(/*key: PageStorageKey("song_key"), */playSongs: true,),

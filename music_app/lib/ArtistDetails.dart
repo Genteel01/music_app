@@ -26,7 +26,7 @@ class ArtistDetails extends StatelessWidget {
     ScrollController myScrollController = ScrollController();
     Artist artist = dataModel.artists[index];
     return Scaffold(
-        appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
+        appBar: dataModel.isSelecting() ? AppBar(automaticallyImplyLeading: false,
           title: SelectingAppBarTitle(artist: artist,),
         ) : AppBar(
           title: Text(artist.name),

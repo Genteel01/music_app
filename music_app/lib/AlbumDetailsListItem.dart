@@ -28,7 +28,7 @@ class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
     return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
       child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.album.songs.indexOf(widget.song)) || (dataModel.selectedIndices.length == 0 && dataModel.settings.upNext.length == widget.album.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song) ,
+        selected: dataModel.selectedIndices.contains(widget.album.songs.indexOf(widget.song)) || (!dataModel.isSelecting() && dataModel.settings.upNext.length == widget.album.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song) ,
         title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
         subtitle: Text(widget.song.artist, maxLines: 1, overflow: TextOverflow.ellipsis,),
         trailing: dataModel.settings.upNext.length == widget.album.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song ? Row(mainAxisSize: MainAxisSize.min,
@@ -39,7 +39,7 @@ class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
         ) : Text(widget.song.durationString()),
         leading: Text(widget.song.trackNumber.toString()),
         onTap: () => {
-          if(dataModel.selectedIndices.length == 0)
+          if(!dataModel.isSelecting())
             {
               dataModel.setCurrentlyPlaying(widget.index, widget.album.songs),
             }

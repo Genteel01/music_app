@@ -30,7 +30,7 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
     return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
       child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.artist.songs.indexOf(widget.song)) || (dataModel.selectedIndices.length == 0 && dataModel.settings.upNext.length == widget.artist.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
+        selected: dataModel.selectedIndices.contains(widget.artist.songs.indexOf(widget.song)) || (!dataModel.isSelecting() && dataModel.settings.upNext.length == widget.artist.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
         title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
         subtitle: Text(widget.song.album, maxLines: 1, overflow: TextOverflow.ellipsis,),
         trailing: dataModel.settings.upNext.length == widget.artist.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song ? Row(mainAxisSize: MainAxisSize.min,
@@ -41,7 +41,7 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
         ) : Text(widget.song.durationString()),
         leading: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song))),
         onTap: () => {
-          if(dataModel.selectedIndices.length == 0)
+          if(!dataModel.isSelecting())
             {
               dataModel.setCurrentlyPlaying(widget.index, widget.artist.songs),
             }

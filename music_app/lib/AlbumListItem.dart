@@ -36,7 +36,7 @@ class _AlbumListItemState extends State<AlbumListItem> {
         subtitle: Text(widget.album.albumArtist, maxLines: 1, overflow: TextOverflow.ellipsis,),
         leading: widget.album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(widget.album.albumArt)),
         onTap: () => {
-          if(dataModel.selectedIndices.length == 0 && widget.goToDetails)
+          if(!dataModel.isSelecting() && widget.goToDetails)
             {
               Navigator.push(context, MaterialPageRoute(
                   builder: (context) {

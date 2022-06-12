@@ -577,6 +577,12 @@ class DataModel extends ChangeNotifier {
       return "";
     }
   }
+
+  //Returns whether you are currently selecting items
+  bool isSelecting()
+  {
+    return selectedIndices.length > 0;
+  }
   //Function to clear out all the local files I am creating for this app
   Future<void> clearAllData() async
   {

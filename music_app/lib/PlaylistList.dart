@@ -123,7 +123,7 @@ class PlaylistListBuilder extends StatelessWidget {
                           }
                         else
                           {
-                            if(dataModel.selectedIndices.length == 0)
+                            if(!dataModel.isSelecting())
                               {
                                 Navigator.push(context, MaterialPageRoute(
                                     builder: (context) {
