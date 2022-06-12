@@ -13,7 +13,7 @@ class ListHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: Dimens.small, bottom: Dimens.small),
+      padding: const EdgeInsets.only(top: Dimens.small, bottom: Dimens.small, left: Dimens.small, right: Dimens.small),
       child: Text(text, style: TextStyle(fontSize: Dimens.listHeaderFontSize, color: Colours.searchHeaderTextColour),),
     );
   }

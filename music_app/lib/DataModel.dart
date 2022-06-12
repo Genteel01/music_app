@@ -648,7 +648,7 @@ class DataModel extends ChangeNotifier {
   void addAlbumsToArtists()
   {
     artists.forEach((artist) {
-      artist.albums.addAll(albums.where((album) => album.albumArtist == artist.name));
+      artist.albums.addAll(albums.where((album) => album.albumArtist == artist.name || album.songs.any((song) => song.artist == artist.name)));
     });
   }
 
