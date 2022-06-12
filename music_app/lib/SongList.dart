@@ -46,7 +46,7 @@ class _SongListState extends State<SongList> {
                             {
                               return DirectoriesMenuListItem();
                             }
-                          if(widget.playSongs)
+                          if(widget.playSongs && !dataModel.inSelectMode)
                             {
                               return Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: [
@@ -63,7 +63,7 @@ class _SongListState extends State<SongList> {
                                     padding: const EdgeInsets.all(Dimens.xSmall),
                                     child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.songs.length == 1 ? "${dataModel.songs.length} Song" : "${dataModel.songs.length} Songs", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
                                   ),
-                                  SortDropdown(),
+                                  if(!dataModel.inSelectMode) SortDropdown(),
                                 ],
                               );
                             }
