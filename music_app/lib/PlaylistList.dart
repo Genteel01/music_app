@@ -112,6 +112,12 @@ class PlaylistListBuilder extends StatelessWidget {
                       selected: !addingToPlaylist && dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)),
                       title: Text(playlist.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
                       trailing: Text(playlist.songs.length == 1 ? "${playlist.songs.length} Track" : "${playlist.songs.length} Tracks"),
+                      leading: dataModel.isSelecting() ? Checkbox(value: dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)), onChanged: (value) {
+                        if(!addingToPlaylist)
+                        {
+                          dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist);
+                        }
+                      }) : null,
                       onTap: () => {
                         if(addingToPlaylist)
                           {

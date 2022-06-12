@@ -49,7 +49,12 @@ class MyApp extends StatelessWidget {
           //dialogBackgroundColor: Color.fromARGB(255, 255, 240, 201),
           scaffoldBackgroundColor: Colours.backgroundColour,
           textSelectionTheme: TextSelectionThemeData(selectionHandleColor: crabColorScheme.secondary, selectionColor: crabColorScheme.secondary, cursorColor: crabColorScheme.secondary),
-          indicatorColor: crabColorScheme.primary
+          indicatorColor: crabColorScheme.primary,
+          checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+            if (states.contains(MaterialState.selected))
+              return crabColorScheme.primary;
+            return null;
+          })),
         ),
         title: "Music Player",
         home: MyTabBar(),
