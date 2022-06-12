@@ -31,8 +31,6 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
     Type oldSelectionType = Song;
 
     Duration currentSongDuration = Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration);
-    int maxMinutes = currentSongDuration.inMinutes;
-    int maxSeconds = currentSongDuration.inSeconds % 60;
     return Padding(
       padding: const EdgeInsets.all(Dimens.xSmall),
       child: Column(crossAxisAlignment: CrossAxisAlignment.center,
@@ -100,14 +98,10 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
 
                   if(!dataModel.isSeeking) dataModel.setPosition(position!);
 
-                  int currentMinutes = dataModel.currentPosition.inMinutes;
-                  int currentSeconds = dataModel.currentPosition.inSeconds % 60;
-
                   return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, mainAxisSize: MainAxisSize.min,
                     children: [
                       //Current position text
-                      currentSeconds < 10 ? Text("$currentMinutes:0${currentSeconds.toStringAsFixed(0)}") :
-                      Text("$currentMinutes:${currentSeconds.toStringAsFixed(0)}"),
+                      Text(Strings.timeFormat(dataModel.currentPosition)),
                       //Position Slider
                       Slider(value: dataModel.currentPosition.inMilliseconds.toDouble(), max: dataModel.settings.upNext[dataModel.settings.playingIndex].duration.toDouble(),
                         onChanged: (value) {
@@ -128,8 +122,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                         });
                       },),
                       //Duration text
-                      maxSeconds < 10 ? Text("$maxMinutes:0${maxSeconds.toStringAsFixed(0)}") :
-                      Text("$maxMinutes:${maxSeconds.toStringAsFixed(0)}"),
+                      Text(Strings.timeFormat(currentSongDuration)),
                     ],
                   );
                 }

@@ -550,7 +550,6 @@ class DataModel extends ChangeNotifier {
       {
         songList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
       }
-
   }
   //Sorts a list of albums by name
   void sortByAlbumName (List<Album> albumList)
@@ -691,6 +690,15 @@ class DataModel extends ChangeNotifier {
       albums.add(newAlbum);
     }
   }
+
+  Duration calculateDuration(List<Song> mySongs)
+  {
+    int currentDuration = 0;
+    mySongs.forEach((song) {
+      currentDuration += song.duration;
+    });
+    return Duration(milliseconds: currentDuration);
+  }
   //Function that sets the currently playing song
   void setCurrentlyPlaying(int index, List<Song> futureSongs) async
   {
@@ -795,7 +803,6 @@ class DataModel extends ChangeNotifier {
   void setPosition(Duration newCurrentPosition)
   {
     currentPosition = newCurrentPosition;
-    notifyListeners();
   }
   //Toggles shuffle behaviour when the shuffle button is pressed
   void toggleShuffle() async

@@ -66,7 +66,12 @@ class AlbumDetails extends StatelessWidget {
                                           }));
                                       },
                                   ),
-                                  Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Text(album.albumArtist), Text("Tracks: " + album.songs.length.toString())],),
+                                  Column(
+                                    children: [
+                                      Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [ListHeader(text: album.albumArtist), ListHeader(text: "Tracks: " + album.songs.length.toString())],),
+                                      Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [ListHeader(text: album.year), ListHeader(text: Strings.timeFormat(dataModel.calculateDuration(album.songs)))],),
+                                    ],
+                                  ),
                                   ShuffleButton(dataModel: dataModel, futureSongs: album.songs)
                                 ],);
                               }

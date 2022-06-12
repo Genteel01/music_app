@@ -51,3 +51,32 @@ class Colours{
   static const Color listDividerColour = Color.fromARGB(255, 158, 158, 158);
   static const Color currentlyPlayingBarBorderColour = Color.fromARGB(255, 0, 0, 0);
 }
+
+class Strings{
+  static String timeFormat(Duration time)
+  {
+    int currentHours = time.inHours;
+    int currentMinutes = time.inMinutes % 60;
+    int currentSeconds = time.inSeconds % 60;
+    String timeString = "";
+    if(currentHours > 0) timeString += currentHours.toString() + ":";
+    if(currentHours > 0 && currentMinutes < 10)
+    {
+      timeString += "0" + currentMinutes.toString();
+    }
+    else
+      {
+        timeString += currentMinutes.toString();
+      }
+    timeString += ":";
+    if(currentSeconds < 10)
+    {
+      timeString += "0" + currentSeconds.toString();
+    }
+    else
+    {
+      timeString += currentSeconds.toString();
+    }
+    return timeString;
+  }
+}
