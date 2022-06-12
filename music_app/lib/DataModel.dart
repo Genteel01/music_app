@@ -51,6 +51,13 @@ class DataModel extends ChangeNotifier {
   bool isPlaying = false;
   bool wasPlaying = false;
 
+  //Whether you are currently using the seekbar
+  bool isSeeking = false;
+  //The current playback position
+  Duration currentPosition = Duration();
+  //Needed for a slider workaround because onChangeStart and onChangeEnd fire twice each when you don't move the slider quickly
+  bool seekbarIsPushed = false;
+
   Random randomNumbers = new Random();
   getSearchResults(String searchText)
   {
@@ -745,20 +752,26 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void startSeek() async
+  Future<void> startSeek() async
   {
-    wasPlaying = isPlaying;
-    if(isPlaying) await _audioHandler.pause();
+    isSeeking = true;
   }
 
-  void stopSeek() async
+  Future<void> stopSeek(Duration position) async
   {
-    if(wasPlaying) await _audioHandler.play();
+    await _audioHandler.seek(position);
+    isSeeking = false;
   }
 
   void seek(Duration position) async
   {
     await _audioHandler.seek(position);
+  }
+
+  void setPosition(Duration newCurrentPosition)
+  {
+    currentPosition = newCurrentPosition;
+    notifyListeners();
   }
   //Toggles shuffle behaviour when the shuffle button is pressed
   void toggleShuffle() async

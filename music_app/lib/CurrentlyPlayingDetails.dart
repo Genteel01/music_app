@@ -29,6 +29,10 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     List<int> oldSelections = [];
     Type oldSelectionType = Song;
+
+    Duration currentSongDuration = Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration);
+    int maxMinutes = currentSongDuration.inMinutes;
+    int maxSeconds = currentSongDuration.inSeconds % 60;
     return Padding(
       padding: const EdgeInsets.all(Dimens.xSmall),
       child: Column(crossAxisAlignment: CrossAxisAlignment.center,
@@ -87,24 +91,45 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
           ),
           //Seekbar
           StreamBuilder<Duration> (
+              //Note still using deprecated `positionStream` instead of `position` because with `position` it doesn't get the position while paused
               stream: AudioService.positionStream,
               builder: (context, snapshot) {
                 if(snapshot.hasData)
                 {
                   final position = snapshot.data;
+
+                  if(!dataModel.isSeeking) dataModel.setPosition(position!);
+
+                  int currentMinutes = dataModel.currentPosition.inMinutes;
+                  int currentSeconds = dataModel.currentPosition.inSeconds % 60;
+
                   return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, mainAxisSize: MainAxisSize.min,
                     children: [
-                      //Current position
-                      (position!.inSeconds % 60) < 10 ? Text("${position.inMinutes}:0${(position.inSeconds % 60).toStringAsFixed(0)}") :
-                      Text("${position.inMinutes}:${(position.inSeconds % 60).toStringAsFixed(0)}"),
+                      //Current position text
+                      currentSeconds < 10 ? Text("$currentMinutes:0${currentSeconds.toStringAsFixed(0)}") :
+                      Text("$currentMinutes:${currentSeconds.toStringAsFixed(0)}"),
                       //Position Slider
-                      Slider(value: position.inMilliseconds.toDouble(), max: dataModel.settings.upNext[dataModel.settings.playingIndex].duration.toDouble(), onChanged: (value) => {
-                        dataModel.seek(Duration(milliseconds: value.toInt()))
-                      },onChangeStart: (value) => {dataModel.startSeek()},
-                      onChangeEnd: (value) => {dataModel.stopSeek()},),
-                      //Duration
-                      (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60) < 10 ? Text("${Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inMinutes}:0" + (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60).toStringAsFixed(0)) :
-                      Text("${Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inMinutes}:" + (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60).toStringAsFixed(0)),
+                      Slider(value: dataModel.currentPosition.inMilliseconds.toDouble(), max: dataModel.settings.upNext[dataModel.settings.playingIndex].duration.toDouble(),
+                        onChanged: (value) {
+                        dataModel.setPosition(Duration(milliseconds: value.toInt()));
+                      },
+                        onChangeStart: (value) async {
+                          await dataModel.startSeek();
+                          dataModel.seekbarIsPushed = true;
+                      },
+                      onChangeEnd: (value) {
+                        dataModel.seekbarIsPushed = false;
+                        //Workaround for onChangeStart and onChangeEnd firing twice
+                        Future.delayed(const Duration(milliseconds: 200), () async {
+                          if(!dataModel.seekbarIsPushed)
+                            {
+                              await dataModel.stopSeek(Duration(milliseconds: value.toInt()));
+                            }
+                        });
+                      },),
+                      //Duration text
+                      maxSeconds < 10 ? Text("$maxMinutes:0${maxSeconds.toStringAsFixed(0)}") :
+                      Text("$maxMinutes:${maxSeconds.toStringAsFixed(0)}"),
                     ],
                   );
                 }
