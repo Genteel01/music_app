@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
           indicatorColor: crabColorScheme.primary,
           checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
             if (states.contains(MaterialState.selected))
-              return crabColorScheme.primary;
+              return crabColorScheme.secondary;
             return null;
           })),
         ),

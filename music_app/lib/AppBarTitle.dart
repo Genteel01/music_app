@@ -30,8 +30,8 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
       children: [
         Row(
           children: [
-            ElevatedButton(child: Text(dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist) ? "Clear" : "All"), onPressed: () {
-              dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist) ? dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist, widget.playlist);
+            Checkbox(value: dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist), onChanged: (value) {
+              !value! ?  dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist, widget.playlist);
             },),
             Padding(
               padding: const EdgeInsets.only(left: Dimens.small, right: Dimens.small),
