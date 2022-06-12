@@ -30,7 +30,12 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
       children: [
         Row(
           children: [
-            Checkbox(value: dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist), onChanged: (value) {
+            Checkbox(fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected))
+                  return Colours.deepRed;
+                return null;
+              }),
+              value: dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist), onChanged: (value) {
               !value! ?  dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist, widget.playlist);
             },),
             Padding(
@@ -40,7 +45,8 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
           ],
         ),
         widget.rightButtonReplacement != null ? widget.rightButtonReplacement! :
-        ElevatedButton(child: Text(dataModel.selectionType == Playlist || widget.playlist != null ? "Remove" : "Add To"), onPressed: () {
+        ElevatedButton(style: ButtonStyle(backgroundColor: dataModel.hasSelections() ? MaterialStateProperty.all(Colours.primaryColour) : MaterialStateProperty.all(Colours.redDisabledButtonColour)),
+          child: Text(dataModel.selectionType == Playlist || widget.playlist != null ? "Remove" : "Add To"), onPressed: dataModel.hasSelections() ? () {
           if(dataModel.selectionType == Playlist)
             {
               dataModel.deletePlaylists();
@@ -79,7 +85,7 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
                 },
               );
             }
-        },),
+        } : (){},),
       ],
     );
   }

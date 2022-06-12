@@ -38,7 +38,7 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
     );
   }
 
-  Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
+  Widget buildScaffold(BuildContext context, DataModel dataModel, _) {
     Playlist playlist = dataModel.playlists[widget.index];
     ScrollController myScrollController = ScrollController();
     void selectMenuButton(String button)
@@ -110,82 +110,92 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
           break;
       }
     }
-    return Scaffold(
-        appBar: dataModel.isSelecting() ? AppBar(automaticallyImplyLeading: false,
-          title: SelectingAppBarTitle(playlist: playlist,),
-        ) : AppBar(automaticallyImplyLeading: !reordering!,
-          title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(playlist.name),
-              reordering! ? ElevatedButton(onPressed: () {
-                setState(() {
-                  reordering = false;
-                });
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text("Playlist Reordered"),
-                ));
-              }, child: Text("End")) :
-              PopupMenuButton<String>(
-                onSelected: selectMenuButton,
-                itemBuilder: (BuildContext context) {
-                  return {"Rename", "Reorder", "Delete", "Add to Playlist"}.map((String choice) {
-                    return PopupMenuItem<String>(
-                      value: choice,
-                      child: Text(choice),
-                    );
-                  }).toList();
-                },
-              ),
-            ],
-          ),
-        ),
-        bottomNavigationBar: CurrentlyPlayingBar(),
-        body: Column(
-            children: <Widget>[
-              Expanded(
-                child: reordering! ? ReorderableListView.builder(
-                    itemBuilder: (_, index) {
-                      var song = playlist.songs[index];
-
-                      return Container(key: Key(index.toString()), height: Dimens.listItemSize, decoration: BoxDecoration(
-                          border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
-                        child: ListTile(
-                          title: Text(song.name),
-                          subtitle: Text(song.artist),
-                          trailing: Icon(Icons.menu),
-                          leading: dataModel.getAlbumArt(song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(song))),
-                        ),
+    return WillPopScope(
+      onWillPop: () async {
+        if(dataModel.inSelectMode)
+        {
+          dataModel.stopSelecting();
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+          appBar: dataModel.inSelectMode ? AppBar(automaticallyImplyLeading: false,
+            title: SelectingAppBarTitle(playlist: playlist,),
+          ) : AppBar(automaticallyImplyLeading: !reordering!,
+            title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(playlist.name),
+                reordering! ? ElevatedButton(onPressed: () {
+                  setState(() {
+                    reordering = false;
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text("Playlist Reordered"),
+                  ));
+                }, child: Text("End")) :
+                PopupMenuButton<String>(
+                  onSelected: selectMenuButton,
+                  itemBuilder: (BuildContext context) {
+                    return {"Rename", "Reorder", "Delete", "Add to Playlist"}.map((String choice) {
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Text(choice),
                       );
-                    },
-                    itemCount: playlist.songs.length,
-                  onReorder: (int oldIndex, int newIndex) {
-                    dataModel.reorderPlaylist(oldIndex, newIndex, playlist);
+                    }).toList();
                   },
-                )
-                : Container(decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour),)),
-                  child: DraggableScrollbar.arrows(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    controller: myScrollController,
-                    child: ListView.builder(
-                      controller: myScrollController,
-                        itemBuilder: (_, index) {
-                          if(index == 0)
-                          {
-                            return ShuffleButton(dataModel: dataModel, futureSongs: playlist.songs);
-                          }
-                          var song = playlist.songs[index - 1];
+                ),
+              ],
+            ),
+          ),
+          bottomNavigationBar: CurrentlyPlayingBar(),
+          body: Column(
+              children: <Widget>[
+                Expanded(
+                  child: reordering! ? ReorderableListView.builder(
+                      itemBuilder: (_, index) {
+                        var song = playlist.songs[index];
 
-                          return SongListItem(song: song, allowSelection: true, futureSongs: playlist.songs, index: index - 1, playSongs: true,);
-                        },
-                        itemCount: playlist.songs.length + 1,
-                      itemExtent: Dimens.listItemSize,
+                        return Container(key: Key(index.toString()), height: Dimens.listItemSize, decoration: BoxDecoration(
+                            border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
+                          child: ListTile(
+                            title: Text(song.name),
+                            subtitle: Text(song.artist),
+                            trailing: Icon(Icons.menu),
+                            leading: dataModel.getAlbumArt(song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(song))),
+                          ),
+                        );
+                      },
+                      itemCount: playlist.songs.length,
+                    onReorder: (int oldIndex, int newIndex) {
+                      dataModel.reorderPlaylist(oldIndex, newIndex, playlist);
+                    },
+                  )
+                  : Container(decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour),)),
+                    child: DraggableScrollbar.arrows(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      controller: myScrollController,
+                      child: ListView.builder(
+                        controller: myScrollController,
+                          itemBuilder: (_, index) {
+                            if(index == 0)
+                            {
+                              return ShuffleButton(dataModel: dataModel, futureSongs: playlist.songs);
+                            }
+                            var song = playlist.songs[index - 1];
+
+                            return SongListItem(song: song, allowSelection: true, futureSongs: playlist.songs, index: index - 1, playSongs: true,);
+                          },
+                          itemCount: playlist.songs.length + 1,
+                        itemExtent: Dimens.listItemSize,
+                      ),
                     ),
                   ),
-                ),
-              )
-            ]
-        )
+                )
+              ]
+          )
+      ),
     );
   }
 }

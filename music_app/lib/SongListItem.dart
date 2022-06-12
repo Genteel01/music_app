@@ -35,7 +35,7 @@ class _SongListItemState extends State<SongListItem> {
         border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
       child: Row(
         children: [
-          if (dataModel.isSelecting()) Checkbox(value: dataModel.selectedIndices.contains(dataModel.songs.indexOf(widget.song)), onChanged: (value) {
+          if (dataModel.inSelectMode) Checkbox(value: dataModel.selectedIndices.contains(dataModel.songs.indexOf(widget.song)), onChanged: (value) {
             if(widget.allowSelection)
             {
               dataModel.toggleSelection(dataModel.songs.indexOf(widget.song), Song);
@@ -43,7 +43,7 @@ class _SongListItemState extends State<SongListItem> {
           }),
           Expanded(
             child: ListTile(
-              selected: dataModel.selectedIndices.contains(widget.index) || (!dataModel.isSelecting() && dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
+              selected: dataModel.selectedIndices.contains(widget.index) || (!dataModel.inSelectMode && dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
               title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
               subtitle: Text(widget.song.artist, maxLines: 1, overflow: TextOverflow.ellipsis,),
               trailing: dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song ? Row(mainAxisSize: MainAxisSize.min,
@@ -54,7 +54,7 @@ class _SongListItemState extends State<SongListItem> {
               ) : Text(widget.song.durationString()),
               leading: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song))),
               onTap: () {
-                if(!dataModel.isSelecting() && widget.playSongs)
+                if(!dataModel.inSelectMode && widget.playSongs)
                   {
                     dataModel.setCurrentlyPlaying(widget.index, widget.futureSongs);
                   }

@@ -43,6 +43,7 @@ class DataModel extends ChangeNotifier {
 
   List<int> selectedIndices = [];
   Type selectionType = Song;
+  bool inSelectMode = false;
 
   List<Object> searchResults = [];
 
@@ -106,13 +107,19 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void stopSelecting()
+  {
+    inSelectMode = false;
+    clearSelections();
+  }
+
   removeFromPlaylist(Playlist playlist)
   {
     selectedIndices.sort((a, b) => b.compareTo(a));
     selectedIndices.forEach((element) {
       playlist.songs.removeAt(element);
     });
-    clearSelections();
+    stopSelecting();
     notifyListeners();
     savePlaylists();
   }
@@ -183,6 +190,7 @@ class DataModel extends ChangeNotifier {
 
   void toggleSelection(int index, Type newSelectionType)
   {
+    inSelectMode = true;
     if(selectedIndices.contains(index))
     {
       selectedIndices.remove(index);
@@ -195,6 +203,10 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool hasSelections()
+  {
+    return selectedIndices.length > 0;
+  }
   //replaced this
   DataModel()
   {
@@ -256,7 +268,7 @@ class DataModel extends ChangeNotifier {
       });
       playlist.addToPlaylist(newSongs);
       savePlaylists();
-      clearSelections();
+      stopSelecting();
   }
 
   void reorderPlaylist(int oldIndex, int newIndex, Playlist playlist)
@@ -275,7 +287,7 @@ class DataModel extends ChangeNotifier {
       playlists.removeAt(element);
     });
     savePlaylists();
-    clearSelections();
+    stopSelecting();
   }
 
   Future<void> fetch() async
@@ -580,11 +592,6 @@ class DataModel extends ChangeNotifier {
     }
   }
 
-  //Returns whether you are currently selecting items
-  bool isSelecting()
-  {
-    return selectedIndices.length > 0;
-  }
   //Function to clear out all the local files I am creating for this app
   Future<void> clearAllData() async
   {

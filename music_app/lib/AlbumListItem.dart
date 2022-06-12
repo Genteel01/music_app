@@ -31,7 +31,7 @@ class _AlbumListItemState extends State<AlbumListItem> {
         border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
       child: Row(
         children: [
-          if (dataModel.isSelecting()) Checkbox(value: dataModel.selectedIndices.contains(dataModel.albums.indexOf(widget.album)), onChanged: (value) {
+          if (dataModel.inSelectMode) Checkbox(value: dataModel.selectedIndices.contains(dataModel.albums.indexOf(widget.album)), onChanged: (value) {
             if(widget.allowSelection)
             {
               dataModel.toggleSelection(dataModel.albums.indexOf(widget.album), Album);
@@ -45,7 +45,7 @@ class _AlbumListItemState extends State<AlbumListItem> {
               subtitle: Text(widget.album.albumArtist, maxLines: 1, overflow: TextOverflow.ellipsis,),
               leading: widget.album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(widget.album.albumArt)),
               onTap: () {
-                if(!dataModel.isSelecting() && widget.goToDetails)
+                if(!dataModel.inSelectMode && widget.goToDetails)
                   {
                     Navigator.push(context, MaterialPageRoute(
                         builder: (context) {

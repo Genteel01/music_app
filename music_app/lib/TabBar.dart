@@ -62,54 +62,64 @@ class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
     }
     return DefaultTabController(
       length: myTabs.length,
-      child: Scaffold(
-        bottomNavigationBar: CurrentlyPlayingBar(),
-        appBar: dataModel.isSelecting() ? AppBar(
-            title: SelectingAppBarTitle(),
-            bottom: NonTappableTabBar(tabBar: TabBar(indicatorColor: Theme.of(context).primaryColor, tabs: myTabs, isScrollable: true,),)
-        ) : AppBar(
-          title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              //Title
-              Text("Music"),
-              //Search Button
-              Row(
-                children: [
-                  ElevatedButton.icon(onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(
-                        builder: (context) {
-                          return SearchResults();
-                        })).then((value) {
-                      dataModel.searchResults.clear();
-                    });
-                  }, icon: Icon(Icons.search), label: Text("Search")),
-                  //Menu
-                  Padding(
-                    padding: const EdgeInsets.only(left: Dimens.xSmall),
-                    child: IconButton(icon: Icon(Icons.settings), color: dataModel.errorMessage == "" ? Colours.buttonIconColour : Colors.red, onPressed: () {
+      child: WillPopScope(
+        onWillPop: () async {
+          if(dataModel.inSelectMode)
+            {
+              dataModel.stopSelecting();
+              return false;
+            }
+          return true;
+        },
+        child: Scaffold(
+          bottomNavigationBar: CurrentlyPlayingBar(),
+          appBar: dataModel.inSelectMode ? AppBar(
+              title: SelectingAppBarTitle(),
+              bottom: NonTappableTabBar(tabBar: TabBar(indicatorColor: Theme.of(context).primaryColor, tabs: myTabs, isScrollable: true,),)
+          ) : AppBar(
+            title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                //Title
+                Text("Music"),
+                //Search Button
+                Row(
+                  children: [
+                    ElevatedButton.icon(onPressed: () {
                       Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
-                            return SettingsPage();
-                          }));
-                    },),
-                  ),
-                ],
-              ),
+                            return SearchResults();
+                          })).then((value) {
+                        dataModel.searchResults.clear();
+                      });
+                    }, icon: Icon(Icons.search), label: Text("Search")),
+                    //Menu
+                    Padding(
+                      padding: const EdgeInsets.only(left: Dimens.xSmall),
+                      child: IconButton(icon: Icon(Icons.settings), color: dataModel.errorMessage == "" ? Colours.buttonIconColour : Colors.red, onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(
+                            builder: (context) {
+                              return SettingsPage();
+                            }));
+                      },),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            bottom: TabBar(
+              isScrollable: true,
+              tabs: myTabs,
+            ),
+          ),
+          body: dataModel.songs.length == 0 && dataModel.errorMessage != "" ? Padding(padding: const EdgeInsets.all(Dimens.xSmall), child: Text(dataModel.errorMessage),) : TabBarView(
+            physics: dataModel.inSelectMode ? NeverScrollableScrollPhysics() : null,
+            children: [
+              PlaylistList(/*key: PageStorageKey("playlist_key"),*/),
+              SongList(/*key: PageStorageKey("song_key"), */playSongs: true,),
+              ArtistList(/*key: PageStorageKey("artist_key"), */goToDetails: true,),
+              AlbumList(/*key: PageStorageKey("album_key"), */goToDetails: true,),
             ],
           ),
-          bottom: TabBar(
-            isScrollable: true,
-            tabs: myTabs,
-          ),
-        ),
-        body: dataModel.songs.length == 0 && dataModel.errorMessage != "" ? Padding(padding: const EdgeInsets.all(Dimens.xSmall), child: Text(dataModel.errorMessage),) : TabBarView(
-          physics: dataModel.isSelecting() ? NeverScrollableScrollPhysics() : null,
-          children: [
-            PlaylistList(/*key: PageStorageKey("playlist_key"),*/),
-            SongList(/*key: PageStorageKey("song_key"), */playSongs: true,),
-            ArtistList(/*key: PageStorageKey("artist_key"), */goToDetails: true,),
-            AlbumList(/*key: PageStorageKey("album_key"), */goToDetails: true,),
-          ],
         ),
       ),
     );
