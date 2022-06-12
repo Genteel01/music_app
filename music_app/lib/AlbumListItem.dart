@@ -35,7 +35,7 @@ class _AlbumListItemState extends State<AlbumListItem> {
         trailing: Text(widget.album.songs.length == 1 ? "${widget.album.songs.length} track" : "${widget.album.songs.length} tracks"),
         subtitle: Text(widget.album.albumArtist, maxLines: 1, overflow: TextOverflow.ellipsis,),
         leading: widget.album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(widget.album.albumArt)),
-        onTap: () => {
+        onTap: () {
           if(!dataModel.isSelecting() && widget.goToDetails)
             {
               Navigator.push(context, MaterialPageRoute(
@@ -43,17 +43,17 @@ class _AlbumListItemState extends State<AlbumListItem> {
                     return AlbumDetails(index: dataModel.albums.indexOf(widget.album));
                   })).then((value) {
                 dataModel.clearSelections();
-              })
+              });
             }
           else if(widget.allowSelection)
             {
-              dataModel.toggleSelection(dataModel.albums.indexOf(widget.album), Album)
+              dataModel.toggleSelection(dataModel.albums.indexOf(widget.album), Album);
             }
         },
-        onLongPress: () => {
+        onLongPress: () {
           if(widget.allowSelection)
             {
-              dataModel.toggleSelection(dataModel.albums.indexOf(widget.album), Album)
+              dataModel.toggleSelection(dataModel.albums.indexOf(widget.album), Album);
             }
         },
       ),

@@ -75,22 +75,22 @@ class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
               //Search Button
               Row(
                 children: [
-                  ElevatedButton.icon(onPressed: () => {
+                  ElevatedButton.icon(onPressed: () {
                     Navigator.push(context, MaterialPageRoute(
                         builder: (context) {
                           return SearchResults();
-                        })).then((value) => {
-                      dataModel.searchResults.clear()
-                    })
+                        })).then((value) {
+                      dataModel.searchResults.clear();
+                    });
                   }, icon: Icon(Icons.search), label: Text("Search")),
                   //Menu
                   Padding(
                     padding: const EdgeInsets.only(left: Dimens.xSmall),
-                    child: IconButton(icon: Icon(Icons.settings), color: dataModel.errorMessage == "" ? Colours.buttonIconColour : Colors.red, onPressed: () => {
+                    child: IconButton(icon: Icon(Icons.settings), color: dataModel.errorMessage == "" ? Colours.buttonIconColour : Colors.red, onPressed: () {
                       Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
                             return SettingsPage();
-                          }))
+                          }));
                     },),
                   ),
                 ],

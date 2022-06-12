@@ -40,18 +40,18 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
           ],
         ) : Text(widget.song.durationString()),
         leading: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song))),
-        onTap: () => {
+        onTap: () {
           if(!dataModel.isSelecting())
             {
-              dataModel.setCurrentlyPlaying(widget.index, widget.artist.songs),
+              dataModel.setCurrentlyPlaying(widget.index, widget.artist.songs);
             }
           else
             {
-              dataModel.toggleSelection(widget.index, Song)
+              dataModel.toggleSelection(widget.index, Song);
             }
         },
-        onLongPress: () => {
-          dataModel.toggleSelection(widget.index, Song)
+        onLongPress: () {
+          dataModel.toggleSelection(widget.index, Song);
         },
       ),
     );

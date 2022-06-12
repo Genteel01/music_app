@@ -50,11 +50,13 @@ class AlbumDetails extends StatelessWidget {
                           if(index == 0)
                             {
                               return Column(children: [
-                                InkWell(child: Hero(tag: "album_art", child: album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(album.albumArt))), onTap: () =>
+                                InkWell(child: Hero(tag: "album_art", child: album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(album.albumArt))), onTap: () {
                                     Navigator.push(context, MaterialPageRoute(
                                         builder: (context) {
                                           return AlbumArtView(image: album.albumArt);
-                                        })),),
+                                        }));
+                                    },
+                                ),
                                 Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Text(album.albumArtist), Text("Tracks: " + album.songs.length.toString())],),
                                 ShuffleButton(dataModel: dataModel, futureSongs: album.songs)
                               ],);

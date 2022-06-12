@@ -292,7 +292,9 @@ class DataModel extends ChangeNotifier {
       //}
     //await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
     _audioHandler = await AudioService.init(
-      builder: () => AudioPlayerTask(),
+      builder: () {
+          return AudioPlayerTask();
+        },
       config: AudioServiceConfig(
         androidNotificationChannelId: 'au.com.genteel01.music_app.channel.audio',
         androidNotificationChannelName: 'Music playback',

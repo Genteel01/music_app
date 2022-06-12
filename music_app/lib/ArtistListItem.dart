@@ -34,7 +34,7 @@ class _ArtistListItemState extends State<ArtistListItem> {
         subtitle: Text(widget.artist.albums.length == 1 ? "${widget.artist.albums.length} albums" : "${widget.artist.albums.length} albums"),
         trailing: Text(widget.artist.songs.length == 1 ? "${widget.artist.songs.length} track" : "${widget.artist.songs.length} tracks"),
         leading: !widget.artist.songs.any((element) => dataModel.getAlbumArt(element) != "") ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != "")))),
-        onTap: () async => {
+        onTap: () async {
           if(!dataModel.isSelecting() && widget.goToDetails)
             {
               Navigator.push(context, MaterialPageRoute(
@@ -42,17 +42,17 @@ class _ArtistListItemState extends State<ArtistListItem> {
                     return ArtistDetails(index: dataModel.artists.indexOf(widget.artist));
                   })).then((value) {
                 dataModel.clearSelections();
-              })
+              });
             }
           else if(widget.allowSelection)
             {
-              dataModel.toggleSelection(dataModel.artists.indexOf(widget.artist), Artist)
+              dataModel.toggleSelection(dataModel.artists.indexOf(widget.artist), Artist);
             }
         },
-        onLongPress: () => {
+        onLongPress: () {
           if(widget.allowSelection)
             {
-              dataModel.toggleSelection(dataModel.artists.indexOf(widget.artist), Artist)
+              dataModel.toggleSelection(dataModel.artists.indexOf(widget.artist), Artist);
             }
         },
       ),

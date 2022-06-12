@@ -56,25 +56,27 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                     content: TextField(controller: playlistNameController, textCapitalization: TextCapitalization.sentences, decoration: InputDecoration(hintText: playlist.name),),
                     actions: <Widget>[
                       TextButton(
-                        onPressed: () =>
-                            Navigator.pop(context, false),
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                          },
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () =>
-                            Navigator.pop(context, true),
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
                         child: const Text('Create'),
                       ),
                     ],
                   )
-          ).then((value) =>
+          ).then((value)
           {
             if(value != null && value)
               {
-                dataModel.renamePlaylist(playlist, playlistNameController.text),
+                dataModel.renamePlaylist(playlist, playlistNameController.text);
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text("Playlist Renamed"),
-                )),
+                ));
               }
           });
           break;
@@ -115,13 +117,13 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
           title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(playlist.name),
-              reordering! ? ElevatedButton(onPressed: () => {
+              reordering! ? ElevatedButton(onPressed: () {
                 setState(() {
                   reordering = false;
-                }),
+                });
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text("Playlist Reordered"),
-                )),
+                ));
               }, child: Text("End")) :
               PopupMenuButton<String>(
                 onSelected: selectMenuButton,

@@ -38,18 +38,18 @@ class _AlbumDetailsListItemState extends State<AlbumDetailsListItem> {
           ],
         ) : Text(widget.song.durationString()),
         leading: Text(widget.song.trackNumber.toString()),
-        onTap: () => {
+        onTap: () {
           if(!dataModel.isSelecting())
             {
-              dataModel.setCurrentlyPlaying(widget.index, widget.album.songs),
+              dataModel.setCurrentlyPlaying(widget.index, widget.album.songs);
             }
           else
             {
-              dataModel.toggleSelection(widget.index, Song)
+              dataModel.toggleSelection(widget.index, Song);
             }
         },
-        onLongPress: () => {
-          dataModel.toggleSelection(widget.index, Song)
+        onLongPress: () {
+          dataModel.toggleSelection(widget.index, Song);
         },
       ),
     );

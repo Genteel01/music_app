@@ -54,19 +54,19 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
           //shuffle, loop, and add to playlist row
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              SizedBox(width: Dimens.currentlyPlayingModalButtonSize, height: Dimens.currentlyPlayingModalButtonSize, child: FloatingActionButton(backgroundColor: dataModel.settings.shuffle ? Theme.of(context).primaryColor : Colours.disabledButtonColour, child: Icon( Icons.shuffle, color: Colours.buttonIconColour,), heroTag: null, onPressed: () => {
-                dataModel.toggleShuffle(),
+              SizedBox(width: Dimens.currentlyPlayingModalButtonSize, height: Dimens.currentlyPlayingModalButtonSize, child: FloatingActionButton(backgroundColor: dataModel.settings.shuffle ? Theme.of(context).primaryColor : Colours.disabledButtonColour, child: Icon( Icons.shuffle, color: Colours.buttonIconColour,), heroTag: null, onPressed: () {
+                dataModel.toggleShuffle();
               },)),
               //Loop button
               SizedBox(width: Dimens.currentlyPlayingModalButtonSize, height: Dimens.currentlyPlayingModalButtonSize, child: FloatingActionButton(child: Icon(dataModel.settings.loop == LoopType.singleSong ? Icons.repeat_one : (dataModel.settings.loop == LoopType.loop ? Icons.repeat : Icons.arrow_right_alt)
-                , color: Colors.grey[50],), heroTag: null, onPressed: () => {
-                dataModel.toggleLoop(),
+                , color: Colors.grey[50],), heroTag: null, onPressed: () {
+                dataModel.toggleLoop();
               },)),
-              SizedBox(width: Dimens.currentlyPlayingModalButtonSize, height: Dimens.currentlyPlayingModalButtonSize, child: FloatingActionButton(child: Icon(Icons.playlist_add), onPressed: () => {
-                dataModel.selectedIndices.forEach((element) { oldSelections.add(element);}),
-                dataModel.clearSelections(),
-                oldSelectionType = dataModel.selectionType,
-                dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.upNext[dataModel.settings.playingIndex]), Song),
+              SizedBox(width: Dimens.currentlyPlayingModalButtonSize, height: Dimens.currentlyPlayingModalButtonSize, child: FloatingActionButton(child: Icon(Icons.playlist_add), onPressed: () {
+                dataModel.selectedIndices.forEach((element) { oldSelections.add(element);});
+                dataModel.clearSelections();
+                oldSelectionType = dataModel.selectionType;
+                dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.upNext[dataModel.settings.playingIndex]), Song);
                 showModalBottomSheet<void>(
                   isScrollControlled: true,
                   context: context,
@@ -84,7 +84,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                       ),
                     );
                   },
-                ).then((value) => {dataModel.clearSelections(), oldSelections.forEach((element) {dataModel.toggleSelection(element, oldSelectionType);})})
+                ).then((value) {dataModel.clearSelections(); oldSelections.forEach((element) {dataModel.toggleSelection(element, oldSelectionType);});});
               },),
               ),
             ],
@@ -138,7 +138,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                     //Current position
                     Text("0:00"),
                     //Position Slider
-                    Slider(value: 0, max: 1, onChanged: (value) => {},),
+                    Slider(value: 0, max: 1, onChanged: (value) {},),
                     //Duration
                     Text("0:00"),
                   ],

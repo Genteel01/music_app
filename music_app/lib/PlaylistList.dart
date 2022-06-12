@@ -68,7 +68,7 @@ class PlaylistListBuilder extends StatelessWidget {
                           leading: Icon(Icons.add_box),
                           title: Text("Create new Playlist"),
                           subtitle: Text(dataModel.playlists.length == 1 ? "${dataModel.playlists.length} Playlist" : "${dataModel.playlists.length} Playlists"),
-                          onTap: () => {
+                          onTap: () {
                             showDialog<bool>(
                                 context: context,
                                 builder: (BuildContext context) =>
@@ -77,27 +77,29 @@ class PlaylistListBuilder extends StatelessWidget {
                                       content: TextField(controller: playlistNameController, textCapitalization: TextCapitalization.sentences, decoration: InputDecoration(hintText: "Playlist ${(dataModel.playlists.length + 1)}"),),
                                       actions: <Widget>[
                                         TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, false),
+                                          onPressed: () {
+                                              Navigator.pop(context, false);
+                                            },
                                           child: const Text('Cancel'),
                                         ),
                                         TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, true),
+                                          onPressed: () {
+                                            Navigator.pop(context, true);
+                                          },
                                           child: const Text('Create'),
                                         ),
                                       ],
                                     )
-                            ).then((value) =>
+                            ).then((value)
                             {
                                 if(value != null && value)
                                   {
-                                    dataModel.createPlaylist(playlistNameController.text),
+                                    dataModel.createPlaylist(playlistNameController.text);
                                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                       content: Text("Playlist Created"),
-                                    )),
+                                    ));
                                   }
-                            }),
+                            });
                           },
                         ),
                       ),
@@ -118,14 +120,14 @@ class PlaylistListBuilder extends StatelessWidget {
                           dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist);
                         }
                       }) : null,
-                      onTap: () => {
+                      onTap: () {
                         if(addingToPlaylist)
                           {
-                            dataModel.addToPlaylist(playlist),
+                            dataModel.addToPlaylist(playlist);
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text("Songs Added to Playlist"),
-                            )),
-                            Navigator.pop(context)
+                            ));
+                            Navigator.pop(context);
                           }
                         else
                           {
@@ -136,18 +138,18 @@ class PlaylistListBuilder extends StatelessWidget {
                                       return PlaylistDetails(index: index - 1);
                                   })).then((value) {
                                   dataModel.clearSelections();
-                                })
+                                });
                               }
                             else
                               {
-                                dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist)
+                                dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist);
                               }
                           }
                       },
-                      onLongPress: () => {
+                      onLongPress: () {
                         if(!addingToPlaylist)
                           {
-                            dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist)
+                            dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist);
                           }
                       },
                     ),

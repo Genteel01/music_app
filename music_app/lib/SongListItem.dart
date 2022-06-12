@@ -44,20 +44,20 @@ class _SongListItemState extends State<SongListItem> {
           ],
         ) : Text(widget.song.durationString()),
         leading: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song))),
-        onTap: () => {
+        onTap: () {
           if(!dataModel.isSelecting() && widget.playSongs)
             {
-              dataModel.setCurrentlyPlaying(widget.index, widget.futureSongs),
+              dataModel.setCurrentlyPlaying(widget.index, widget.futureSongs);
             }
           else if(widget.allowSelection)
             {
-              dataModel.toggleSelection(widget.index, Song)
+              dataModel.toggleSelection(widget.index, Song);
             }
         },
-        onLongPress: () => {
+        onLongPress: () {
           if(widget.allowSelection)
             {
-              dataModel.toggleSelection(widget.index, Song)
+              dataModel.toggleSelection(widget.index, Song);
             }
         },
       ),

@@ -34,8 +34,8 @@ class _AddToPlaylistState extends State<AddToPlaylist> {
       length: myTabs.length,
       child: Scaffold(
         appBar: dataModel.isSelecting() ? AppBar(automaticallyImplyLeading: false,
-            title: SelectingAppBarTitle(rightButtonReplacement: ElevatedButton.icon(onPressed: () => {
-              Navigator.pop(context, true)
+            title: SelectingAppBarTitle(rightButtonReplacement: ElevatedButton.icon(onPressed: () {
+              Navigator.pop(context, true);
             }, label: Text("Add"), icon: Icon(Icons.save),),),
             bottom: NonTappableTabBar(tabBar: TabBar(tabs: myTabs, isScrollable: true,),)
         ) : AppBar(

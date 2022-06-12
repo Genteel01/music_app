@@ -34,8 +34,8 @@ class SearchResults extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: Dimens.xSmall),
               child: SizedBox(width: Dimens.searchTextFieldWidth,
-                child: TextField(controller: searchController, decoration: InputDecoration(hintText: "Search",), onChanged: (s) => {
-                dataModel.getSearchResults(s)
+                child: TextField(controller: searchController, decoration: InputDecoration(hintText: "Search",), onChanged: (s) {
+                dataModel.getSearchResults(s);
           },),
               ),
             )

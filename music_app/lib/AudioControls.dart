@@ -21,17 +21,17 @@ class _AudioControlsState extends State<AudioControls> {
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return Row(mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(Icons.skip_previous, color: Colours.buttonIconColour,), heroTag: null, onPressed: () => {
-          dataModel.previousButton(),
+        SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(Icons.skip_previous, color: Colours.buttonIconColour,), heroTag: null, onPressed: () {
+          dataModel.previousButton();
         },)),
         Padding(
           padding: const EdgeInsets.only(left: Dimens.xSmall, right: Dimens.xSmall),
-          child: SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(dataModel.isPlaying ? Icons.pause : Icons.play_arrow, color: Colours.buttonIconColour,), heroTag: null, onPressed: () async => {
-            dataModel.playButton(),
+          child: SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(dataModel.isPlaying ? Icons.pause : Icons.play_arrow, color: Colours.buttonIconColour,), heroTag: null, onPressed: () async {
+            dataModel.playButton();
           },)),
         ),
-        SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(Icons.skip_next, color: Colours.buttonIconColour,), heroTag: null, onPressed: () => {
-          dataModel.nextButton()
+        SizedBox(width: widget.buttonSizes, height: widget.buttonSizes, child: FloatingActionButton(child: Icon(Icons.skip_next, color: Colours.buttonIconColour,), heroTag: null, onPressed: () {
+          dataModel.nextButton();
         },)),
       ],
     );
