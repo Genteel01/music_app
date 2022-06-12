@@ -35,11 +35,12 @@ class _SongListItemState extends State<SongListItem> {
         border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
       child: Row(
         children: [
-          if (dataModel.inSelectMode) Checkbox(value: dataModel.selectedIndices.contains(dataModel.songs.indexOf(widget.song)), onChanged: (value) {
-            if(widget.allowSelection)
-            {
-              dataModel.toggleSelection(dataModel.songs.indexOf(widget.song), Song);
-            }
+          if (dataModel.inSelectMode) Checkbox(value: dataModel.selectedIndices.contains(widget.index) || (!dataModel.inSelectMode && dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
+              onChanged: (value) {
+                if(widget.allowSelection)
+                {
+                  dataModel.toggleSelection(dataModel.songs.indexOf(widget.song), Song);
+                }
           }),
           Expanded(
             child: ListTile(
