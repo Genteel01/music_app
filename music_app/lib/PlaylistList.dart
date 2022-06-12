@@ -57,6 +57,7 @@ class PlaylistListBuilder extends StatelessWidget {
           child: ListView.builder(
             controller: myScrollController,
               itemBuilder: (_, index) {
+                //If it is the first item make the Create Playlist button
                 if(index == 0)
                   {
                     final playlistNameController = TextEditingController();
@@ -104,7 +105,7 @@ class PlaylistListBuilder extends StatelessWidget {
                   }
                 var playlist = dataModel.playlists[index - 1];
 
-                return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
+                return Container(decoration: BoxDecoration(
                     border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
                   child: Center(
                     child: ListTile(
@@ -148,7 +149,6 @@ class PlaylistListBuilder extends StatelessWidget {
                 );
               },
               itemCount: dataModel.playlists.length + 1,
-            itemExtent: Dimens.listItemSize,
           ),
         ),
       ),
