@@ -1,12 +1,14 @@
 
+import 'Album.dart';
 import 'Song.dart';
 
 
 class Artist{
   List<Song> songs;
   String name;
+  List<Album> albums;
 
-  Artist({required this.songs, required this.name});
+  Artist({required this.songs, required this.name, required this.albums});
 
   Map<String, dynamic> toJson() =>
       {
@@ -16,16 +18,17 @@ class Artist{
   Artist.fromJson(Map<String, dynamic> json)
       :
         name = json['name'],
-        songs = [];
+        songs = [],
+        albums = [];
 
   //Function to turn a json file of several artists into a list of artists
   static List<Artist> loadArtistFile(List<dynamic> data)
   {
-    List<Artist> newAlbums = List<Artist>.empty(growable: true);
+    List<Artist> newArtists = List<Artist>.empty(growable: true);
     data.forEach((element) {
-      newAlbums.add(Artist.fromJson(element));
+      newArtists.add(Artist.fromJson(element));
     });
-    return newAlbums;
+    return newArtists;
   }
   //Function to turn a list of artists into a json file to be saved
   static List<Map<String, dynamic>> saveArtistFile(List<Artist> artistList)

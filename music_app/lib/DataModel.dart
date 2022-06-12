@@ -457,6 +457,8 @@ class DataModel extends ChangeNotifier {
         notifyListeners();
       }
     }
+
+    addAlbumsToArtists();
     //Set up the listener to detect when songs finish
     _audioHandler.playbackState.listen((state) {
       /*if(state.processingState == AudioProcessingState.idle)
@@ -627,6 +629,13 @@ class DataModel extends ChangeNotifier {
     }
     catch(error){}
   }
+  //Add the albums to all the artist objects
+  void addAlbumsToArtists()
+  {
+    artists.forEach((artist) {
+      artist.albums.addAll(albums.where((album) => album.albumArtist == artist.name));
+    });
+  }
 
   void addToArtistsAndAlbums(Song newSong, Uint8List? albumArt, String? albumYear)
   {
@@ -636,7 +645,7 @@ class DataModel extends ChangeNotifier {
     }
     catch(error)
     {
-      Artist newArtist = Artist(songs: [], name: newSong.artist);
+      Artist newArtist = Artist(songs: [], name: newSong.artist, albums: []);
       newArtist.songs.add(newSong);
       artists.add(newArtist);
     }
