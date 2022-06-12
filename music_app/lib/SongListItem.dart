@@ -33,33 +33,45 @@ class _SongListItemState extends State<SongListItem> {
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
-      child: ListTile(
-        selected: dataModel.selectedIndices.contains(widget.index) || (!dataModel.isSelecting() && dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
-        title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
-        subtitle: Text(widget.song.artist, maxLines: 1, overflow: TextOverflow.ellipsis,),
-        trailing: dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song ? Row(mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(widget.song.durationString()),
-            Icon(Icons.play_arrow)
-          ],
-        ) : Text(widget.song.durationString()),
-        leading: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song))),
-        onTap: () {
-          if(!dataModel.isSelecting() && widget.playSongs)
+      child: Row(
+        children: [
+          if (dataModel.isSelecting()) Checkbox(value: dataModel.selectedIndices.contains(dataModel.songs.indexOf(widget.song)), onChanged: (value) {
+            if(widget.allowSelection)
             {
-              dataModel.setCurrentlyPlaying(widget.index, widget.futureSongs);
+              dataModel.toggleSelection(dataModel.songs.indexOf(widget.song), Song);
             }
-          else if(widget.allowSelection)
-            {
-              dataModel.toggleSelection(widget.index, Song);
-            }
-        },
-        onLongPress: () {
-          if(widget.allowSelection)
-            {
-              dataModel.toggleSelection(widget.index, Song);
-            }
-        },
+          }),
+          Expanded(
+            child: ListTile(
+              selected: dataModel.selectedIndices.contains(widget.index) || (!dataModel.isSelecting() && dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
+              title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
+              subtitle: Text(widget.song.artist, maxLines: 1, overflow: TextOverflow.ellipsis,),
+              trailing: dataModel.settings.upNext.length == widget.futureSongs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song ? Row(mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(widget.song.durationString()),
+                  Icon(Icons.play_arrow)
+                ],
+              ) : Text(widget.song.durationString()),
+              leading: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song))),
+              onTap: () {
+                if(!dataModel.isSelecting() && widget.playSongs)
+                  {
+                    dataModel.setCurrentlyPlaying(widget.index, widget.futureSongs);
+                  }
+                else if(widget.allowSelection)
+                  {
+                    dataModel.toggleSelection(widget.index, Song);
+                  }
+              },
+              onLongPress: () {
+                if(widget.allowSelection)
+                  {
+                    dataModel.toggleSelection(widget.index, Song);
+                  }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
