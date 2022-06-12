@@ -380,7 +380,7 @@ class DataModel extends ChangeNotifier {
       {
         var directoryMap = Directory(directoryPath).listSync(recursive: true);
         await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
-          if(filePath.path.endsWith("mp3") || filePath.path.endsWith("flac") || filePath.path.endsWith("m4a"))
+          if(filePath.path.toLowerCase().endsWith("mp3") || filePath.path.toLowerCase().endsWith("flac") || filePath.path.toLowerCase().endsWith("m4a") || filePath.path.toLowerCase().endsWith("wma"))
           {
             if(!songs.any((element) => element.filePath == filePath.path))
             {
