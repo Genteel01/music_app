@@ -757,7 +757,6 @@ class DataModel extends ChangeNotifier {
   {
     if(settings.upNext.length != 0)
       {
-        print("RECEIVED_EVENT_IN_SECOND_IF");
         settings.playingIndex = index;
         notifyListeners();
         saveSettings();

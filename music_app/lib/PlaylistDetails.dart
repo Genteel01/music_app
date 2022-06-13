@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 
 import 'AddToPlaylistScreen.dart';
+import 'AlbumArtView.dart';
 import 'AppBarTitle.dart';
 import 'CurrentlyPlayingBar.dart';
 import 'DataModel.dart';
@@ -181,14 +182,25 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                           itemBuilder: (_, index) {
                             if(index == 0)
                             {
-                              return ShuffleButton(dataModel: dataModel, futureSongs: playlist.songs);
+                              return Column(
+                                children: [
+                                  InkWell(child: Hero(tag: playlist.name, child: !playlist.songs.any((element) => dataModel.getAlbumArt(element) != "") ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(playlist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != ""))))),
+                                   onTap: () {
+                                    Navigator.push(context, MaterialPageRoute(
+                                        builder: (context) {
+                                          return AlbumArtView(image: dataModel.getAlbumArt(playlist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != "")), tagName: playlist.name,);
+                                        }));
+                                  },
+                                  ),
+                                  ShuffleButton(dataModel: dataModel, futureSongs: playlist.songs),
+                                ],
+                              );
                             }
                             var song = playlist.songs[index - 1];
 
                             return SongListItem(song: song, allowSelection: true, futureSongs: playlist.songs, index: index - 1, playSongs: true,);
                           },
                           itemCount: playlist.songs.length + 1,
-                        itemExtent: Dimens.listItemSize,
                       ),
                     ),
                   ),

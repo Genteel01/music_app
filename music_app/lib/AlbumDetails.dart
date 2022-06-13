@@ -62,7 +62,7 @@ class AlbumDetails extends StatelessWidget {
                                   InkWell(child: Hero(tag: album.name, child: album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(album.albumArt))), onTap: () {
                                       Navigator.push(context, MaterialPageRoute(
                                           builder: (context) {
-                                            return AlbumArtView(image: album.albumArt, albumName: album.name,);
+                                            return AlbumArtView(image: album.albumArt, tagName: album.name,);
                                           }));
                                       },
                                   ),

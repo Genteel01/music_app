@@ -1,11 +1,10 @@
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
-import 'package:music_app/PlaylistDetails.dart';
 import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
-import 'Playlist.dart';
+import 'PlaylistListItem.dart';
 class PlaylistList extends StatefulWidget {
   const PlaylistList({Key? key}) : super(key: key);
 
@@ -107,54 +106,7 @@ class PlaylistListBuilder extends StatelessWidget {
                   }
                 var playlist = dataModel.playlists[index - 1];
 
-                return Container(decoration: BoxDecoration(
-                    border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
-                  child: Center(
-                    child: ListTile(
-                      selected: !addingToPlaylist && dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)),
-                      title: Text(playlist.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
-                      trailing: Text(playlist.songs.length == 1 ? "${playlist.songs.length} Track" : "${playlist.songs.length} Tracks"),
-                      leading: dataModel.inSelectMode ? Checkbox(value: dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)), onChanged: (value) {
-                        if(!addingToPlaylist)
-                        {
-                          dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist);
-                        }
-                      }) : null,
-                      onTap: () {
-                        if(addingToPlaylist)
-                          {
-                            dataModel.addToPlaylist(playlist);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text("Songs Added to Playlist"),
-                            ));
-                            Navigator.pop(context);
-                          }
-                        else
-                          {
-                            if(!dataModel.inSelectMode)
-                              {
-                                Navigator.push(context, MaterialPageRoute(
-                                    builder: (context) {
-                                      return PlaylistDetails(index: index - 1);
-                                  })).then((value) {
-                                  dataModel.clearSelections();
-                                });
-                              }
-                            else
-                              {
-                                dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist);
-                              }
-                          }
-                      },
-                      onLongPress: () {
-                        if(!addingToPlaylist)
-                          {
-                            dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist);
-                          }
-                      },
-                    ),
-                  ),
-                );
+                return PlaylistListItem(addingToPlaylist: addingToPlaylist, playlist: playlist, index: index - 1);
               },
               itemCount: dataModel.playlists.length + 1,
           ),

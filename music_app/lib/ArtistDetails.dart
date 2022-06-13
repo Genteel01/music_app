@@ -1,5 +1,6 @@
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
+import 'package:music_app/ArtistListAlbumHeader.dart';
 import 'package:provider/provider.dart';
 
 import 'AppBarTitle.dart';
@@ -7,7 +8,6 @@ import 'Artist.dart';
 import 'ArtistDetailsListItem.dart';
 import 'CurrentlyPlayingBar.dart';
 import 'DataModel.dart';
-import 'ListHeader.dart';
 import 'ShuffleButton.dart';
 import 'Values.dart';
 
@@ -62,7 +62,7 @@ class ArtistDetails extends StatelessWidget {
                             {
                               return Column(
                                 children: [
-                                  ListHeader(text: song.album),
+                                  ArtistDetailsAlbumHeader(song: song, index: index - 1),
                                   ArtistDetailsListItem(song: song, artist: artist, index: index - 1),
                                 ],
                               );

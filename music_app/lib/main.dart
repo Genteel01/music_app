@@ -58,7 +58,16 @@ class MyApp extends StatelessWidget {
         ),
         title: "Music Player",
         home: MyTabBar(),
-        //home: MyHomePage(title: 'List Tutorial'),
+        /*builder: (context, child) {
+          return Scaffold(
+            body: Column(
+              children: [
+                Expanded(child: child!),
+                CurrentlyPlayingBar()
+              ],
+            ),
+          );
+        },*/
       ),
     );
   }

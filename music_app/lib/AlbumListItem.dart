@@ -47,10 +47,12 @@ class _AlbumListItemState extends State<AlbumListItem> {
               onTap: () {
                 if(!dataModel.inSelectMode && widget.goToDetails)
                   {
-                    Navigator.push(context, MaterialPageRoute(
+                    Navigator.push(context, PageRouteBuilder(pageBuilder: (_, __, ___) => AlbumDetails(index: dataModel.albums.indexOf(widget.album)))
+                      /*MaterialPageRoute(
                         builder: (context) {
                           return AlbumDetails(index: dataModel.albums.indexOf(widget.album));
-                        })).then((value) {
+                        })*/
+                    ).then((value) {
                       dataModel.clearSelections();
                     });
                   }
