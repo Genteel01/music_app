@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 
 import 'AddToPlaylistScreen.dart';
+import 'AlbumArtView.dart';
 import 'AppBarTitle.dart';
 import 'CurrentlyPlayingBar.dart';
 import 'DataModel.dart';
@@ -38,7 +39,7 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
     );
   }
 
-  Scaffold buildScaffold(BuildContext context, DataModel dataModel, _) {
+  Widget buildScaffold(BuildContext context, DataModel dataModel, _) {
     Playlist playlist = dataModel.playlists[widget.index];
     ScrollController myScrollController = ScrollController();
     void selectMenuButton(String button)
@@ -56,25 +57,27 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                     content: TextField(controller: playlistNameController, textCapitalization: TextCapitalization.sentences, decoration: InputDecoration(hintText: playlist.name),),
                     actions: <Widget>[
                       TextButton(
-                        onPressed: () =>
-                            Navigator.pop(context, false),
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                          },
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () =>
-                            Navigator.pop(context, true),
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
                         child: const Text('Create'),
                       ),
                     ],
                   )
-          ).then((value) =>
+          ).then((value)
           {
             if(value != null && value)
               {
-                dataModel.renamePlaylist(playlist, playlistNameController.text),
+                dataModel.renamePlaylist(playlist, playlistNameController.text);
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                   content: Text("Playlist Renamed"),
-                )),
+                ));
               }
           });
           break;
@@ -108,82 +111,103 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
           break;
       }
     }
-    return Scaffold(
-        appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
-          title: SelectingAppBarTitle(playlist: playlist,),
-        ) : AppBar(automaticallyImplyLeading: !reordering!,
-          title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(playlist.name),
-              reordering! ? ElevatedButton(onPressed: () => {
-                setState(() {
-                  reordering = false;
-                }),
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text("Playlist Reordered"),
-                )),
-              }, child: Text("End")) :
-              PopupMenuButton<String>(
-                onSelected: selectMenuButton,
-                itemBuilder: (BuildContext context) {
-                  return {"Rename", "Reorder", "Delete", "Add to Playlist"}.map((String choice) {
-                    return PopupMenuItem<String>(
-                      value: choice,
-                      child: Text(choice),
-                    );
-                  }).toList();
-                },
-              ),
-            ],
-          ),
-        ),
-        bottomNavigationBar: CurrentlyPlayingBar(),
-        body: Column(
-            children: <Widget>[
-              Expanded(
-                child: reordering! ? ReorderableListView.builder(
-                    itemBuilder: (_, index) {
-                      var song = playlist.songs[index];
-
-                      return Container(key: Key(index.toString()), height: Dimens.listItemSize, decoration: BoxDecoration(
-                          border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
-                        child: ListTile(
-                          title: Text(song.name),
-                          subtitle: Text(song.artist),
-                          trailing: Icon(Icons.menu),
-                          leading: dataModel.getAlbumArt(song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(song))),
-                        ),
+    return WillPopScope(
+      onWillPop: () async {
+        if(dataModel.inSelectMode)
+        {
+          dataModel.stopSelecting();
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+          appBar: dataModel.inSelectMode ? AppBar(automaticallyImplyLeading: false,
+            title: SelectingAppBarTitle(playlist: playlist,),
+          ) : AppBar(automaticallyImplyLeading: !reordering!,
+            title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(playlist.name),
+                reordering! ? ElevatedButton(onPressed: () {
+                  setState(() {
+                    reordering = false;
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text("Playlist Reordered"),
+                  ));
+                }, child: Text("End")) :
+                PopupMenuButton<String>(
+                  onSelected: selectMenuButton,
+                  itemBuilder: (BuildContext context) {
+                    return {"Rename", "Reorder", "Delete", "Add to Playlist"}.map((String choice) {
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Text(choice),
                       );
-                    },
-                    itemCount: playlist.songs.length,
-                  onReorder: (int oldIndex, int newIndex) {
-                    dataModel.reorderPlaylist(oldIndex, newIndex, playlist);
+                    }).toList();
                   },
-                )
-                : Container(decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour),)),
-                  child: DraggableScrollbar.arrows(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    controller: myScrollController,
-                    child: ListView.builder(
-                      controller: myScrollController,
-                        itemBuilder: (_, index) {
-                          if(index == 0)
-                          {
-                            return ShuffleButton(dataModel: dataModel, futureSongs: playlist.songs);
-                          }
-                          var song = playlist.songs[index - 1];
+                ),
+              ],
+            ),
+          ),
+          bottomNavigationBar: CurrentlyPlayingBar(),
+          body: Column(
+              children: <Widget>[
+                Expanded(
+                  child: reordering! ? ReorderableListView.builder(
+                      itemBuilder: (_, index) {
+                        var song = playlist.songs[index];
 
-                          return SongListItem(song: song, allowSelection: true, futureSongs: playlist.songs, index: index - 1, playSongs: true,);
-                        },
-                        itemCount: playlist.songs.length + 1,
-                      itemExtent: Dimens.listItemSize,
+                        return Container(key: Key(index.toString()), height: Dimens.listItemSize, decoration: BoxDecoration(
+                            border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
+                          child: ListTile(
+                            title: Text(song.name),
+                            subtitle: Text(song.artist),
+                            trailing: Icon(Icons.menu),
+                            leading: dataModel.getAlbumArt(song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(song))),
+                          ),
+                        );
+                      },
+                      itemCount: playlist.songs.length,
+                    onReorder: (int oldIndex, int newIndex) {
+                      dataModel.reorderPlaylist(oldIndex, newIndex, playlist);
+                    },
+                  )
+                  : Container(decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour),)),
+                    child: DraggableScrollbar.arrows(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      controller: myScrollController,
+                      child: ListView.builder(
+                        controller: myScrollController,
+                          itemBuilder: (_, index) {
+                            if(index == 0)
+                            {
+                              return Column(
+                                children: [
+                                  InkWell(child: Hero(tag: playlist.name, child: !playlist.songs.any((element) => dataModel.getAlbumArt(element) != "") ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(playlist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != ""))))),
+                                   onTap: () {
+                                    Navigator.push(context, MaterialPageRoute(
+                                        builder: (context) {
+                                          return AlbumArtView(image: dataModel.getAlbumArt(playlist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != "")), tagName: playlist.name,);
+                                        }));
+                                  },
+                                  ),
+                                  ShuffleButton(dataModel: dataModel, futureSongs: playlist.songs),
+                                ],
+                              );
+                            }
+                            var song = playlist.songs[index - 1];
+
+                            return SongListItem(song: song, allowSelection: true, futureSongs: playlist.songs, index: index - 1, playSongs: true,);
+                          },
+                          itemCount: playlist.songs.length + 1,
+                      ),
                     ),
                   ),
-                ),
-              )
-            ]
-        )
+                )
+              ]
+          )
+      ),
     );
   }
 }

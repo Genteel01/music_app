@@ -52,7 +52,7 @@ class Settings{
     originalSongPaths.forEach((element) {
       try
       {
-        originalUpNext.add(allSongs.firstWhere((song) => song.filePath ==element));
+        originalUpNext.add(allSongs.firstWhere((song) => song.filePath == element));
       }
       catch(error)
       {

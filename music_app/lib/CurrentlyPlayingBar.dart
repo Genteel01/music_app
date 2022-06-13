@@ -50,7 +50,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
             Padding(padding: const EdgeInsets.only(right: Dimens.xSmall), child: AudioControls(buttonSizes: Dimens.currentlyPlayingBarButtonSize,),),
           ],
         ),
-      ),onTap: dataModel.loading || dataModel.settings.upNext.length == 0 ? () => {} : () => {
+      ),onTap: dataModel.loading || dataModel.settings.upNext.length == 0 ? () {} : () {
       showModalBottomSheet<void>(
         isScrollControlled: true,
         context: context,
@@ -68,7 +68,7 @@ class _CurrentlyPlayingBarState extends State<CurrentlyPlayingBar> {
             ),
           );
         },
-      )
+      );
     },
     );
   }

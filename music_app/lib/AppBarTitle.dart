@@ -30,8 +30,13 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
       children: [
         Row(
           children: [
-            ElevatedButton(child: Text(dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist) ? "Clear" : "All"), onPressed: () => {
-              dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist) ? dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist, widget.playlist)
+            Checkbox(fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+                if (states.contains(MaterialState.selected))
+                  return Colours.deepRed;
+                return null;
+              }),
+              value: dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist), onChanged: (value) {
+              !value! ?  dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist, widget.playlist);
             },),
             Padding(
               padding: const EdgeInsets.only(left: Dimens.small, right: Dimens.small),
@@ -40,20 +45,21 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
           ],
         ),
         widget.rightButtonReplacement != null ? widget.rightButtonReplacement! :
-        ElevatedButton(child: Text(dataModel.selectionType == Playlist || widget.playlist != null ? "Remove" : "Add To"), onPressed: () => {
+        ElevatedButton(style: ButtonStyle(backgroundColor: dataModel.hasSelections() ? MaterialStateProperty.all(Colours.primaryColour) : MaterialStateProperty.all(Colours.redDisabledButtonColour)),
+          child: Text(dataModel.selectionType == Playlist || widget.playlist != null ? "Remove" : "Add To"), onPressed: dataModel.hasSelections() ? () {
           if(dataModel.selectionType == Playlist)
             {
-              dataModel.deletePlaylists(),
+              dataModel.deletePlaylists();
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text("Playlists Deleted"),
-              )),
+              ));
             }
           else if(widget.playlist != null)
             {
-              dataModel.removeFromPlaylist(widget.playlist!),
+              dataModel.removeFromPlaylist(widget.playlist!);
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text("Songs Removed From Playlist"),
-              )),
+              ));
             }
           else
             {
@@ -77,9 +83,9 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
                     ),
                   );
                 },
-              )
+              );
             }
-        },),
+        } : (){},),
       ],
     );
   }

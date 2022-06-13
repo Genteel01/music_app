@@ -26,8 +26,8 @@ class _PathsListState extends State<PathsList> {
           return ListTile(
             leading: Icon(Icons.add),
             title: Text("Add New Location"),
-            onTap: () async => {
-              await dataModel.getNewDirectory(),
+            onTap: () async {
+              await dataModel.getNewDirectory();
             },
           );
         }
@@ -36,8 +36,8 @@ class _PathsListState extends State<PathsList> {
         return ListTile(
           title: Text(path),
           subtitle: Text("Hold to remove"),
-          onLongPress: () async => {
-            await dataModel.removeDirectoryPath(path)
+          onLongPress: () async {
+            await dataModel.removeDirectoryPath(path);
           },
         );
       },

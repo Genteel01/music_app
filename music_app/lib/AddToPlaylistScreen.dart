@@ -33,9 +33,9 @@ class _AddToPlaylistState extends State<AddToPlaylist> {
     return DefaultTabController(
       length: myTabs.length,
       child: Scaffold(
-        appBar: dataModel.selectedIndices.length > 0 ? AppBar(automaticallyImplyLeading: false,
-            title: SelectingAppBarTitle(rightButtonReplacement: ElevatedButton.icon(onPressed: () => {
-              Navigator.pop(context, true)
+        appBar: dataModel.inSelectMode ? AppBar(automaticallyImplyLeading: false,
+            title: SelectingAppBarTitle(rightButtonReplacement: ElevatedButton.icon(onPressed: () {
+              Navigator.pop(context, true);
             }, label: Text("Add"), icon: Icon(Icons.save),),),
             bottom: NonTappableTabBar(tabBar: TabBar(tabs: myTabs, isScrollable: true,),)
         ) : AppBar(
@@ -46,7 +46,7 @@ class _AddToPlaylistState extends State<AddToPlaylist> {
           ),
         ),
         body: TabBarView(
-          physics: dataModel.selectedIndices.length > 0 ? NeverScrollableScrollPhysics() : null,
+          physics: dataModel.inSelectMode ? NeverScrollableScrollPhysics() : null,
           children: [
             SongList(/*key: PageStorageKey("song_key"), */playSongs: false,),
             ArtistList(/*key: PageStorageKey("artist_key"), */goToDetails: false,),

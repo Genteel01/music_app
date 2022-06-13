@@ -28,34 +28,49 @@ class _ArtistListItemState extends State<ArtistListItem> {
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
         border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
-      child: Align(alignment: Alignment.center,
-        child: ListTile(
-          selected: dataModel.selectedIndices.contains(dataModel.artists.indexOf(widget.artist)),
-          title: Text(widget.artist.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
-          trailing: Text(widget.artist.songs.length == 1 ? "${widget.artist.songs.length} track" : "${widget.artist.songs.length} tracks"),
-          leading: !widget.artist.songs.any((element) => dataModel.getAlbumArt(element) != "") ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != "")))),
-          onTap: () async => {
-            if(dataModel.selectedIndices.length == 0 && widget.goToDetails)
-              {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (context) {
-                      return ArtistDetails(index: dataModel.artists.indexOf(widget.artist));
-                    })).then((value) {
-                  dataModel.clearSelections();
-                })
-              }
-            else if(widget.allowSelection)
-              {
-                dataModel.toggleSelection(dataModel.artists.indexOf(widget.artist), Artist)
-              }
-          },
-          onLongPress: () => {
+      child: Row(
+        children: [
+          if (dataModel.inSelectMode) Checkbox(value: dataModel.selectedIndices.contains(dataModel.artists.indexOf(widget.artist)), onChanged: (value) {
             if(widget.allowSelection)
-              {
-                dataModel.toggleSelection(dataModel.artists.indexOf(widget.artist), Artist)
-              }
-          },
-        ),
+            {
+              dataModel.toggleSelection(dataModel.artists.indexOf(widget.artist), Artist);
+            }
+          }),
+          Expanded(
+            child: ListTile(
+              selected: dataModel.selectedIndices.contains(dataModel.artists.indexOf(widget.artist)),
+              title: Text(widget.artist.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
+              subtitle: Text(widget.artist.albums.length == 1 ? "${widget.artist.albums.length} album" : "${widget.artist.albums.length} albums"),
+              trailing: Text(widget.artist.songs.length == 1 ? "${widget.artist.songs.length} track" : "${widget.artist.songs.length} tracks"),
+              leading: Hero(tag: widget.artist.name, child:
+                !widget.artist.songs.any((element) => dataModel.getAlbumArt(element) != "") ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != "")))),
+              ),
+              onTap: () async {
+                if(!dataModel.inSelectMode && widget.goToDetails)
+                  {
+                    Navigator.push(context, PageRouteBuilder(pageBuilder: (_, __, ___) => ArtistDetails(index: dataModel.artists.indexOf(widget.artist)))
+                      /*MaterialPageRoute(
+                        builder: (context) {
+                          return ArtistDetails(index: dataModel.artists.indexOf(widget.artist));
+                        })*/
+                    ).then((value) {
+                      dataModel.clearSelections();
+                    });
+                  }
+                else if(widget.allowSelection)
+                  {
+                    dataModel.toggleSelection(dataModel.artists.indexOf(widget.artist), Artist);
+                  }
+              },
+              onLongPress: () {
+                if(widget.allowSelection)
+                  {
+                    dataModel.toggleSelection(dataModel.artists.indexOf(widget.artist), Artist);
+                  }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

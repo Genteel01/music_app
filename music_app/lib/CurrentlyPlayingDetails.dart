@@ -29,6 +29,8 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
     List<int> oldSelections = [];
     Type oldSelectionType = Song;
+
+    Duration currentSongDuration = Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration);
     return Padding(
       padding: const EdgeInsets.all(Dimens.xSmall),
       child: Column(crossAxisAlignment: CrossAxisAlignment.center,
@@ -50,19 +52,19 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
           //shuffle, loop, and add to playlist row
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              SizedBox(width: Dimens.currentlyPlayingModalButtonSize, height: Dimens.currentlyPlayingModalButtonSize, child: FloatingActionButton(backgroundColor: dataModel.settings.shuffle ? Theme.of(context).primaryColor : Colours.disabledButtonColour, child: Icon( Icons.shuffle, color: Colours.buttonIconColour,), heroTag: null, onPressed: () => {
-                dataModel.toggleShuffle(),
+              SizedBox(width: Dimens.currentlyPlayingModalButtonSize, height: Dimens.currentlyPlayingModalButtonSize, child: FloatingActionButton(backgroundColor: dataModel.settings.shuffle ? Theme.of(context).primaryColor : Colours.disabledButtonColour, child: Icon( Icons.shuffle, color: Colours.buttonIconColour,), heroTag: null, onPressed: () {
+                dataModel.toggleShuffle();
               },)),
               //Loop button
               SizedBox(width: Dimens.currentlyPlayingModalButtonSize, height: Dimens.currentlyPlayingModalButtonSize, child: FloatingActionButton(child: Icon(dataModel.settings.loop == LoopType.singleSong ? Icons.repeat_one : (dataModel.settings.loop == LoopType.loop ? Icons.repeat : Icons.arrow_right_alt)
-                , color: Colors.grey[50],), heroTag: null, onPressed: () => {
-                dataModel.toggleLoop(),
+                , color: Colors.grey[50],), heroTag: null, onPressed: () {
+                dataModel.toggleLoop();
               },)),
-              SizedBox(width: Dimens.currentlyPlayingModalButtonSize, height: Dimens.currentlyPlayingModalButtonSize, child: FloatingActionButton(child: Icon(Icons.playlist_add), onPressed: () => {
-                dataModel.selectedIndices.forEach((element) { oldSelections.add(element);}),
-                dataModel.clearSelections(),
-                oldSelectionType = dataModel.selectionType,
-                dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.upNext[dataModel.settings.playingIndex]), Song),
+              SizedBox(width: Dimens.currentlyPlayingModalButtonSize, height: Dimens.currentlyPlayingModalButtonSize, child: FloatingActionButton(child: Icon(Icons.playlist_add), onPressed: () {
+                dataModel.selectedIndices.forEach((element) { oldSelections.add(element);});
+                dataModel.clearSelections();
+                oldSelectionType = dataModel.selectionType;
+                dataModel.toggleSelection(dataModel.songs.indexOf(dataModel.settings.upNext[dataModel.settings.playingIndex]), Song);
                 showModalBottomSheet<void>(
                   isScrollControlled: true,
                   context: context,
@@ -80,30 +82,47 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                       ),
                     );
                   },
-                ).then((value) => {dataModel.clearSelections(), oldSelections.forEach((element) {dataModel.toggleSelection(element, oldSelectionType);})})
+                ).then((value) {dataModel.clearSelections(); oldSelections.forEach((element) {dataModel.toggleSelection(element, oldSelectionType);});});
               },),
               ),
             ],
           ),
           //Seekbar
           StreamBuilder<Duration> (
+              //Note still using deprecated `positionStream` instead of `position` because with `position` it doesn't get the position while paused
               stream: AudioService.positionStream,
               builder: (context, snapshot) {
                 if(snapshot.hasData)
                 {
                   final position = snapshot.data;
+
+                  if(!dataModel.isSeeking) dataModel.setPosition(position!);
+
                   return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, mainAxisSize: MainAxisSize.min,
                     children: [
-                      //Current position
-                      (position!.inSeconds % 60) < 10 ? Text("${position.inMinutes}:0${(position.inSeconds % 60).toStringAsFixed(0)}") :
-                      Text("${position.inMinutes}:${(position.inSeconds % 60).toStringAsFixed(0)}"),
+                      //Current position text
+                      Text(Strings.timeFormat(dataModel.currentPosition)),
                       //Position Slider
-                      Slider(value: position.inSeconds.toDouble(), max: Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds.toDouble(), onChanged: (value) => {
-                        AudioService.seekTo(Duration(seconds: value.toInt()))
+                      Slider(value: dataModel.currentPosition.inMilliseconds.toDouble(), max: dataModel.settings.upNext[dataModel.settings.playingIndex].duration.toDouble(),
+                        onChanged: (value) {
+                        dataModel.setPosition(Duration(milliseconds: value.toInt()));
+                      },
+                        onChangeStart: (value) async {
+                          await dataModel.startSeek();
+                          dataModel.seekbarIsPushed = true;
+                      },
+                      onChangeEnd: (value) {
+                        dataModel.seekbarIsPushed = false;
+                        //Workaround for onChangeStart and onChangeEnd firing twice
+                        Future.delayed(const Duration(milliseconds: 200), () async {
+                          if(!dataModel.seekbarIsPushed)
+                            {
+                              await dataModel.stopSeek(Duration(milliseconds: value.toInt()));
+                            }
+                        });
                       },),
-                      //Duration
-                      (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60) < 10 ? Text("${Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inMinutes}:0" + (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60).toStringAsFixed(0)) :
-                      Text("${Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inMinutes}:" + (Duration(milliseconds: dataModel.settings.upNext[dataModel.settings.playingIndex].duration).inSeconds % 60).toStringAsFixed(0)),
+                      //Duration text
+                      Text(Strings.timeFormat(currentSongDuration)),
                     ],
                   );
                 }
@@ -112,7 +131,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
                     //Current position
                     Text("0:00"),
                     //Position Slider
-                    Slider(value: 0, max: 1, onChanged: (value) => {},),
+                    Slider(value: 0, max: 1, onChanged: (value) {},),
                     //Duration
                     Text("0:00"),
                   ],

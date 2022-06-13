@@ -26,7 +26,7 @@ class _DirectoriesMenuListItemState extends State<DirectoriesMenuListItem> {
     return ListTile(
       title: Text("Music Directories"),
       subtitle: Text("Choose where to look for music on this device"),
-      onTap: () => {
+      onTap: () {
         showModalBottomSheet<void>(
           isScrollControlled: true,
           context: context,
@@ -53,7 +53,7 @@ class _DirectoriesMenuListItemState extends State<DirectoriesMenuListItem> {
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBarMessage);
           dataModel.fetch();
-        })
+        });
       },
     );
   }

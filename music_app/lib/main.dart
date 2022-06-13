@@ -1,4 +1,3 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,9 +6,10 @@ import 'TabBar.dart';
 import 'Values.dart';
 //Saving/loading from json
 //https://gist.github.com/tomasbaran/f6726922bfa59ffcf07fa8c1663f2efc
-void main() {
-  runApp(MyApp());
 
+
+void main()  {
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -49,11 +49,25 @@ class MyApp extends StatelessWidget {
           //dialogBackgroundColor: Color.fromARGB(255, 255, 240, 201),
           scaffoldBackgroundColor: Colours.backgroundColour,
           textSelectionTheme: TextSelectionThemeData(selectionHandleColor: crabColorScheme.secondary, selectionColor: crabColorScheme.secondary, cursorColor: crabColorScheme.secondary),
-          indicatorColor: crabColorScheme.primary
+          indicatorColor: crabColorScheme.primary,
+          checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+            if (states.contains(MaterialState.selected))
+              return crabColorScheme.primary;
+            return null;
+          })),
         ),
         title: "Music Player",
-        home: AudioServiceWidget(child: MyTabBar()),
-        //home: MyHomePage(title: 'List Tutorial'),
+        home: MyTabBar(),
+        /*builder: (context, child) {
+          return Scaffold(
+            body: Column(
+              children: [
+                Expanded(child: child!),
+                CurrentlyPlayingBar()
+              ],
+            ),
+          );
+        },*/
       ),
     );
   }

@@ -1,11 +1,10 @@
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
-import 'package:music_app/PlaylistDetails.dart';
 import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
-import 'Playlist.dart';
+import 'PlaylistListItem.dart';
 class PlaylistList extends StatefulWidget {
   const PlaylistList({Key? key}) : super(key: key);
 
@@ -57,6 +56,7 @@ class PlaylistListBuilder extends StatelessWidget {
           child: ListView.builder(
             controller: myScrollController,
               itemBuilder: (_, index) {
+                //If it is the first item make the Create Playlist button
                 if(index == 0)
                   {
                     final playlistNameController = TextEditingController();
@@ -67,7 +67,7 @@ class PlaylistListBuilder extends StatelessWidget {
                           leading: Icon(Icons.add_box),
                           title: Text("Create new Playlist"),
                           subtitle: Text(dataModel.playlists.length == 1 ? "${dataModel.playlists.length} Playlist" : "${dataModel.playlists.length} Playlists"),
-                          onTap: () => {
+                          onTap: () {
                             showDialog<bool>(
                                 context: context,
                                 builder: (BuildContext context) =>
@@ -76,27 +76,29 @@ class PlaylistListBuilder extends StatelessWidget {
                                       content: TextField(controller: playlistNameController, textCapitalization: TextCapitalization.sentences, decoration: InputDecoration(hintText: "Playlist ${(dataModel.playlists.length + 1)}"),),
                                       actions: <Widget>[
                                         TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, false),
+                                          onPressed: () {
+                                              Navigator.pop(context, false);
+                                            },
                                           child: const Text('Cancel'),
                                         ),
                                         TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, true),
+                                          onPressed: () {
+                                            Navigator.pop(context, true);
+                                          },
                                           child: const Text('Create'),
                                         ),
                                       ],
                                     )
-                            ).then((value) =>
+                            ).then((value)
                             {
                                 if(value != null && value)
                                   {
-                                    dataModel.createPlaylist(playlistNameController.text),
+                                    dataModel.createPlaylist(playlistNameController.text);
                                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                       content: Text("Playlist Created"),
-                                    )),
+                                    ));
                                   }
-                            }),
+                            });
                           },
                         ),
                       ),
@@ -104,51 +106,9 @@ class PlaylistListBuilder extends StatelessWidget {
                   }
                 var playlist = dataModel.playlists[index - 1];
 
-                return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
-                    border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
-                  child: Center(
-                    child: ListTile(
-                      selected: !addingToPlaylist && dataModel.selectedIndices.contains(dataModel.playlists.indexOf(playlist)),
-                      title: Text(playlist.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
-                      trailing: Text(playlist.songs.length == 1 ? "${playlist.songs.length} Track" : "${playlist.songs.length} Tracks"),
-                      onTap: () => {
-                        if(addingToPlaylist)
-                          {
-                            dataModel.addToPlaylist(playlist),
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text("Songs Added to Playlist"),
-                            )),
-                            Navigator.pop(context)
-                          }
-                        else
-                          {
-                            if(dataModel.selectedIndices.length == 0)
-                              {
-                                Navigator.push(context, MaterialPageRoute(
-                                    builder: (context) {
-                                      return PlaylistDetails(index: index - 1);
-                                  })).then((value) {
-                                  dataModel.clearSelections();
-                                })
-                              }
-                            else
-                              {
-                                dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist)
-                              }
-                          }
-                      },
-                      onLongPress: () => {
-                        if(!addingToPlaylist)
-                          {
-                            dataModel.toggleSelection(dataModel.playlists.indexOf(playlist), Playlist)
-                          }
-                      },
-                    ),
-                  ),
-                );
+                return PlaylistListItem(addingToPlaylist: addingToPlaylist, playlist: playlist, index: index - 1);
               },
               itemCount: dataModel.playlists.length + 1,
-            itemExtent: Dimens.listItemSize,
           ),
         ),
       ),

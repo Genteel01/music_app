@@ -22,9 +22,11 @@ import 'Settings.dart';
 import 'Song.dart';
 import 'Sorting.dart';
 
-void _backgroundTaskEntrypoint() async {
+/*void _backgroundTaskEntrypoint() async {
   await AudioServiceBackground.run(() => AudioPlayerTask());
-}
+}*/
+late AudioHandler _audioHandler;
+
 class DataModel extends ChangeNotifier {
 
   bool loading = false;
@@ -41,12 +43,21 @@ class DataModel extends ChangeNotifier {
 
   List<int> selectedIndices = [];
   Type selectionType = Song;
+  bool inSelectMode = false;
 
   List<Object> searchResults = [];
 
   String errorMessage = "";
 
   bool isPlaying = false;
+  bool wasPlaying = false;
+
+  //Whether you are currently using the seekbar
+  bool isSeeking = false;
+  //The current playback position
+  Duration currentPosition = Duration();
+  //Needed for a slider workaround because onChangeStart and onChangeEnd fire twice each when you don't move the slider quickly
+  bool seekbarIsPushed = false;
 
   Random randomNumbers = new Random();
   getSearchResults(String searchText)
@@ -96,13 +107,19 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void stopSelecting()
+  {
+    inSelectMode = false;
+    clearSelections();
+  }
+
   removeFromPlaylist(Playlist playlist)
   {
     selectedIndices.sort((a, b) => b.compareTo(a));
     selectedIndices.forEach((element) {
       playlist.songs.removeAt(element);
     });
-    clearSelections();
+    stopSelecting();
     notifyListeners();
     savePlaylists();
   }
@@ -173,6 +190,7 @@ class DataModel extends ChangeNotifier {
 
   void toggleSelection(int index, Type newSelectionType)
   {
+    inSelectMode = true;
     if(selectedIndices.contains(index))
     {
       selectedIndices.remove(index);
@@ -185,6 +203,10 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool hasSelections()
+  {
+    return selectedIndices.length > 0;
+  }
   //replaced this
   DataModel()
   {
@@ -246,7 +268,7 @@ class DataModel extends ChangeNotifier {
       });
       playlist.addToPlaylist(newSongs);
       savePlaylists();
-      clearSelections();
+      stopSelecting();
   }
 
   void reorderPlaylist(int oldIndex, int newIndex, Playlist playlist)
@@ -265,7 +287,7 @@ class DataModel extends ChangeNotifier {
       playlists.removeAt(element);
     });
     savePlaylists();
-    clearSelections();
+    stopSelecting();
   }
 
   Future<void> fetch() async
@@ -277,9 +299,21 @@ class DataModel extends ChangeNotifier {
     notifyListeners(); //tell children to redraw, and they will see that the loading indicator is on
     //if(!AudioService.connected)
       //{
-        await AudioService.connect();
+
+        //await AudioService.connect();
       //}
-    await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
+    //await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
+    _audioHandler = await AudioService.init(
+      builder: () {
+          return AudioPlayerTask();
+        },
+      config: AudioServiceConfig(
+        androidNotificationChannelId: 'au.com.genteel01.music_app.channel.audio',
+        androidNotificationChannelName: 'Music playback',
+      ),
+    );
+
+    //_audioHandler.customAction("onStart");
     appDocumentsDirectory = await getAppDocumentsDirectory();
     //clear any existing data we have gotten previously, to avoid duplicate data
     songs.clear();
@@ -329,10 +363,10 @@ class DataModel extends ChangeNotifier {
       if(settings.upNext.length > 0)
       {
         //Set the starting index in the background audio service
-        await AudioService.customAction("setStartingIndex", settings.playingIndex);
+        await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
         //Set the playlist in the background audio service
-        await AudioService.customAction("setPlaylist", makeSongMap(settings.upNext));
-        AudioService.pause();
+        await _audioHandler.customAction("setPlaylist", {"playlist" : makeSongMap(settings.upNext) });
+        _audioHandler.pause();
       }
     }
     catch(error){}
@@ -346,7 +380,7 @@ class DataModel extends ChangeNotifier {
       {
         var directoryMap = Directory(directoryPath).listSync(recursive: true);
         await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
-          if(filePath.path.endsWith("mp3") || filePath.path.endsWith("flac") || filePath.path.endsWith("m4a"))
+          if(filePath.path.toLowerCase().endsWith("mp3") || filePath.path.toLowerCase().endsWith("flac") || filePath.path.toLowerCase().endsWith("m4a") || filePath.path.toLowerCase().endsWith("wma"))
           {
             if(!songs.any((element) => element.filePath == filePath.path))
             {
@@ -437,26 +471,27 @@ class DataModel extends ChangeNotifier {
         notifyListeners();
       }
     }
+
+    addAlbumsToArtists();
     //Set up the listener to detect when songs finish
-    AudioService.playbackStateStream.listen((state) {
-      if(state.processingState == AudioProcessingState.stopped)
+    _audioHandler.playbackState.listen((state) {
+      /*if(state.processingState == AudioProcessingState.idle)
         {
           settings.upNext.clear();
           settings.originalUpNext.clear();
           settings.songPaths.clear();
           settings.originalSongPaths.clear();
           saveSettings();
-        }
+        }*/
       isPlaying = state.playing;
       notifyListeners();
     });
-    AudioService.customEventStream.listen((event) {
+    _audioHandler.customEvent.listen((event) {
       if(event.runtimeType == int)
         {
           setUpNextIndex(event);
         }
     });
-
     loading = false;
     notifyListeners();
     //Save the songs, playlists, albums, and artist lists
@@ -515,7 +550,6 @@ class DataModel extends ChangeNotifier {
       {
         songList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
       }
-
   }
   //Sorts a list of albums by name
   void sortByAlbumName (List<Album> albumList)
@@ -556,6 +590,7 @@ class DataModel extends ChangeNotifier {
       return "";
     }
   }
+
   //Function to clear out all the local files I am creating for this app
   Future<void> clearAllData() async
   {
@@ -608,6 +643,13 @@ class DataModel extends ChangeNotifier {
     }
     catch(error){}
   }
+  //Add the albums to all the artist objects
+  void addAlbumsToArtists()
+  {
+    artists.forEach((artist) {
+      artist.albums.addAll(albums.where((album) => album.albumArtist == artist.name || album.songs.any((song) => song.artist == artist.name)));
+    });
+  }
 
   void addToArtistsAndAlbums(Song newSong, Uint8List? albumArt, String? albumYear)
   {
@@ -617,7 +659,7 @@ class DataModel extends ChangeNotifier {
     }
     catch(error)
     {
-      Artist newArtist = Artist(songs: [], name: newSong.artist);
+      Artist newArtist = Artist(songs: [], name: newSong.artist, albums: []);
       newArtist.songs.add(newSong);
       artists.add(newArtist);
     }
@@ -648,14 +690,23 @@ class DataModel extends ChangeNotifier {
       albums.add(newAlbum);
     }
   }
+
+  Duration calculateDuration(List<Song> mySongs)
+  {
+    int currentDuration = 0;
+    mySongs.forEach((song) {
+      currentDuration += song.duration;
+    });
+    return Duration(milliseconds: currentDuration);
+  }
   //Function that sets the currently playing song
   void setCurrentlyPlaying(int index, List<Song> futureSongs) async
   {
-    if(!AudioService.connected)
-    {
-      print("in the not connected");
-      await AudioService.connect();
-    }
+    //if(!AudioService.connected)
+    //{
+      //print("in the not connected");
+      //await AudioService.connect();
+    //}
     //Clear the upNext list
     settings.upNext.clear();
     //Add all the future songs to upNext
@@ -683,20 +734,20 @@ class DataModel extends ChangeNotifier {
     //Set the song paths so that upNext can be saved and loaded again when you open the app
     settings.setSongPath();
     //Set the starting index in the background audio service
-    await AudioService.customAction("setStartingIndex", settings.playingIndex);
+    await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
     //Set the playlist in the background audio service
-    await AudioService.customAction("setPlaylist", makeSongMap(settings.upNext));
+    await _audioHandler.customAction("setPlaylist", {"playlist" : makeSongMap(settings.upNext) });
     //Play the music
-    AudioService.play();
+    _audioHandler.play();
     notifyListeners();
     saveSettings();
   }
   //Makes the map that is used to send song data to the isolate
-  List<Map<String, String>> makeSongMap(List<Song> songList)
+  List<Map<String, dynamic>> makeSongMap(List<Song> songList)
   {
-    List<Map<String, String>> songsWithMetadata = [];
+    List<Map<String, dynamic>> songsWithMetadata = [];
     songList.forEach((element) {
-      Map<String, String> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.album, "albumart" : getAlbumArt(element) };
+      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.album, "albumart" : getAlbumArt(element), "milliseconds" : element.duration };
       songsWithMetadata.add(song);
     });
     return songsWithMetadata;
@@ -717,19 +768,40 @@ class DataModel extends ChangeNotifier {
     if(settings.upNext.length != 0)
     {
       //Since we are resuming I think it is possible for the app to lose some data as memory is cleared while it is in the background, so check if you need to reconnect
-      if(!AudioService.connected)
-      {
-        print("in the not connected");
-        await AudioService.connect();
-      }
-      await AudioService.customAction("getCurrentIndex");
+      //if(!AudioService.connected)
+      //{
+        //print("in the not connected");
+        //await AudioService.connect();
+      //}
+      await _audioHandler.customAction("getCurrentIndex");
     }
   }
   void playButton() async
   {
     //bool isPlaying = await AudioService.customAction("isPlaying");
-    isPlaying ? await AudioService.pause() : await AudioService.play();
+    isPlaying ? await _audioHandler.pause() : await _audioHandler.play();
     notifyListeners();
+  }
+
+  Future<void> startSeek() async
+  {
+    isSeeking = true;
+  }
+
+  Future<void> stopSeek(Duration position) async
+  {
+    await _audioHandler.seek(position);
+    isSeeking = false;
+  }
+
+  void seek(Duration position) async
+  {
+    await _audioHandler.seek(position);
+  }
+
+  void setPosition(Duration newCurrentPosition)
+  {
+    currentPosition = newCurrentPosition;
   }
   //Toggles shuffle behaviour when the shuffle button is pressed
   void toggleShuffle() async
@@ -766,9 +838,9 @@ class DataModel extends ChangeNotifier {
           settings.playingIndex = settings.upNext.indexOf(currentlyPlayingSong);
         }
         //Set the starting index in the background audio service
-        await AudioService.customAction("setStartingIndex", settings.playingIndex);
+        await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
         //Set the playlist in the background audio service
-        await AudioService.customAction("updatePlaylist", makeSongMap(settings.upNext));
+        await _audioHandler.customAction("updatePlaylist", {"playlist" : makeSongMap(settings.upNext)});
       }
     notifyListeners();
     saveSettings();
@@ -792,15 +864,15 @@ class DataModel extends ChangeNotifier {
     {
       case LoopType.singleSong:
         settings.loop = LoopType.none;
-        AudioService.customAction("setLoopMode", "none");
+        _audioHandler.customAction("setLoopMode", {"loopMode":"none"});
         break;
       case LoopType.loop:
         settings.loop = LoopType.singleSong;
-        AudioService.customAction("setLoopMode", "singleSong");
+        _audioHandler.customAction("setLoopMode", {"loopMode":"singleSong"});
         break;
       case LoopType.none:
         settings.loop = LoopType.loop;
-        AudioService.customAction("setLoopMode", "loop");
+        _audioHandler.customAction("setLoopMode", {"loopMode":"loop"});
         break;
     }
       notifyListeners();
@@ -809,7 +881,7 @@ class DataModel extends ChangeNotifier {
   void nextButton()
   {
     //audioPlayer.seekToNext();
-    AudioService.skipToNext();
+    _audioHandler.skipToNext();
     //playNextSong();
     notifyListeners();
   }
@@ -818,7 +890,7 @@ class DataModel extends ChangeNotifier {
   {
     //Duration position = await AudioService.customAction("getPosition");
     //Duration duration = await AudioService.customAction("getDuration");
-    AudioService.skipToPrevious();
+    _audioHandler.skipToPrevious();
     /*if(AudioService.playbackState.position.inSeconds > Duration(milliseconds: settings.currentlyPlaying!.duration).inSeconds / 20)
       {
         //await AudioService.seekTo(Duration());
