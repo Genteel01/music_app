@@ -53,7 +53,7 @@ class _SongListItemState extends State<SongListItem> {
                   Icon(Icons.play_arrow)
                 ],
               ) : Text(widget.song.durationString()),
-              leading: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song))),
+              leading: AspectRatio(aspectRatio: 1.0/1.0, child: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song)))),
               onTap: () {
                 if(!dataModel.inSelectMode && widget.playSongs)
                   {

@@ -588,24 +588,10 @@ class DataModel extends ChangeNotifier {
       {
         return song.album!.albumArt;
       }
-    try
-    {
-      Album songAlbum;
-      if(albums.any((element) => song.albumArtist == element.albumArtist && song.albumName == element.name))
-        {
-          songAlbum = albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.albumName == element.name);
-        }
-      else
-        {
-          songAlbum = albums.firstWhere((element) => element.songs.any((albumSong) => getFolderPath(song.filePath) == getFolderPath(albumSong.filePath)) && song.albumName == element.name);
-        }
-      return songAlbum.albumArt;
-      //return appDocumentsDirectory + "/albumart/" + songAlbum.name.replaceAll("/", "_") + songAlbum.albumArtist.replaceAll("/", "_") + songAlbum.year.replaceAll("/", "_");
-    }
-    catch(error)
-    {
-      return "";
-    }
+    else
+      {
+        return "";
+      }
   }
 
   //Function to clear out all the local files I am creating for this app

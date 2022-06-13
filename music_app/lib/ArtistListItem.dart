@@ -42,8 +42,10 @@ class _ArtistListItemState extends State<ArtistListItem> {
               title: Text(widget.artist.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
               subtitle: Text(widget.artist.albums.length == 1 ? "${widget.artist.albums.length} album" : "${widget.artist.albums.length} albums"),
               trailing: Text(widget.artist.songs.length == 1 ? "${widget.artist.songs.length} track" : "${widget.artist.songs.length} tracks"),
-              leading: Hero(tag: widget.artist.name, child:
-                !widget.artist.songs.any((element) => dataModel.getAlbumArt(element) != "") ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != "")))),
+              leading: AspectRatio(aspectRatio: 1.0/1.0,
+                child: Hero(tag: widget.artist.name, child:
+                  !widget.artist.songs.any((element) => dataModel.getAlbumArt(element) != "") ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.artist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != "")))),
+                ),
               ),
               onTap: () async {
                 if(!dataModel.inSelectMode && widget.goToDetails)

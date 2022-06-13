@@ -42,8 +42,10 @@ class PlaylistListItem extends StatelessWidget {
               title: Text(playlist.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
               subtitle: Text(Strings.timeFormat(dataModel.calculateDuration(playlist.songs))),
               trailing: Text(playlist.songs.length == 1 ? "${playlist.songs.length} Track" : "${playlist.songs.length} Tracks"),
-              leading: Hero(tag: playlist.name, child:
-              !playlist.songs.any((element) => dataModel.getAlbumArt(element) != "") ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(playlist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != "")))),
+              leading: AspectRatio(aspectRatio: 1.0/1.0,
+                child: Hero(tag: playlist.name, child:
+                !playlist.songs.any((element) => dataModel.getAlbumArt(element) != "") ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(playlist.songs.firstWhere((element) => dataModel.getAlbumArt(element) != "")))),
+                ),
               ),
               onTap: () {
                 if(addingToPlaylist)
