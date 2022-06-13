@@ -39,7 +39,7 @@ class _ArtistDetailsListItemState extends State<ArtistDetailsListItem> {
             child: ListTile(
               selected: dataModel.selectedIndices.contains(widget.artist.songs.indexOf(widget.song)) || (!dataModel.inSelectMode && dataModel.settings.upNext.length == widget.artist.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song),
               title: Text(widget.song.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
-              subtitle: Text(widget.song.album, maxLines: 1, overflow: TextOverflow.ellipsis,),
+              subtitle: Text(widget.song.albumName, maxLines: 1, overflow: TextOverflow.ellipsis,),
               trailing: dataModel.settings.upNext.length == widget.artist.songs.length && dataModel.settings.upNext[dataModel.settings.playingIndex] == widget.song ? Row(mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(widget.song.durationString()),

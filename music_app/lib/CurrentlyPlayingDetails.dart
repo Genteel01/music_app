@@ -47,7 +47,7 @@ class _PlayingSongDetailsState extends State<PlayingSongDetails> {
           //Song album
           Padding(
             padding: const EdgeInsets.only(top: Dimens.xXSmall, bottom: Dimens.xXSmall),
-            child: Text(dataModel.settings.upNext[dataModel.settings.playingIndex].album, overflow: TextOverflow.ellipsis,),
+            child: Text(dataModel.settings.upNext[dataModel.settings.playingIndex].albumName, overflow: TextOverflow.ellipsis,),
           ),
           //shuffle, loop, and add to playlist row
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,

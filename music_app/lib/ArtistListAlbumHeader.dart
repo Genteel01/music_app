@@ -32,7 +32,7 @@ class ArtistDetailsAlbumHeader extends StatelessWidget {
           //SizedBox(width: 200, height: Dimens.listItemSize, child: Marquee(style: TextStyle(fontSize: 10), crossAxisAlignment: CrossAxisAlignment.start, text: song.album, velocity: 35, blankSpace: 32, fadingEdgeStartFraction: 0.1, fadingEdgeEndFraction: 0.1,))
           Expanded(child: Padding(
             padding: const EdgeInsets.only(left: Dimens.small),
-            child: Text(song.album, style: TextStyle(fontSize: Dimens.listHeaderFontSize, color: Colours.searchHeaderTextColour), overflow: TextOverflow.ellipsis,),
+            child: Text(song.albumName, style: TextStyle(fontSize: Dimens.listHeaderFontSize, color: Colours.searchHeaderTextColour), overflow: TextOverflow.ellipsis,),
           )),
         ],
       ),

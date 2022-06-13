@@ -1,23 +1,25 @@
 import 'dart:io';
 
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+import 'package:music_app/Album.dart';
 
 class Song {
   String filePath;
   String name;
   String artist;
-  String album;
+  String albumName;
   int duration;
   String albumArtist;
   int discNumber;
   int trackNumber;
   DateTime lastModified;
+  Album? album;
 
   Song(Metadata metadata, String songFilePath, DateTime modified)
   :
     name = metadata.trackName == null ? songFilePath.split("/").last.split(".").first : metadata.trackName!,
     artist = metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!),
-    album = metadata.albumName == null ? "Unknown Album" : metadata.albumName!,
+    albumName = metadata.albumName == null ? "Unknown Album" : metadata.albumName!,
     albumArtist = metadata.albumArtistName == null ? (metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!)) : metadata.albumArtistName!,
     discNumber = metadata.discNumber == null ? 1 : metadata.discNumber!,
     trackNumber = metadata.trackNumber == null ? 1 : metadata.trackNumber!,
@@ -31,7 +33,7 @@ class Song {
   {
     name = metadata.trackName == null ? filePath.split("/").last.split(".").first : metadata.trackName!;
     artist = metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!);
-    album = metadata.albumName == null ? "Unknown Album" : metadata.albumName!;
+    albumName = metadata.albumName == null ? "Unknown Album" : metadata.albumName!;
     albumArtist = metadata.albumArtistName == null ? (metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!)) : metadata.albumArtistName!;
     discNumber = metadata.discNumber == null ? 1 : metadata.discNumber!;
     trackNumber = metadata.trackNumber == null ? 1 : metadata.trackNumber!;
@@ -59,7 +61,7 @@ class Song {
       :
         name = json['name'],
         artist = json['artist'],
-        album = json['album'],
+        albumName = json['album'],
         duration = json['duration'],
         albumArtist = json['albumArtist'],
         discNumber = json['discNumber'],
@@ -71,7 +73,7 @@ class Song {
       {
         'name': name,
         'artist': artist,
-        'album' : album,
+        'album' : albumName,
         'duration' : duration,
         'albumArtist' : albumArtist,
         'discNumber': discNumber,

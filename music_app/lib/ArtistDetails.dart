@@ -58,7 +58,7 @@ class ArtistDetails extends StatelessWidget {
                             }
                             var song = artist.songs[index - 1];
                             //If you're at a new album print an album heading
-                            if(index == 1 || song.album != artist.songs[index - 2].album)
+                            if(index == 1 || song.albumName != artist.songs[index - 2].albumName)
                             {
                               return Column(
                                 children: [

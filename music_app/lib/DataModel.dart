@@ -79,7 +79,7 @@ class DataModel extends ChangeNotifier {
       songs.forEach((element) {
         if (element.name.toUpperCase().contains(searchText.toUpperCase()) ||
             element.artist.toUpperCase().contains(searchText.toUpperCase()) ||
-            element.album.toUpperCase().contains(searchText.toUpperCase()) ||
+            element.albumName.toUpperCase().contains(searchText.toUpperCase()) ||
             element.albumArtist.toUpperCase().contains(
                 searchText.toUpperCase())) {
           searchResults.add(element);
@@ -210,7 +210,7 @@ class DataModel extends ChangeNotifier {
   //replaced this
   DataModel()
   {
-    fetch();
+    initialSetup();
     //clearAllData();
   }
   //Returns the path to the app's documents directory
@@ -290,6 +290,18 @@ class DataModel extends ChangeNotifier {
     stopSelecting();
   }
 
+  Future<void> initialSetup() async {
+    _audioHandler = await AudioService.init(
+      builder: () {
+        return AudioPlayerTask();
+      },
+      config: AudioServiceConfig(
+        androidNotificationChannelId: 'au.com.genteel01.music_app.channel.audio',
+        androidNotificationChannelName: 'Music playback',
+      ),
+    );
+    await fetch();
+  }
   Future<void> fetch() async
   {
     print("BREAK________________________________________________________________");
@@ -303,15 +315,7 @@ class DataModel extends ChangeNotifier {
         //await AudioService.connect();
       //}
     //await AudioService.start(backgroundTaskEntrypoint: _backgroundTaskEntrypoint);
-    _audioHandler = await AudioService.init(
-      builder: () {
-          return AudioPlayerTask();
-        },
-      config: AudioServiceConfig(
-        androidNotificationChannelId: 'au.com.genteel01.music_app.channel.audio',
-        androidNotificationChannelName: 'Music playback',
-      ),
-    );
+
 
     //_audioHandler.customAction("onStart");
     appDocumentsDirectory = await getAppDocumentsDirectory();
@@ -537,7 +541,7 @@ class DataModel extends ChangeNotifier {
   //Sorts a list of songs by album, then disc number, then track number
   void sortByAlbumDiscAndTrackNumber(List<Song> songList)
   {
-    songList.sort((a, b) => a.album.compareTo(b.album) == 0 ? (a.discNumber.compareTo(b.discNumber) == 0 ? (a.trackNumber.compareTo(b.trackNumber)) : a.discNumber.compareTo(b.discNumber)): a.album.compareTo(b.album));
+    songList.sort((a, b) => a.albumName.compareTo(b.albumName) == 0 ? (a.discNumber.compareTo(b.discNumber) == 0 ? (a.trackNumber.compareTo(b.trackNumber)) : a.discNumber.compareTo(b.discNumber)): a.albumName.compareTo(b.albumName));
   }
   //Sorts a list of songs by the track name
   void sortByTrackName(List<Song> songList, bool descending)
@@ -580,10 +584,23 @@ class DataModel extends ChangeNotifier {
 
   String getAlbumArt(Song song)
   {
+    if(song.album != null)
+      {
+        return song.album!.albumArt;
+      }
     try
     {
-      Album songAlbum = albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.album == element.name);
-      return appDocumentsDirectory + "/albumart/" + songAlbum.name.replaceAll("/", "_") + songAlbum.albumArtist.replaceAll("/", "_") + songAlbum.year.replaceAll("/", "_");
+      Album songAlbum;
+      if(albums.any((element) => song.albumArtist == element.albumArtist && song.albumName == element.name))
+        {
+          songAlbum = albums.firstWhere((element) => song.albumArtist == element.albumArtist && song.albumName == element.name);
+        }
+      else
+        {
+          songAlbum = albums.firstWhere((element) => element.songs.any((albumSong) => getFolderPath(song.filePath) == getFolderPath(albumSong.filePath)) && song.albumName == element.name);
+        }
+      return songAlbum.albumArt;
+      //return appDocumentsDirectory + "/albumart/" + songAlbum.name.replaceAll("/", "_") + songAlbum.albumArtist.replaceAll("/", "_") + songAlbum.year.replaceAll("/", "_");
     }
     catch(error)
     {
@@ -651,6 +668,18 @@ class DataModel extends ChangeNotifier {
     });
   }
 
+  //Get the path without the file name
+  String getFolderPath(String songPath)
+  {
+    List<String> splitPath = songPath.split("/");
+    String finalString = "";
+    for(int i = 0; i < splitPath.length - 1; i++)
+      {
+        finalString += splitPath[i];
+      }
+    return finalString;
+  }
+  //Adds a song to the album and artist that it belongs to
   void addToArtistsAndAlbums(Song newSong, Uint8List? albumArt, String? albumYear)
   {
     try
@@ -664,31 +693,40 @@ class DataModel extends ChangeNotifier {
       artists.add(newArtist);
     }
     //If the album is unknown album and you are making a new album set the album artist to various artists, if you are adding to unknown album ignore the album artist from the song and use various artists
-    try
-    {
-      if(newSong.album == "Unknown Album")
+      Album? songAlbum;
+      if(newSong.albumName == "Unknown Album")
         {
-          albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == "Various Artists").songs.add(newSong);
+          if(albums.any((element) => element.name == newSong.albumName && element.albumArtist == "Various Artists"))
+            {
+              songAlbum = albums.firstWhere((element) => element.name == newSong.albumName && element.albumArtist == "Various Artists");
+            }
         }
       else
         {
-          albums.firstWhere((element) => element.name == newSong.album && element.albumArtist == newSong.albumArtist).songs.add(newSong);
+          if(albums.any((element) => element.name == newSong.albumName && element.albumArtist == newSong.albumArtist))
+            {
+              songAlbum = albums.firstWhere((element) => element.name == newSong.albumName && element.albumArtist == newSong.albumArtist);
+            }
+          else if(albums.any((element) => element.name == newSong.albumName && element.songs.any((albumSong) => getFolderPath(albumSong.filePath) == getFolderPath(newSong.filePath))))
+            {
+              songAlbum = albums.firstWhere((element) => element.name == newSong.albumName && element.songs.any((albumSong) => getFolderPath(albumSong.filePath) == getFolderPath(newSong.filePath)));
+            }
         }
-    }
-    catch(error)
-    {
-      String albumArtLocation = "";
-      String albumArtist =  newSong.album == "Unknown Album" ? "Various Artists" : newSong.albumArtist;
-      String albumYearString = albumYear == null ? "Unknown Year" : albumYear;
-      if(albumArt != null)
+      if(songAlbum == null)
         {
-          File(appDocumentsDirectory + "/albumart/" + newSong.album.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + albumYearString.replaceAll("/", "_")).writeAsBytes(albumArt);
-          albumArtLocation = appDocumentsDirectory + "/albumart/" + newSong.album.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + albumYearString.replaceAll("/", "_");
-        }
-      Album newAlbum = Album(songs: [], name: newSong.album, albumArtist: albumArtist, albumArt: albumArtLocation, year: albumYearString, lastModified: newSong.lastModified);
-      newAlbum.songs.add(newSong);
-      albums.add(newAlbum);
-    }
+            String albumArtLocation = "";
+            String albumArtist =  newSong.albumName == "Unknown Album" ? "Various Artists" : newSong.albumArtist;
+            String albumYearString = albumYear == null ? "Unknown Year" : albumYear;
+            if(albumArt != null)
+              {
+                File(appDocumentsDirectory + "/albumart/" + newSong.albumName.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + albumYearString.replaceAll("/", "_")).writeAsBytes(albumArt);
+                albumArtLocation = appDocumentsDirectory + "/albumart/" + newSong.albumName.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + albumYearString.replaceAll("/", "_");
+              }
+            songAlbum = Album(songs: [], name: newSong.albumName, albumArtist: albumArtist, albumArt: albumArtLocation, year: albumYearString, lastModified: newSong.lastModified);
+            albums.add(songAlbum);
+      }
+      songAlbum.songs.add(newSong);
+      newSong.album = songAlbum;
   }
 
   Duration calculateDuration(List<Song> mySongs)
@@ -747,7 +785,7 @@ class DataModel extends ChangeNotifier {
   {
     List<Map<String, dynamic>> songsWithMetadata = [];
     songList.forEach((element) {
-      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.album, "albumart" : getAlbumArt(element), "milliseconds" : element.duration };
+      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.albumName, "albumart" : getAlbumArt(element), "milliseconds" : element.duration };
       songsWithMetadata.add(song);
     });
     return songsWithMetadata;
