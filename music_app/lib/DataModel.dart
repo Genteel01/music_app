@@ -304,8 +304,8 @@ class DataModel extends ChangeNotifier {
   }
   Future<void> fetch() async
   {
-    print("BREAK________________________________________________________________");
-    print("Start: " + DateTime.now().toString());
+    print("LOGGING BREAK________________________________________________________________");
+    print("LOGGING Start: " + DateTime.now().toString());
     //indicate that we are loading
     loading = true;
     notifyListeners(); //tell children to redraw, and they will see that the loading indicator is on
@@ -449,11 +449,14 @@ class DataModel extends ChangeNotifier {
         //If you aren't removing it check if the album's metadata needs to be updated
         else
           {
-            if(albums[i - 1].lastModified.isBefore(albums[i - 1].songs[0].lastModified))
+            Album currentAlbum = albums[i - 1];
+            if(currentAlbum.songs.any((song) => song.lastModified.isAfter(currentAlbum.lastModified)))
             {
+              //Get the most recently modified song
+              Song currentSong = currentAlbum.songs.reduce((song1, song2) => song1.lastModified.isBefore(song2.lastModified) ? song2 : song1);
               Uint8List? albumArt;
               String albumYear = "Unknown Year";
-              File file = File(albums[i - 1].songs[0].filePath);
+              File file = File(currentSong.filePath);
               await retriever.setFile(file);
               Metadata metaData = await retriever.metadata;
               if (retriever.albumArt != null) {
@@ -463,8 +466,22 @@ class DataModel extends ChangeNotifier {
               {
                 albumYear = metaData.year.toString();
               }
-              albums[i - 1].updateAlbum(albumYear, albumArt, albums[i - 1].songs[0].lastModified, appDocumentsDirectory);
+              currentAlbum.updateAlbum(albumYear, albumArt, currentSong.lastModified, appDocumentsDirectory);
             }
+            //If there is no album art look for some
+            if(currentAlbum.albumArt != "" && !File(currentAlbum.albumArt).existsSync())
+              {
+                for(int i = 0; i < currentAlbum.songs.length; i++)
+                  {
+                      Song albumSong = currentAlbum.songs[i];
+                      File file = File(albumSong.filePath);
+                      await retriever.setFile(file);
+                      if (retriever.albumArt != null) {
+                        currentAlbum.updateAlbumArt(appDocumentsDirectory, retriever.albumArt!);
+                        break;
+                      }
+                  }
+              }
           }
       }
     for (int i = artists.length; i > 0; i--)
@@ -509,7 +526,7 @@ class DataModel extends ChangeNotifier {
     File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
     //Save your settings
     saveSettings();
-    print("End: " + DateTime.now().toString());
+    print("LOGGING End: " + DateTime.now().toString());
   }
   //Sorts songs depending on the sort setting
   void sortSongs(SortType newSort)

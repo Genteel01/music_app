@@ -18,15 +18,26 @@ class Album{
     try
       {
         File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).delete();
-        if(newAlbumArt != null)
-          {
-            File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).writeAsBytes(newAlbumArt);
-            albumArt = directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_");
-          }
       }
     catch(error){}
+    if(newAlbumArt != null)
+    {
+      File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).writeAsBytes(newAlbumArt);
+      albumArt = directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_");
+    }
     year = newYear;
     lastModified = newLastModified;
+  }
+
+  void updateAlbumArt(String directoryPath, Uint8List newAlbumArt)
+  {
+    try
+    {
+      File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).delete();
+    }
+    catch(error){}
+    File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).writeAsBytes(newAlbumArt);
+    albumArt = directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_");
   }
   Map<String, dynamic> toJson() =>
       {
