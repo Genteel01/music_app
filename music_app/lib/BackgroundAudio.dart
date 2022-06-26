@@ -15,7 +15,7 @@ class AudioPlayerTask extends BaseAudioHandler {
   void onStart()
   {
     playbackState.add(
-        PlaybackState(controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
+        PlaybackState(controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext,],
             systemActions: const {
               MediaAction.seek,
             },
@@ -62,7 +62,7 @@ class AudioPlayerTask extends BaseAudioHandler {
     audioPlayer.play();
     playbackState.add(
         playbackState.valueOrNull!.copyWith(
-        controls: [MediaControl.skipToPrevious, MediaControl.pause, MediaControl.skipToNext, MediaControl.stop],
+        controls: [MediaControl.skipToPrevious, MediaControl.pause, MediaControl.skipToNext],
         playing: true,
         processingState: AudioProcessingState.ready,)
     );
@@ -103,7 +103,7 @@ class AudioPlayerTask extends BaseAudioHandler {
   Future<void> pause() async {
     playbackState.add(
         playbackState.valueOrNull!.copyWith(
-            controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
+            controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext],
             playing: false,
             processingState: AudioProcessingState.ready,
             updatePosition: audioPlayer.position
