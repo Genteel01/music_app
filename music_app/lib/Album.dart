@@ -13,7 +13,7 @@ class Album{
   String albumArt;
   Album({required this.songs, required this.name, required this.albumArtist, required this.year, required this.lastModified, required this.albumArt});
 
-  void updateAlbum(String newYear, Uint8List? newAlbumArt, DateTime newLastModified, String directoryPath)
+  void updateAlbum(String newYear, String newArtist, Uint8List? newAlbumArt, DateTime newLastModified, String directoryPath)
   {
     if(albumArt != "")
       {
@@ -31,6 +31,7 @@ class Album{
     }
 
     year = newYear;
+    albumArtist = newArtist;
     lastModified = newLastModified;
   }
 
@@ -43,6 +44,7 @@ class Album{
           File(albumArt).delete();
         }
       }
+    //TODO use uuid
     albumArt = directoryPath + year + albumArtist + name;
     File(albumArt).writeAsBytes(newAlbumArt);
   }

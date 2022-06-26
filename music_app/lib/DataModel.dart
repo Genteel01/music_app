@@ -26,6 +26,7 @@ import 'Sorting.dart';
 /*void _backgroundTaskEntrypoint() async {
   await AudioServiceBackground.run(() => AudioPlayerTask());
 }*/
+//TODO Go through Dart Analysis tab and solve issues
 late AudioHandler _audioHandler;
 
 class DataModel extends ChangeNotifier {
@@ -305,6 +306,8 @@ class DataModel extends ChangeNotifier {
       config: AudioServiceConfig(
         androidNotificationChannelId: 'au.com.genteel01.music_app.channel.audio',
         androidNotificationChannelName: 'Music playback',
+        //TODO These settings are how you alter the notification thing
+        androidShowNotificationBadge: true
       ),
     );
 
@@ -347,9 +350,10 @@ class DataModel extends ChangeNotifier {
     playlists.clear();
     errorMessage = "";
 
+    //TODO Updates metadata package with timing measurements before and after
     var retriever = new MetadataRetriever();
     //If the album art directory doesn't exist create it
-    if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
+    /*if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
     {
       Directory(appDocumentsDirectory + "/albumart").createSync();
     }
@@ -384,7 +388,7 @@ class DataModel extends ChangeNotifier {
       String playlistsFile = await File(appDocumentsDirectory + "/playlists.txt").readAsString();
       var jsonFile = jsonDecode(playlistsFile);
       playlists = Playlist.loadPlaylistFile(jsonFile, songs);
-    }
+    }*/
 
     //Load your settings file
     if(File(appDocumentsDirectory + "/settings.txt").existsSync())
@@ -476,30 +480,76 @@ class DataModel extends ChangeNotifier {
           {
             Album currentAlbum = albums[i - 1];
             //TODO redo the metadata check to update it with the most common album artist/artist, year, and album art
+            //Check if any of the songs was updated more recently than the album
             if(currentAlbum.songs.any((song) => song.lastModified.isAfter(currentAlbum.lastModified)))
             {
-              //Get the most recently modified song
-              Song currentSong = currentAlbum.songs.reduce((song1, song2) => song1.lastModified.isBefore(song2.lastModified) ? song2 : song1);
-              Uint8List? albumArt;
+              Map<String, int> yearCounts = {};
+              Map<String, int> albumArtistCounts = {};
+              Map<String, int> artistCounts = {};
+              //Go through each song in the album
+              currentAlbum.songs.forEach((song) {
+                //Count the occurrences of the year, artist, and albumartist strings
+                if(song.year != "Unknown Year")
+                  {
+                    if(yearCounts.containsKey(song.year))
+                      {
+                        yearCounts[song.year] = yearCounts[song.year]! + 1;
+                      }
+                    else
+                      {
+                        yearCounts[song.year] = 1;
+                      }
+                  }
+
+                if(song.albumArtist != "Unknown Artist")
+                  {
+                    if(albumArtistCounts.containsKey(song.albumArtist))
+                    {
+                      albumArtistCounts[song.albumArtist] = albumArtistCounts[song.albumArtist]! + 1;
+                    }
+                    else
+                    {
+                      albumArtistCounts[song.albumArtist] = 1;
+                    }
+                  }
+
+                if(song.artist != "Unknown Artist")
+                  {
+                    if(artistCounts.containsKey(song.artist))
+                    {
+                      artistCounts[song.artist] = artistCounts[song.artist]! + 1;
+                    }
+                    else
+                    {
+                      artistCounts[song.artist] = 1;
+                    }
+                  }
+              });
+
               String albumYear = "Unknown Year";
-              File file = File(currentSong.filePath);
-              await retriever.setFile(file);
-              Metadata metaData = await retriever.metadata;
-              if (retriever.albumArt != null) {
-                albumArt = retriever.albumArt!;
-              }
-              if(metaData.year != null)
-              {
-                albumYear = metaData.year.toString();
-              }
-              currentAlbum.updateAlbum(albumYear, albumArt, currentSong.lastModified, appDocumentsDirectory);
+              if(yearCounts.isNotEmpty) albumYear = getMostCommonString(yearCounts);
+
+              String albumArtist = "Unknown Artist";
+              if(albumArtistCounts.isNotEmpty)
+                {
+                  albumArtist = getMostCommonString(albumArtistCounts);
+                }
+              else if(artistCounts.isNotEmpty)
+                {
+                  albumArtist = getMostCommonString(artistCounts);
+                }
+
+              //TODO Get the most common album art
+              Uint8List? albumArt;
+
+              currentAlbum.updateAlbum(albumYear, albumArtist, albumArt, DateTime.now(), appDocumentsDirectory);
             }
             //If there is no album art look for some
             if(currentAlbum.albumArt != "")
               {
                 while(!File(currentAlbum.albumArt).existsSync())
                 {
-                  //TODO Change this to use the most common metadata
+                  //TODO Change this to use the most common album art
                   for(int i = 0; i < currentAlbum.songs.length; i++)
                     {
                         Song albumSong = currentAlbum.songs[i];
@@ -524,7 +574,16 @@ class DataModel extends ChangeNotifier {
         artists.removeAt(i - 1);
         notifyListeners();
       }
-      //TODO Add albums for each song to the list if they aren't already there
+      else
+        {
+          Artist currentArtist = artists[i - 1];
+          currentArtist.songs.forEach((song) {
+            if(!currentArtist.albums.contains(song.album))
+              {
+                currentArtist.albums.add(song.album!);
+              }
+          });
+        }
     }
 
     loading = false;
@@ -541,6 +600,20 @@ class DataModel extends ChangeNotifier {
     //Save your settings
     saveSettings();
     print("LOGGING End: " + DateTime.now().toString());
+  }
+
+  String getMostCommonString(Map<String, int> map)
+  {
+    String mostCommonString = "";
+    int mostCommonValue = 0;
+    map.forEach((key, value) {
+      if(value > mostCommonValue)
+        {
+          mostCommonValue = value;
+          mostCommonString = key;
+        }
+    });
+    return mostCommonString;
   }
 
   //Sorts songs depending on the sort setting
