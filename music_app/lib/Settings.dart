@@ -60,6 +60,7 @@ class Settings{
       }
     });
   }
+
   setSongPath()
   {
     songPaths.clear();

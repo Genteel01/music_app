@@ -15,30 +15,38 @@ class Album{
 
   void updateAlbum(String newYear, Uint8List? newAlbumArt, DateTime newLastModified, String directoryPath)
   {
-    try
+    if(albumArt != "")
       {
-        File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).delete();
+        if(File(albumArt).existsSync())
+        {
+          File(albumArt).delete();
+        }
       }
-    catch(error){}
+
     if(newAlbumArt != null)
     {
-      File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).writeAsBytes(newAlbumArt);
-      albumArt = directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_");
+      //TODO use UUID
+      albumArt = directoryPath + year + albumArtist + name;
+      File(albumArt).writeAsBytes(newAlbumArt);
     }
+
     year = newYear;
     lastModified = newLastModified;
   }
 
   void updateAlbumArt(String directoryPath, Uint8List newAlbumArt)
   {
-    try
-    {
-      File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).delete();
-    }
-    catch(error){}
-    File(directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_")).writeAsBytes(newAlbumArt);
-    albumArt = directoryPath + "/albumart/" + name.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + year.replaceAll("/", "_");
+    if(albumArt != "")
+      {
+        if(File(albumArt).existsSync())
+        {
+          File(albumArt).delete();
+        }
+      }
+    albumArt = directoryPath + year + albumArtist + name;
+    File(albumArt).writeAsBytes(newAlbumArt);
   }
+
   Map<String, dynamic> toJson() =>
       {
         'name': name,
@@ -67,6 +75,7 @@ class Album{
       });
       return newAlbums;
   }
+
   //Function to turn a list of albums into a json file to be saved
   static List<Map<String, dynamic>> saveAlbumFile(List<Album> albumList, String directoryPath)
   {

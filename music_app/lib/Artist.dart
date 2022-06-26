@@ -30,6 +30,7 @@ class Artist{
     });
     return newArtists;
   }
+
   //Function to turn a list of artists into a json file to be saved
   static List<Map<String, dynamic>> saveArtistFile(List<Artist> artistList)
   {

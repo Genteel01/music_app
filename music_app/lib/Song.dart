@@ -14,13 +14,15 @@ class Song {
   int trackNumber;
   DateTime lastModified;
   Album? album;
+  String year;
 
   Song(Metadata metadata, String songFilePath, DateTime modified)
   :
     name = metadata.trackName == null ? songFilePath.split("/").last.split(".").first : metadata.trackName!,
     artist = metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!),
     albumName = metadata.albumName == null ? "Unknown Album" : metadata.albumName!,
-    albumArtist = metadata.albumArtistName == null ? (metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!)) : metadata.albumArtistName!,
+    year = metadata.year == null ? "Unknown Year" : metadata.year.toString(),
+    albumArtist = metadata.albumArtistName == null ? "Unknown Artist" : metadata.albumArtistName!,
     discNumber = metadata.discNumber == null ? 1 : metadata.discNumber!,
     trackNumber = metadata.trackNumber == null ? 1 : metadata.trackNumber!,
     //year = metadata.year == null ? "Unknown Year" : metadata.year.toString(),
@@ -34,12 +36,14 @@ class Song {
     name = metadata.trackName == null ? filePath.split("/").last.split(".").first : metadata.trackName!;
     artist = metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!);
     albumName = metadata.albumName == null ? "Unknown Album" : metadata.albumName!;
-    albumArtist = metadata.albumArtistName == null ? (metadata.trackArtistNames == null ? "Unknown Artist" : artistString(metadata.trackArtistNames!)) : metadata.albumArtistName!;
+    year = metadata.year == null ? "Unknown Year" : metadata.year.toString();
+    albumArtist = metadata.albumArtistName == null ? "Unknown Artist" : metadata.albumArtistName!;
     discNumber = metadata.discNumber == null ? 1 : metadata.discNumber!;
     trackNumber = metadata.trackNumber == null ? 1 : metadata.trackNumber!;
     duration = metadata.trackDuration == null ? 0 : metadata.trackDuration!;
     lastModified = modified;
   }
+
   static String artistString(List<String?> originalList)
   {
     String artist = "";
@@ -51,12 +55,14 @@ class Song {
     }
     return artist;
   }
+
   //Function to return the duration as a human readable string
   String durationString()
   {
     return duration == 0 ? "Unknown" :
     ((duration / 1000) / 60).floor().toString() + (((duration / 1000) % 60).floor() < 10 ? ":0" : ":") + ((duration / 1000) % 60).floor().toString();
   }
+
   Song.fromJson(Map<String, dynamic> json)
       :
         name = json['name'],
@@ -67,6 +73,7 @@ class Song {
         discNumber = json['discNumber'],
         trackNumber = json['trackNumber'],
         filePath = json['filePath'],
+        year = json['year'],
         lastModified = DateTime.fromMillisecondsSinceEpoch(json['lastModified']);
 
   Map<String, dynamic> toJson() =>
@@ -79,6 +86,7 @@ class Song {
         'discNumber': discNumber,
         'trackNumber' : trackNumber,
         'filePath' : filePath,
+        'year' : year,
         'lastModified' : lastModified.millisecondsSinceEpoch,
 
       };
@@ -87,26 +95,17 @@ class Song {
   static Future<List<Song>> loadSongFile(List<dynamic> data) async
   {
     List<Song> newSongs = List<Song>.empty(growable: true);
-    var retriever = new MetadataRetriever();
     await Future.forEach(data, (dynamic element) async {
       Song newSong = Song.fromJson(element);
       //Check if the song still exists
-      try
+      if(File(newSong.filePath).existsSync())
       {
-        //Check for updated metadata
-        if(File(newSong.filePath).lastModifiedSync().isAfter(newSong.lastModified))
-        {
-          File songFile = File(newSong.filePath);
-          await retriever.setFile(songFile);
-          Metadata metaData = await retriever.metadata;
-          newSong.updateSong(metaData, songFile.lastModifiedSync());
-        }
         newSongs.add(Song.fromJson(element));
       }
-      catch(error){}
     });
     return newSongs;
   }
+
   //Function to turn a list of songs into a json file to be saved
   static List<Map<String, dynamic>> saveSongFile(List<Song> songList)
   {
