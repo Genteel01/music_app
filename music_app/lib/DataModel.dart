@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
 
@@ -369,7 +370,7 @@ class DataModel extends ChangeNotifier {
         //Set the starting index in the background audio service
         await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
         //Set the playlist in the background audio service
-        await _audioHandler.customAction("setPlaylist", {"playlist" : makeSongMap(settings.upNext) });
+        await _audioHandler.customAction("setPlaylist", makeSongMap(settings.upNext));
         _audioHandler.pause();
       }
     }
@@ -777,20 +778,35 @@ class DataModel extends ChangeNotifier {
     //Set the starting index in the background audio service
     await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
     //Set the playlist in the background audio service
-    await _audioHandler.customAction("setPlaylist", {"playlist" : makeSongMap(settings.upNext) });
+    await _audioHandler.customAction("setPlaylist", makeSongMap(settings.upNext));
     //Play the music
     _audioHandler.play();
     notifyListeners();
     saveSettings();
   }
   //Makes the map that is used to send song data to the isolate
-  List<Map<String, dynamic>> makeSongMap(List<Song> songList)
+  Map<String, dynamic> makeSongMap(List<Song> songList)
   {
-    List<Map<String, dynamic>> songsWithMetadata = [];
+    Map<String, dynamic> songsWithMetadata = {};
+    List<MediaItem> mediaItems = [];
+    List<AudioSource> audioSources = [];
+
     songList.forEach((element) {
-      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.albumName, "albumart" : getAlbumArt(element), "milliseconds" : element.duration };
-      songsWithMetadata.add(song);
+      audioSources.add(AudioSource.uri(Uri.file(element.filePath)));
+      mediaItems.add(
+        MediaItem(
+          id: element.filePath,
+          artist: element.artist,
+          title: element.name,
+          album: element.albumName,
+          artUri: Uri.file(getAlbumArt(element)),
+          duration: Duration(milliseconds: element.duration)
+        )
+      );
     });
+
+    songsWithMetadata["mediaItems"] = mediaItems;
+    songsWithMetadata["audioSources"] = audioSources;
     return songsWithMetadata;
   }
   //Changes current song to the up next song at the given index
@@ -881,7 +897,7 @@ class DataModel extends ChangeNotifier {
         //Set the starting index in the background audio service
         await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
         //Set the playlist in the background audio service
-        await _audioHandler.customAction("updatePlaylist", {"playlist" : makeSongMap(settings.upNext)});
+        await _audioHandler.customAction("updatePlaylist", makeSongMap(settings.upNext));
       }
     notifyListeners();
     saveSettings();
