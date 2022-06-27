@@ -25,9 +25,9 @@ class Album{
 
     if(newAlbumArt != null)
     {
-      //TODO use UUID
-      albumArt = directoryPath + year + albumArtist + name;
-      File(albumArt).writeAsBytes(newAlbumArt);
+      //TODO use UUID and might not need Sync
+      albumArt = directoryPath + year + albumArtist.substring(0, 1) + name.substring(0, 1);
+      File(albumArt).writeAsBytesSync(newAlbumArt);
     }
 
     year = newYear;
@@ -44,9 +44,9 @@ class Album{
           File(albumArt).delete();
         }
       }
-    //TODO use uuid
-    albumArt = directoryPath + year + albumArtist + name;
-    File(albumArt).writeAsBytes(newAlbumArt);
+    //TODO use UUID and might not need Sync
+    albumArt = directoryPath + year + albumArtist.substring(0, 1) + name.substring(0, 1);
+    File(albumArt).writeAsBytesSync(newAlbumArt);
   }
 
   Map<String, dynamic> toJson() =>

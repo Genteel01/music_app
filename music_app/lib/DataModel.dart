@@ -479,7 +479,6 @@ class DataModel extends ChangeNotifier {
         else
           {
             Album currentAlbum = albums[i - 1];
-            //TODO redo the metadata check to update it with the most common album artist/artist, year, and album art
             //Check if any of the songs was updated more recently than the album
             if(currentAlbum.songs.any((song) => song.lastModified.isAfter(currentAlbum.lastModified)))
             {
@@ -539,28 +538,22 @@ class DataModel extends ChangeNotifier {
                   albumArtist = getMostCommonString(artistCounts);
                 }
 
-              //TODO Get the most common album art
-              Uint8List? albumArt;
+              Uint8List? albumArt = await getMostCommonAlbumArt(currentAlbum.songs, retriever);
 
               currentAlbum.updateAlbum(albumYear, albumArtist, albumArt, DateTime.now(), appDocumentsDirectory);
             }
-            //If there is no album art look for some
+            //If there is no album art look for some, to fix it sometimes not saving
             if(currentAlbum.albumArt != "")
               {
-                while(!File(currentAlbum.albumArt).existsSync())
+                /*while(!File(currentAlbum.albumArt).existsSync())
                 {
-                  //TODO Change this to use the most common album art
-                  for(int i = 0; i < currentAlbum.songs.length; i++)
+                  print("LOGGING: Searching for art for ${currentAlbum.name}");
+                  Uint8List? art = await getMostCommonAlbumArt(currentAlbum.songs, retriever);
+                  if(art != null)
                     {
-                        Song albumSong = currentAlbum.songs[i];
-                        File file = File(albumSong.filePath);
-                        await retriever.setFile(file);
-                        if (retriever.albumArt != null) {
-                          currentAlbum.updateAlbumArt(appDocumentsDirectory, retriever.albumArt!);
-                          break;
-                        }
+                      currentAlbum.updateAlbumArt(appDocumentsDirectory, art);
                     }
-                }
+                }*/
               }
           }
       }
@@ -590,16 +583,67 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
     //Save the songs, playlists, albums, and artist lists
     String albumsJson = jsonEncode(Album.saveAlbumFile(albums, appDocumentsDirectory));
-    File(appDocumentsDirectory + "/albums.txt").writeAsString(albumsJson);
+    File(appDocumentsDirectory + "/albums.txt").writeAsStringSync(albumsJson);
     String artistsJson = jsonEncode(Artist.saveArtistFile(artists));
-    File(appDocumentsDirectory + "/artists.txt").writeAsString(artistsJson);
+    File(appDocumentsDirectory + "/artists.txt").writeAsStringSync(artistsJson);
     String songsJson = jsonEncode(Song.saveSongFile(songs));
-    File(appDocumentsDirectory + "/songs.txt").writeAsString(songsJson);
+    File(appDocumentsDirectory + "/songs.txt").writeAsStringSync(songsJson);
     String playlistsJson = jsonEncode(Playlist.savePlaylistFile(playlists));
-    File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
+    File(appDocumentsDirectory + "/playlists.txt").writeAsStringSync(playlistsJson);
     //Save your settings
     saveSettings();
     print("LOGGING End: " + DateTime.now().toString());
+  }
+
+  Future<Uint8List?> getMostCommonAlbumArt(List<Song> songList, MetadataRetriever retriever) async
+  {
+    Map<Uint8List, int> artCounts = {};
+
+    await Future.forEach(songList, (Song song) async {
+      File file = File(song.filePath);
+      await retriever.setFile(file);
+      if (retriever.albumArt != null) {
+        Iterable<Uint8List> countedArts = artCounts.keys;
+        bool foundArt = false;
+        for(int i = 0; i < countedArts.length; i++)
+          {
+            if(areAlbumArtsEqual(countedArts.elementAt(i), retriever.albumArt!))
+              {
+                artCounts[countedArts.elementAt(i)] = artCounts[countedArts.elementAt(i)]! + 1;
+                foundArt = true;
+              }
+          }
+        if(!foundArt)
+          {
+            artCounts[retriever.albumArt!] = 1;
+          }
+      }
+
+    });
+
+    if(artCounts.isEmpty) return null;
+
+    Uint8List mostCommonArt = artCounts.keys.first;
+    int mostCommonValue = 0;
+    artCounts.forEach((key, value) {
+      if(value > mostCommonValue)
+      {
+        mostCommonValue = value;
+        mostCommonArt = key;
+      }
+    });
+
+    return mostCommonArt;
+  }
+
+  bool areAlbumArtsEqual(Uint8List a, Uint8List b)
+  {
+    int length = a.length;
+    for(int i = 0; i < length; i++)
+      {
+        if(a[i] != b[i]) return false;
+      }
+    return true;
   }
 
   String getMostCommonString(Map<String, int> map)
@@ -1067,7 +1111,7 @@ class DataModel extends ChangeNotifier {
   void savePlaylists()
   {
     String playlistsJson = jsonEncode(Playlist.savePlaylistFile(playlists));
-    File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
+    File(appDocumentsDirectory + "/playlists.txt").writeAsStringSync(playlistsJson);
   }
 
   Future<void> deleteSongList() async
