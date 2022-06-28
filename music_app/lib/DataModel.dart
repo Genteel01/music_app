@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 
 
@@ -35,7 +36,7 @@ class DataModel extends ChangeNotifier {
   List<Album> albums = [];
   List<Playlist> playlists = [];
 
-  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, sort: SortType.AZ, playingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: [], directoryPaths: []);
+  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, sort: SortType.AZ, playingIndex: 0, originalUpNext: [], directoryPaths: []);
 
   String appDocumentsDirectory = "";
 
@@ -60,15 +61,18 @@ class DataModel extends ChangeNotifier {
   bool seekbarIsPushed = false;
 
   Random randomNumbers = new Random();
+
   getSearchResults(String searchText)
   {
     searchResults.clear();
+
     if(searchText != "") {
       artists.forEach((element) {
         if (element.name.toUpperCase().contains(searchText.toUpperCase())) {
           searchResults.add(element);
         }
       });
+
       albums.forEach((element) {
         if (element.name.toUpperCase().contains(searchText.toUpperCase()) ||
             element.albumArtist.toUpperCase().contains(
@@ -76,7 +80,11 @@ class DataModel extends ChangeNotifier {
           searchResults.add(element);
         }
       });
-      songs.forEach((element) {
+
+      List<Song> searchableSongs = List.from(songs);
+      sortByTrackName(searchableSongs, false);
+
+      searchableSongs.forEach((element) {
         if (element.name.toUpperCase().contains(searchText.toUpperCase()) ||
             element.artist.toUpperCase().contains(searchText.toUpperCase()) ||
             element.albumName.toUpperCase().contains(searchText.toUpperCase()) ||
@@ -85,6 +93,7 @@ class DataModel extends ChangeNotifier {
           searchResults.add(element);
         }
       });
+
     }
     notifyListeners();
   }
@@ -242,7 +251,7 @@ class DataModel extends ChangeNotifier {
   void createPlaylist(String playlistName)
   {
     String finalName = playlistName == "" ? "Playlist " + (playlists.length + 1).toString() : playlistName;
-    Playlist newPlaylist = Playlist(songs: [], name: finalName, songPaths: []);
+    Playlist newPlaylist = Playlist(songs: [], name: finalName,);
     playlists.add(newPlaylist);
     sortPlaylists(playlists);
     savePlaylists();
@@ -298,9 +307,25 @@ class DataModel extends ChangeNotifier {
       config: AudioServiceConfig(
         androidNotificationChannelId: 'au.com.genteel01.music_app.channel.audio',
         androidNotificationChannelName: 'Music playback',
+        //TODO These settings are how you alter the notification thing
+        androidShowNotificationBadge: true
       ),
     );
+
     await fetch();
+
+    //Set up the listener to detect when songs finish
+    _audioHandler.playbackState.listen((state) {
+      isPlaying = state.playing;
+      notifyListeners();
+    });
+
+    _audioHandler.customEvent.listen((event) {
+      if(event.runtimeType == int)
+      {
+        setUpNextIndex(event);
+      }
+    });
   }
   Future<void> fetch() async
   {
@@ -326,84 +351,110 @@ class DataModel extends ChangeNotifier {
     playlists.clear();
     errorMessage = "";
 
+    //TODO Updates metadata package with timing measurements before and after
     var retriever = new MetadataRetriever();
     //If the album art directory doesn't exist create it
-    try
+    if(!Directory(appDocumentsDirectory + "/albumArt").existsSync())
     {
-      Directory(appDocumentsDirectory + "/albumart").createSync();
+      Directory(appDocumentsDirectory + "/albumArt").createSync();
     }
-    catch(error){}
-    //If the albums file exists load everything from it
-    try
-      {
-        String albumFile = await File(appDocumentsDirectory + "/albums.txt").readAsString();
-        var jsonFile = jsonDecode(albumFile);
-        albums = Album.loadAlbumFile(jsonFile, appDocumentsDirectory);
-      }
-    catch (error){}
-    //If the artists file exists load everything from it
-    try
-    {
-      String artistsFile = await File(appDocumentsDirectory + "/artists.txt").readAsString();
-      var jsonFile = jsonDecode(artistsFile);
-      artists = Artist.loadArtistFile(jsonFile);
-    }
-    catch (error){}
+
     //If the songs file exists load everything from it
-    try
+    if(File(appDocumentsDirectory + "/songs.txt").existsSync())
     {
       String songsFile = await File(appDocumentsDirectory + "/songs.txt").readAsString();
       var jsonFile = jsonDecode(songsFile);
       songs = await Song.loadSongFile(jsonFile);
     }
-    catch (error){}
+
+    //If the albums file exists load everything from it
+    if(File(appDocumentsDirectory + "/albums.txt").existsSync())
+      {
+        String albumFile = await File(appDocumentsDirectory + "/albums.txt").readAsString();
+        var jsonFile = jsonDecode(albumFile);
+        albums = Album.loadAlbumFile(jsonFile, songs);
+      }
+
+    //If the artists file exists load everything from it
+    if(File(appDocumentsDirectory + "/artists.txt").existsSync())
+    {
+      String artistsFile = await File(appDocumentsDirectory + "/artists.txt").readAsString();
+      var jsonFile = jsonDecode(artistsFile);
+      artists = Artist.loadArtistFile(jsonFile, songs, albums);
+    }
+
+    //If the playlists file exists load everything from it
+    if(File(appDocumentsDirectory + "/playlists.txt").existsSync())
+    {
+      String playlistsFile = await File(appDocumentsDirectory + "/playlists.txt").readAsString();
+      var jsonFile = jsonDecode(playlistsFile);
+      playlists = Playlist.loadPlaylistFile(jsonFile, songs);
+    }
+
     //Load your settings file
-    try
+    if(File(appDocumentsDirectory + "/settings.txt").existsSync())
     {
       String settingsFile = await File(appDocumentsDirectory + "/settings.txt").readAsString();
       var jsonFile = jsonDecode(settingsFile);
-      settings = Settings.fromJson(jsonFile);
-      settings.loadSongs(songs);
+      settings = Settings.fromJson(jsonFile, songs);
+
       if(settings.upNext.length > 0)
       {
         //Set the starting index in the background audio service
         await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
         //Set the playlist in the background audio service
-        await _audioHandler.customAction("setPlaylist", {"playlist" : makeSongMap(settings.upNext) });
+        await _audioHandler.customAction("setPlaylist", makeSongMap(settings.upNext));
         _audioHandler.pause();
       }
     }
-    catch(error){}
-    //Sort the songs into artists and albums
-    songs.forEach((element) {
-      addToArtistsAndAlbums(element, null, null);
+
+    //Check for updated song metadata
+    await Future.forEach(songs, (Song song) async {
+      File songFile = File(song.filePath);
+      if(songFile.lastModifiedSync().isAfter(song.lastModified))
+      {
+        //Remove the song from artists and albums
+        albums.forEach((album) {
+          if(album.songs.contains(song))
+            {
+              album.songs.remove(song);
+            }
+        });
+        artists.forEach((artist) {
+          if(artist.songs.contains(song))
+          {
+            artist.songs.remove(song);
+          }
+        });
+
+        File songFile = File(song.filePath);
+        await retriever.setFile(songFile);
+        Metadata metaData = await retriever.metadata;
+        song.updateSong(metaData, songFile.lastModifiedSync());
+        //Add the song back to artists and albums
+        addToArtistsAndAlbums(song);
+      }
     });
+
+
     //Check for new songs within the directories you are looking at
     await Future.forEach(settings.directoryPaths, (String directoryPath) async {
       try
       {
         var directoryMap = Directory(directoryPath).listSync(recursive: true);
         await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
-          if(filePath.path.toLowerCase().endsWith("mp3") || filePath.path.toLowerCase().endsWith("flac") || filePath.path.toLowerCase().endsWith("m4a") || filePath.path.toLowerCase().endsWith("wma"))
+          String _path = filePath.path.toLowerCase();
+          if(_path.endsWith("mp3") || _path.endsWith("flac") || _path.endsWith("m4a") || _path.endsWith("wma"))
           {
             if(!songs.any((element) => element.filePath == filePath.path))
             {
               Song newSong;
-              Uint8List? albumArt;
-              String albumYear = "Unknown Year";
               File file = File(filePath.path);
               await retriever.setFile(file);
               Metadata metaData = await retriever.metadata;
-              if (retriever.albumArt != null) {
-                albumArt = retriever.albumArt!;
-              }
-              if(metaData.year != null)
-              {
-                albumYear = metaData.year.toString();
-              }
               newSong = Song(metaData, filePath.path, file.lastModifiedSync());
               songs.add(newSong);
-              addToArtistsAndAlbums(newSong, albumArt, albumYear);
+              addToArtistsAndAlbums(newSong,);
             }
           }
         });
@@ -413,36 +464,34 @@ class DataModel extends ChangeNotifier {
         errorMessage = errorMessage + "The directory \"" + directoryPath + "\" contains inaccessible system files, and could not be mapped\n";
       }
     });
-    //If the playlists file exists load everything from it
-    try
-    {
-      String playlistsFile = await File(appDocumentsDirectory + "/playlists.txt").readAsString();
-      var jsonFile = jsonDecode(playlistsFile);
-      playlists = Playlist.loadPlaylistFile(jsonFile, songs);
-    }
-    catch (error){}
+
+
     //Sort the song and album lists
     sortSongs(settings.sort);
-    //sortByDuration(songs);
+
     sortByAlbumName(albums);
     sortByArtistName(artists);
+
     artists.forEach((element) {
       sortByAlbumDiscAndTrackNumber(element.songs);
     });
+
     albums.forEach((element) {
       sortByNumber(element.songs);
     });
-    //Remove all the artists and albums that have 0 songs in them
+
+    //Go through each album
     for (int i = albums.length; i > 0; i--)
       {
+        //Delete the album if it has no songs
         if(albums[i - 1].songs.length == 0)
           {
             //Delete the album art if it exists
-            try
+            if(File(albums[i - 1].albumArt).existsSync())
             {
               File(albums[i - 1].albumArt).delete();
             }
-            catch(e){}
+
             albums.removeAt(i - 1);
             notifyListeners();
           }
@@ -450,84 +499,180 @@ class DataModel extends ChangeNotifier {
         else
           {
             Album currentAlbum = albums[i - 1];
-            if(currentAlbum.songs.any((song) => song.lastModified.isAfter(currentAlbum.lastModified)))
+            //Set the values for unknown album
+            if(currentAlbum.name == "Unknown Album")
+              {
+                currentAlbum.updateAlbum("Unknown Year", "Unknown Artist", null, DateTime.now(), appDocumentsDirectory);
+              }
+            //Check if any of the songs was updated more recently than the album
+            else if(currentAlbum.songs.any((song) => song.lastModified.isAfter(currentAlbum.lastModified)))
             {
-              //Get the most recently modified song
-              Song currentSong = currentAlbum.songs.reduce((song1, song2) => song1.lastModified.isBefore(song2.lastModified) ? song2 : song1);
-              Uint8List? albumArt;
-              String albumYear = "Unknown Year";
-              File file = File(currentSong.filePath);
-              await retriever.setFile(file);
-              Metadata metaData = await retriever.metadata;
-              if (retriever.albumArt != null) {
-                albumArt = retriever.albumArt!;
-              }
-              if(metaData.year != null)
-              {
-                albumYear = metaData.year.toString();
-              }
-              currentAlbum.updateAlbum(albumYear, albumArt, currentSong.lastModified, appDocumentsDirectory);
-            }
-            //If there is no album art look for some
-            if(currentAlbum.albumArt != "" && !File(currentAlbum.albumArt).existsSync())
-              {
-                for(int i = 0; i < currentAlbum.songs.length; i++)
+              Map<String, int> yearCounts = {};
+              Map<String, int> albumArtistCounts = {};
+              Map<String, int> artistCounts = {};
+              //Go through each song in the album
+              currentAlbum.songs.forEach((song) {
+                //Count the occurrences of the year, artist, and albumartist strings
+                if(song.year != "Unknown Year")
                   {
-                      Song albumSong = currentAlbum.songs[i];
-                      File file = File(albumSong.filePath);
-                      await retriever.setFile(file);
-                      if (retriever.albumArt != null) {
-                        currentAlbum.updateAlbumArt(appDocumentsDirectory, retriever.albumArt!);
-                        break;
+                    if(yearCounts.containsKey(song.year))
+                      {
+                        yearCounts[song.year] = yearCounts[song.year]! + 1;
+                      }
+                    else
+                      {
+                        yearCounts[song.year] = 1;
                       }
                   }
-              }
+
+                if(song.albumArtist != "Unknown Artist")
+                  {
+                    if(albumArtistCounts.containsKey(song.albumArtist))
+                    {
+                      albumArtistCounts[song.albumArtist] = albumArtistCounts[song.albumArtist]! + 1;
+                    }
+                    else
+                    {
+                      albumArtistCounts[song.albumArtist] = 1;
+                    }
+                  }
+
+                if(song.artist != "Unknown Artist")
+                  {
+                    if(artistCounts.containsKey(song.artist))
+                    {
+                      artistCounts[song.artist] = artistCounts[song.artist]! + 1;
+                    }
+                    else
+                    {
+                      artistCounts[song.artist] = 1;
+                    }
+                  }
+              });
+
+              String albumYear = "Unknown Year";
+              if(yearCounts.isNotEmpty) albumYear = getMostCommonString(yearCounts);
+
+              String albumArtist = "Unknown Artist";
+              if(albumArtistCounts.isNotEmpty)
+                {
+                  albumArtist = getMostCommonString(albumArtistCounts);
+                }
+              else if(artistCounts.isNotEmpty)
+                {
+                  albumArtist = getMostCommonString(artistCounts);
+                }
+
+              Uint8List? albumArt = await getMostCommonAlbumArt(currentAlbum.songs, retriever);
+
+              currentAlbum.updateAlbum(albumYear, albumArtist, albumArt, DateTime.now(), appDocumentsDirectory);
+            }
           }
       }
+
+    //Go through each artist
     for (int i = artists.length; i > 0; i--)
     {
+      //Remove the artist if it has no songs
       if(artists[i - 1].songs.length == 0)
       {
         artists.removeAt(i - 1);
         notifyListeners();
       }
+      else
+        {
+          Artist currentArtist = artists[i - 1];
+          currentArtist.songs.forEach((song) {
+            Album songAlbum = albums.firstWhere((element) => element.id == song.album);
+            if(!currentArtist.albums.contains(songAlbum))
+              {
+                currentArtist.albums.add(songAlbum);
+              }
+          });
+        }
     }
 
-    addAlbumsToArtists();
-    //Set up the listener to detect when songs finish
-    _audioHandler.playbackState.listen((state) {
-      /*if(state.processingState == AudioProcessingState.idle)
-        {
-          settings.upNext.clear();
-          settings.originalUpNext.clear();
-          settings.songPaths.clear();
-          settings.originalSongPaths.clear();
-          saveSettings();
-        }*/
-      isPlaying = state.playing;
-      notifyListeners();
-    });
-    _audioHandler.customEvent.listen((event) {
-      if(event.runtimeType == int)
-        {
-          setUpNextIndex(event);
-        }
-    });
     loading = false;
     notifyListeners();
     //Save the songs, playlists, albums, and artist lists
     String albumsJson = jsonEncode(Album.saveAlbumFile(albums, appDocumentsDirectory));
-    File(appDocumentsDirectory + "/albums.txt").writeAsString(albumsJson);
+    File(appDocumentsDirectory + "/albums.txt").writeAsStringSync(albumsJson);
     String artistsJson = jsonEncode(Artist.saveArtistFile(artists));
-    File(appDocumentsDirectory + "/artists.txt").writeAsString(artistsJson);
+    File(appDocumentsDirectory + "/artists.txt").writeAsStringSync(artistsJson);
     String songsJson = jsonEncode(Song.saveSongFile(songs));
-    File(appDocumentsDirectory + "/songs.txt").writeAsString(songsJson);
+    File(appDocumentsDirectory + "/songs.txt").writeAsStringSync(songsJson);
     String playlistsJson = jsonEncode(Playlist.savePlaylistFile(playlists));
-    File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
+    File(appDocumentsDirectory + "/playlists.txt").writeAsStringSync(playlistsJson);
     //Save your settings
     saveSettings();
     print("LOGGING End: " + DateTime.now().toString());
   }
+
+  Future<Uint8List?> getMostCommonAlbumArt(List<Song> songList, MetadataRetriever retriever) async
+  {
+    Map<Uint8List, int> artCounts = {};
+
+    await Future.forEach(songList, (Song song) async {
+      File file = File(song.filePath);
+      await retriever.setFile(file);
+      if (retriever.albumArt != null) {
+        Iterable<Uint8List> countedArts = artCounts.keys;
+        bool foundArt = false;
+        for(int i = 0; i < countedArts.length; i++)
+          {
+            if(areAlbumArtsEqual(countedArts.elementAt(i), retriever.albumArt!))
+              {
+                artCounts[countedArts.elementAt(i)] = artCounts[countedArts.elementAt(i)]! + 1;
+                foundArt = true;
+              }
+          }
+        if(!foundArt)
+          {
+            artCounts[retriever.albumArt!] = 1;
+          }
+      }
+
+    });
+
+    if(artCounts.isEmpty) return null;
+
+    Uint8List mostCommonArt = artCounts.keys.first;
+    int mostCommonValue = 0;
+    artCounts.forEach((key, value) {
+      if(value > mostCommonValue)
+      {
+        mostCommonValue = value;
+        mostCommonArt = key;
+      }
+    });
+
+    return mostCommonArt;
+  }
+
+  bool areAlbumArtsEqual(Uint8List a, Uint8List b)
+  {
+    int length = a.length;
+    for(int i = 0; i < length; i++)
+      {
+        if(a[i] != b[i]) return false;
+      }
+    return true;
+  }
+
+  String getMostCommonString(Map<String, int> map)
+  {
+    String mostCommonString = "";
+    int mostCommonValue = 0;
+    map.forEach((key, value) {
+      if(value > mostCommonValue)
+        {
+          mostCommonValue = value;
+          mostCommonString = key;
+        }
+    });
+    return mostCommonString;
+  }
+
   //Sorts songs depending on the sort setting
   void sortSongs(SortType newSort)
   {
@@ -550,16 +695,19 @@ class DataModel extends ChangeNotifier {
     saveSettings();
     notifyListeners();
   }
+
   //Sorts a list of songs by the disc and track numbers
   void sortByNumber(List<Song> songList)
   {
     songList.sort((a, b) => a.discNumber.compareTo(b.discNumber) == 0 ? (a.trackNumber.compareTo(b.trackNumber)) : a.discNumber.compareTo(b.discNumber));
   }
+
   //Sorts a list of songs by album, then disc number, then track number
   void sortByAlbumDiscAndTrackNumber(List<Song> songList)
   {
     songList.sort((a, b) => a.albumName.compareTo(b.albumName) == 0 ? (a.discNumber.compareTo(b.discNumber) == 0 ? (a.trackNumber.compareTo(b.trackNumber)) : a.discNumber.compareTo(b.discNumber)): a.albumName.compareTo(b.albumName));
   }
+
   //Sorts a list of songs by the track name
   void sortByTrackName(List<Song> songList, bool descending)
   {
@@ -572,16 +720,19 @@ class DataModel extends ChangeNotifier {
         songList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
       }
   }
+
   //Sorts a list of albums by name
   void sortByAlbumName (List<Album> albumList)
   {
     albumList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
   }
+
   //Sorts a list of artists by name
   void sortByArtistName (List<Artist> artistList)
   {
     artistList.sort((a, b) => a.name.toUpperCase().compareTo(b.name.toUpperCase()));
   }
+
   //Sorts a list of songs for duration
   void sortByDuration(List<Song> songList, bool descending)
   {
@@ -594,6 +745,7 @@ class DataModel extends ChangeNotifier {
       songList.sort((a, b) => a.duration.compareTo(b.duration));
     }
   }
+
   void sortPlaylists(List<Playlist> playlistList)
   {
     playlistList.sort((a, b) => a.name.compareTo(b.name));
@@ -601,9 +753,10 @@ class DataModel extends ChangeNotifier {
 
   String getAlbumArt(Song song)
   {
-    if(song.album != null)
+    if(song.album != "")
       {
-        return song.album!.albumArt;
+        //return appDocumentsDirectory + "/albumArt/" + song.album;
+        return albums.firstWhere((element) => element.id == song.album).albumArt;
       }
     else
       {
@@ -611,6 +764,7 @@ class DataModel extends ChangeNotifier {
       }
   }
 
+  //TODO replace this with a single recursive delete call
   //Function to clear out all the local files I am creating for this app
   Future<void> clearAllData() async
   {
@@ -663,38 +817,35 @@ class DataModel extends ChangeNotifier {
     }
     catch(error){}
   }
-  //Add the albums to all the artist objects
-  void addAlbumsToArtists()
-  {
-    artists.forEach((artist) {
-      artist.albums.addAll(albums.where((album) => album.albumArtist == artist.name || album.songs.any((song) => song.artist == artist.name)));
-    });
-  }
 
   //Get the path without the file name
-  String getFolderPath(String songPath)
+  String getFolderPath(String songPath, int levels)
   {
     List<String> splitPath = songPath.split("/");
     String finalString = "";
-    for(int i = 0; i < splitPath.length - 1; i++)
+    for(int i = 0; i < splitPath.length - levels; i++)
       {
         finalString += splitPath[i];
       }
     return finalString;
   }
+
   //Adds a song to the album and artist that it belongs to
-  void addToArtistsAndAlbums(Song newSong, Uint8List? albumArt, String? albumYear)
+  void addToArtistsAndAlbums(Song newSong)
   {
-    try
+    //Add the song to its artist if it exists
+    if(artists.any((element) => element.name == newSong.artist))
     {
       artists.firstWhere((element) => element.name == newSong.artist).songs.add(newSong);
     }
-    catch(error)
+    //Create a new artist if one doesn't already exist
+    else
     {
       Artist newArtist = Artist(songs: [], name: newSong.artist, albums: []);
       newArtist.songs.add(newSong);
       artists.add(newArtist);
     }
+
     //If the album is unknown album and you are making a new album set the album artist to various artists, if you are adding to unknown album ignore the album artist from the song and use various artists
       Album? songAlbum;
       if(newSong.albumName == "Unknown Album")
@@ -706,30 +857,32 @@ class DataModel extends ChangeNotifier {
         }
       else
         {
-          if(albums.any((element) => element.name == newSong.albumName && element.albumArtist == newSong.albumArtist))
+          //If there is an album with the same name and with songs from the same folder, add the song to it
+          if(albums.any((element) => element.name == newSong.albumName && element.songs.any((albumSong) => getFolderPath(albumSong.filePath, 1) == getFolderPath(newSong.filePath, 1))))
+          {
+            songAlbum = albums.firstWhere((element) => element.name == newSong.albumName && element.songs.any((albumSong) => getFolderPath(albumSong.filePath, 1) == getFolderPath(newSong.filePath, 1)));
+          }
+          //Next check for songs in the same grandparent folder, to account for different disc numbers being in different subfolders
+          else if(albums.any((element) => element.name == newSong.albumName && element.songs.any((albumSong) => getFolderPath(albumSong.filePath, 2) == getFolderPath(newSong.filePath, 2))))
+            {
+              songAlbum = albums.firstWhere((element) => element.name == newSong.albumName && element.songs.any((albumSong) => getFolderPath(albumSong.filePath, 2) == getFolderPath(newSong.filePath, 2)));
+            }
+          //As a backup check for albums with the same album artist and name
+          else if(albums.any((element) => element.name == newSong.albumName && element.albumArtist == newSong.albumArtist))
             {
               songAlbum = albums.firstWhere((element) => element.name == newSong.albumName && element.albumArtist == newSong.albumArtist);
             }
-          else if(albums.any((element) => element.name == newSong.albumName && element.songs.any((albumSong) => getFolderPath(albumSong.filePath) == getFolderPath(newSong.filePath))))
-            {
-              songAlbum = albums.firstWhere((element) => element.name == newSong.albumName && element.songs.any((albumSong) => getFolderPath(albumSong.filePath) == getFolderPath(newSong.filePath)));
-            }
         }
+      //If you didn't find an album make a new one
       if(songAlbum == null)
         {
-            String albumArtLocation = "";
-            String albumArtist =  newSong.albumName == "Unknown Album" ? "Various Artists" : newSong.albumArtist;
-            String albumYearString = albumYear == null ? "Unknown Year" : albumYear;
-            if(albumArt != null)
-              {
-                File(appDocumentsDirectory + "/albumart/" + newSong.albumName.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + albumYearString.replaceAll("/", "_")).writeAsBytes(albumArt);
-                albumArtLocation = appDocumentsDirectory + "/albumart/" + newSong.albumName.replaceAll("/", "_") + albumArtist.replaceAll("/", "_") + albumYearString.replaceAll("/", "_");
-              }
-            songAlbum = Album(songs: [], name: newSong.albumName, albumArtist: albumArtist, albumArt: albumArtLocation, year: albumYearString, lastModified: newSong.lastModified);
+          String albumArtist =  newSong.albumName == "Unknown Album" ? "Various Artists" : newSong.albumArtist;
+
+          songAlbum = Album([], newSong.albumName, albumArtist);
             albums.add(songAlbum);
       }
       songAlbum.songs.add(newSong);
-      newSong.album = songAlbum;
+      newSong.album = songAlbum.id;
   }
 
   Duration calculateDuration(List<Song> mySongs)
@@ -772,27 +925,43 @@ class DataModel extends ChangeNotifier {
         }
         settings.playingIndex = 0;
       }
-    //Set the song paths so that upNext can be saved and loaded again when you open the app
-    settings.setSongPath();
+
     //Set the starting index in the background audio service
     await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
     //Set the playlist in the background audio service
-    await _audioHandler.customAction("setPlaylist", {"playlist" : makeSongMap(settings.upNext) });
+    await _audioHandler.customAction("setPlaylist", makeSongMap(settings.upNext));
     //Play the music
     _audioHandler.play();
     notifyListeners();
     saveSettings();
   }
+
   //Makes the map that is used to send song data to the isolate
-  List<Map<String, dynamic>> makeSongMap(List<Song> songList)
+  Map<String, dynamic> makeSongMap(List<Song> songList)
   {
-    List<Map<String, dynamic>> songsWithMetadata = [];
+    Map<String, dynamic> songsWithMetadata = {};
+    List<MediaItem> mediaItems = [];
+    List<AudioSource> audioSources = [];
+
     songList.forEach((element) {
-      Map<String, dynamic> song = {"path" : element.filePath, "name" : element.name, "artist" : element.artist, "album" : element.albumName, "albumart" : getAlbumArt(element), "milliseconds" : element.duration };
-      songsWithMetadata.add(song);
+      audioSources.add(AudioSource.uri(Uri.file(element.filePath)));
+      mediaItems.add(
+        MediaItem(
+          id: element.filePath,
+          artist: element.artist,
+          title: element.name,
+          album: element.albumName,
+          artUri: Uri.file(getAlbumArt(element)),
+          duration: Duration(milliseconds: element.duration)
+        )
+      );
     });
+
+    songsWithMetadata["mediaItems"] = mediaItems;
+    songsWithMetadata["audioSources"] = audioSources;
     return songsWithMetadata;
   }
+
   //Changes current song to the up next song at the given index
   void setUpNextIndex(int index)
   {
@@ -803,6 +972,7 @@ class DataModel extends ChangeNotifier {
         saveSettings();
       }
   }
+
   //Sets the up next index based on the passed in file path (used when resuming the application)
   void setUpNextIndexFromSongPath() async
   {
@@ -817,6 +987,7 @@ class DataModel extends ChangeNotifier {
       await _audioHandler.customAction("getCurrentIndex");
     }
   }
+
   void playButton() async
   {
     //bool isPlaying = await AudioService.customAction("isPlaying");
@@ -844,6 +1015,7 @@ class DataModel extends ChangeNotifier {
   {
     currentPosition = newCurrentPosition;
   }
+
   //Toggles shuffle behaviour when the shuffle button is pressed
   void toggleShuffle() async
   {
@@ -866,7 +1038,7 @@ class DataModel extends ChangeNotifier {
             settings.upNext.add(movedSong);
           }
           settings.playingIndex = 0;
-          settings.setSongPath();
+
         }
         //If you are not shuffling set the upNext playlist to the original un-shuffled one
         else
@@ -875,13 +1047,13 @@ class DataModel extends ChangeNotifier {
           List<Song> newUpNext = [];
           newUpNext.addAll(settings.originalUpNext);
           settings.upNext = newUpNext;
-          settings.setSongPath();
+
           settings.playingIndex = settings.upNext.indexOf(currentlyPlayingSong);
         }
         //Set the starting index in the background audio service
         await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
         //Set the playlist in the background audio service
-        await _audioHandler.customAction("updatePlaylist", {"playlist" : makeSongMap(settings.upNext)});
+        await _audioHandler.customAction("updatePlaylist", makeSongMap(settings.upNext));
       }
     notifyListeners();
     saveSettings();
@@ -919,6 +1091,7 @@ class DataModel extends ChangeNotifier {
       notifyListeners();
       saveSettings();
   }
+
   void nextButton()
   {
     //audioPlayer.seekToNext();
@@ -951,7 +1124,7 @@ class DataModel extends ChangeNotifier {
   void savePlaylists()
   {
     String playlistsJson = jsonEncode(Playlist.savePlaylistFile(playlists));
-    File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
+    File(appDocumentsDirectory + "/playlists.txt").writeAsStringSync(playlistsJson);
   }
 
   Future<void> deleteSongList() async
@@ -972,6 +1145,7 @@ class DataModel extends ChangeNotifier {
         savePlaylists();
       }
   }
+
   void removePlaylist(Playlist playlist)
   {
     playlists.remove(playlist);

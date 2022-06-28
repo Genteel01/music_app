@@ -5,46 +5,31 @@ import 'Song.dart';
 class Playlist{
   List<Song> songs;
   String name;
-  List<String> songPaths;
 
-  Playlist({required this.songs, required this.name, required this.songPaths,});
+  Playlist({required this.songs, required this.name,});
 
   Map<String, dynamic> toJson() =>
       {
         'name': name,
-        'songs' : songPaths
+        'songs' : Song.songListToIdList(songs),
       };
 
-  Playlist.fromJson(Map<String, dynamic> json)
+  Playlist.fromJson(Map<String, dynamic> json, List<Song> allSongs)
       :
         name = json['name'],
-        songPaths = json['songs'].cast<String>(),
-        songs = [];
+        songs = Song.idListToSongList(json['songs'].cast<String>(), allSongs);
 
   //Function to turn a json file of several playlists into a list of playlists
   static List<Playlist> loadPlaylistFile(List<dynamic> data, List<Song> allSongs)
   {
     List<Playlist> newPlaylists = List<Playlist>.empty(growable: true);
     data.forEach((element) {
-      Playlist newPlaylist = Playlist.fromJson(element);
-      newPlaylist.loadSongs(allSongs);
+      Playlist newPlaylist = Playlist.fromJson(element, allSongs);
       newPlaylists.add(newPlaylist);
     });
     return newPlaylists;
   }
-  loadSongs(List<Song> allSongs)
-  {
-    songPaths.forEach((element) {
-      try
-      {
-        songs.add(allSongs.firstWhere((song) => song.filePath ==element));
-      }
-      catch(error)
-      {
 
-      }
-    });
-  }
   //Function to turn a list of playlists into a json file to be saved
   static List<Map<String, dynamic>> savePlaylistFile(List<Playlist> playlistList)
   {
@@ -58,9 +43,6 @@ class Playlist{
   addToPlaylist(List<Song> newSongs)
   {
     songs.addAll(newSongs);
-    newSongs.forEach((element) {
-      songPaths.add(element.filePath);
-    });
   }
 }
 

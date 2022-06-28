@@ -15,7 +15,7 @@ class AudioPlayerTask extends BaseAudioHandler {
   void onStart()
   {
     playbackState.add(
-        PlaybackState(controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
+        PlaybackState(controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext,],
             systemActions: const {
               MediaAction.seek,
             },
@@ -62,7 +62,7 @@ class AudioPlayerTask extends BaseAudioHandler {
     audioPlayer.play();
     playbackState.add(
         playbackState.valueOrNull!.copyWith(
-        controls: [MediaControl.skipToPrevious, MediaControl.pause, MediaControl.skipToNext, MediaControl.stop],
+        controls: [MediaControl.skipToPrevious, MediaControl.pause, MediaControl.skipToNext],
         playing: true,
         processingState: AudioProcessingState.ready,)
     );
@@ -103,7 +103,7 @@ class AudioPlayerTask extends BaseAudioHandler {
   Future<void> pause() async {
     playbackState.add(
         playbackState.valueOrNull!.copyWith(
-            controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext, MediaControl.stop],
+            controls: [MediaControl.skipToPrevious, MediaControl.play, MediaControl.skipToNext],
             playing: false,
             processingState: AudioProcessingState.ready,
             updatePosition: audioPlayer.position
@@ -125,21 +125,9 @@ class AudioPlayerTask extends BaseAudioHandler {
     if(name == "setPlaylist")
       {
         //Build the future playlist
-        futureMediaItems.clear();
         List<AudioSource> playlist = [];
-        arguments!["playlist"].forEach((element) {
-          playlist.add(AudioSource.uri(Uri.file((element as Map)["path"])));
-          futureMediaItems.add(
-              MediaItem(
-                  id: element["path"],
-                  artist: element["artist"],
-                  title: element["name"],
-                  album: element["album"],
-                  artUri: Uri.file(element["albumart"]),
-                  duration: Duration(milliseconds: element["milliseconds"])
-          )
-          );
-        });
+        futureMediaItems = arguments!["mediaItems"];
+        playlist = arguments["audioSources"];
         //futurePlaylist = ConcatenatingAudioSource(children: playlist,);
         audioPlayer.setAudioSource(ConcatenatingAudioSource(children: playlist,), initialIndex: startingIndex);
         queue.add(futureMediaItems);
@@ -152,21 +140,10 @@ class AudioPlayerTask extends BaseAudioHandler {
     if(name == "updatePlaylist")
     {
       //Build the future playlist
-      futureMediaItems.clear();
       List<AudioSource> playlist = [];
-      arguments!["playlist"].forEach((element) {
-        playlist.add(AudioSource.uri(Uri.file((element as Map)["path"])));
-        futureMediaItems.add(
-            MediaItem(
-              id: element["path"],
-              artist: element["artist"],
-              title: element["name"],
-              album: element["album"],
-              artUri: Uri.file(element["albumart"]),
-              duration: Duration(milliseconds: element["milliseconds"])
-            )
-        );
-      });
+      futureMediaItems = arguments!["mediaItems"];
+      playlist = arguments["audioSources"];
+
       Duration currentPosition = audioPlayer.position;
       await audioPlayer.setAudioSource(ConcatenatingAudioSource(children: playlist,), initialIndex: startingIndex);
       await seek(currentPosition);
