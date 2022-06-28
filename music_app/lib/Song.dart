@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_media_metadata/flutter_media_metadata.dart';
-import 'package:music_app/Album.dart';
+import 'package:uuid/uuid.dart';
 
 class Song {
   String filePath;
@@ -13,8 +13,9 @@ class Song {
   int discNumber;
   int trackNumber;
   DateTime lastModified;
-  Album? album;
+  String album;
   String year;
+  String id;
 
   Song(Metadata metadata, String songFilePath, DateTime modified)
   :
@@ -28,7 +29,9 @@ class Song {
     //year = metadata.year == null ? "Unknown Year" : metadata.year.toString(),
     duration = metadata.trackDuration == null ? 0 : metadata.trackDuration!,
     filePath = songFilePath,
-    lastModified = modified;
+    lastModified = modified,
+    album = "",
+    id = Uuid().v1();
     //albumArt = songAlbumArt;
 
   void updateSong(Metadata metadata, DateTime modified)
@@ -63,7 +66,7 @@ class Song {
     ((duration / 1000) / 60).floor().toString() + (((duration / 1000) % 60).floor() < 10 ? ":0" : ":") + ((duration / 1000) % 60).floor().toString();
   }
 
-  Song.fromJson(Map<String, dynamic> json)
+  Song.fromJson(Map<String, dynamic> json,)
       :
         name = json['name'],
         artist = json['artist'],
@@ -74,13 +77,15 @@ class Song {
         trackNumber = json['trackNumber'],
         filePath = json['filePath'],
         year = json['year'],
-        lastModified = DateTime.fromMillisecondsSinceEpoch(json['lastModified']);
+        lastModified = DateTime.fromMillisecondsSinceEpoch(json['lastModified']),
+        album = json['album'],
+        id = json['id'];
 
   Map<String, dynamic> toJson() =>
       {
         'name': name,
         'artist': artist,
-        'album' : albumName,
+        'albumName' : albumName,
         'duration' : duration,
         'albumArtist' : albumArtist,
         'discNumber': discNumber,
@@ -88,7 +93,8 @@ class Song {
         'filePath' : filePath,
         'year' : year,
         'lastModified' : lastModified.millisecondsSinceEpoch,
-
+        'album' : album,
+        'id' : id
       };
 
   //Function to turn a json file of several songs into a list of songs
@@ -114,5 +120,37 @@ class Song {
       newSongs.add(element.toJson());
     });
     return newSongs;
+  }
+
+  ///Converts and id list to a list of songs
+  static List<Song> idListToSongList(List<String> ids, List<Song> allSongs)
+  {
+    List<Song> newSongList = [];
+    int length = allSongs.length;
+    //Look through all songs
+    for(int i = 0; i < length; i++)
+    {
+      //If the song is in the id list, add it to the new song list
+      if(ids.contains(allSongs[i].id))
+      {
+        newSongList.add(allSongs[i]);
+      }
+      //If you have found all the ids end the loop
+      if(newSongList.length == ids.length)
+      {
+        break;
+      }
+    }
+    return newSongList;
+  }
+
+  ///Converts a song list to a list of those song's ids
+  static List<String> songListToIdList(List<Song> songs)
+  {
+    List<String> idList = [];
+    songs.forEach((song) {
+      idList.add(song.id);
+    });
+    return idList;
   }
 }

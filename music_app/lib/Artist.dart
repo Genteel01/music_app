@@ -13,20 +13,22 @@ class Artist{
   Map<String, dynamic> toJson() =>
       {
         'name': name,
+        'songs' : Song.songListToIdList(songs),
+        'albums' : Album.albumListToIdList(albums)
       };
 
-  Artist.fromJson(Map<String, dynamic> json)
+  Artist.fromJson(Map<String, dynamic> json, List<Song> allSongs, List<Album> allAlbums)
       :
         name = json['name'],
-        songs = [],
-        albums = [];
+        songs = Song.idListToSongList(json['songs'].cast<String>(), allSongs),
+        albums = Album.idListToAlbumList(json['albums'].cast<String>(), allAlbums);
 
   //Function to turn a json file of several artists into a list of artists
-  static List<Artist> loadArtistFile(List<dynamic> data)
+  static List<Artist> loadArtistFile(List<dynamic> data, List<Song> allSongs, List<Album> allAlbums)
   {
     List<Artist> newArtists = List<Artist>.empty(growable: true);
     data.forEach((element) {
-      newArtists.add(Artist.fromJson(element));
+      newArtists.add(Artist.fromJson(element, allSongs, allAlbums));
     });
     return newArtists;
   }

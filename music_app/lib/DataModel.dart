@@ -37,7 +37,7 @@ class DataModel extends ChangeNotifier {
   List<Album> albums = [];
   List<Playlist> playlists = [];
 
-  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, sort: SortType.AZ, playingIndex: 0, songPaths: [], originalSongPaths: [], originalUpNext: [], directoryPaths: []);
+  Settings settings = Settings(upNext: [], shuffle: false, loop: LoopType.none, sort: SortType.AZ, playingIndex: 0, originalUpNext: [], directoryPaths: []);
 
   String appDocumentsDirectory = "";
 
@@ -250,7 +250,7 @@ class DataModel extends ChangeNotifier {
   void createPlaylist(String playlistName)
   {
     String finalName = playlistName == "" ? "Playlist " + (playlists.length + 1).toString() : playlistName;
-    Playlist newPlaylist = Playlist(songs: [], name: finalName, songPaths: []);
+    Playlist newPlaylist = Playlist(songs: [], name: finalName,);
     playlists.add(newPlaylist);
     sortPlaylists(playlists);
     savePlaylists();
@@ -353,7 +353,7 @@ class DataModel extends ChangeNotifier {
     //TODO Updates metadata package with timing measurements before and after
     var retriever = new MetadataRetriever();
     //If the album art directory doesn't exist create it
-    /*if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
+    if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
     {
       Directory(appDocumentsDirectory + "/albumart").createSync();
     }
@@ -371,7 +371,7 @@ class DataModel extends ChangeNotifier {
       {
         String albumFile = await File(appDocumentsDirectory + "/albums.txt").readAsString();
         var jsonFile = jsonDecode(albumFile);
-        albums = Album.loadAlbumFile(jsonFile, appDocumentsDirectory);
+        albums = Album.loadAlbumFile(jsonFile, songs);
       }
 
     //If the artists file exists load everything from it
@@ -379,7 +379,7 @@ class DataModel extends ChangeNotifier {
     {
       String artistsFile = await File(appDocumentsDirectory + "/artists.txt").readAsString();
       var jsonFile = jsonDecode(artistsFile);
-      artists = Artist.loadArtistFile(jsonFile);
+      artists = Artist.loadArtistFile(jsonFile, songs, albums);
     }
 
     //If the playlists file exists load everything from it
@@ -388,15 +388,15 @@ class DataModel extends ChangeNotifier {
       String playlistsFile = await File(appDocumentsDirectory + "/playlists.txt").readAsString();
       var jsonFile = jsonDecode(playlistsFile);
       playlists = Playlist.loadPlaylistFile(jsonFile, songs);
-    }*/
+    }
 
     //Load your settings file
     if(File(appDocumentsDirectory + "/settings.txt").existsSync())
     {
       String settingsFile = await File(appDocumentsDirectory + "/settings.txt").readAsString();
       var jsonFile = jsonDecode(settingsFile);
-      settings = Settings.fromJson(jsonFile);
-      settings.loadSongs(songs);
+      settings = Settings.fromJson(jsonFile, songs);
+
       if(settings.upNext.length > 0)
       {
         //Set the starting index in the background audio service
@@ -563,9 +563,10 @@ class DataModel extends ChangeNotifier {
         {
           Artist currentArtist = artists[i - 1];
           currentArtist.songs.forEach((song) {
-            if(!currentArtist.albums.contains(song.album))
+            Album songAlbum = albums.firstWhere((element) => element.id == song.album);
+            if(!currentArtist.albums.contains(songAlbum))
               {
-                currentArtist.albums.add(song.album!);
+                currentArtist.albums.add(songAlbum);
               }
           });
         }
@@ -732,9 +733,9 @@ class DataModel extends ChangeNotifier {
 
   String getAlbumArt(Song song)
   {
-    if(song.album != null)
+    if(song.album != "")
       {
-        return song.album!.albumArt;
+        return albums.firstWhere((element) => element.id == song.album).albumArt;
       }
     else
       {
@@ -860,7 +861,7 @@ class DataModel extends ChangeNotifier {
             albums.add(songAlbum);
       }
       songAlbum.songs.add(newSong);
-      newSong.album = songAlbum;
+      newSong.album = songAlbum.id;
   }
 
   Duration calculateDuration(List<Song> mySongs)
@@ -903,8 +904,7 @@ class DataModel extends ChangeNotifier {
         }
         settings.playingIndex = 0;
       }
-    //Set the song paths so that upNext can be saved and loaded again when you open the app
-    settings.setSongPath();
+
     //Set the starting index in the background audio service
     await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
     //Set the playlist in the background audio service
@@ -1017,7 +1017,7 @@ class DataModel extends ChangeNotifier {
             settings.upNext.add(movedSong);
           }
           settings.playingIndex = 0;
-          settings.setSongPath();
+
         }
         //If you are not shuffling set the upNext playlist to the original un-shuffled one
         else
@@ -1026,7 +1026,7 @@ class DataModel extends ChangeNotifier {
           List<Song> newUpNext = [];
           newUpNext.addAll(settings.originalUpNext);
           settings.upNext = newUpNext;
-          settings.setSongPath();
+
           settings.playingIndex = settings.upNext.indexOf(currentlyPlayingSong);
         }
         //Set the starting index in the background audio service

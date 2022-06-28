@@ -64,26 +64,27 @@ class Album{
         'year': year,
         'lastModified' : lastModified.millisecondsSinceEpoch,
         'albumArt' : albumArt,
-        'id' : id
+        'id' : id,
+        'songs' : Song.songListToIdList(songs)
         //'albumArt': albumArt,
       };
 
-  Album.fromJson(Map<String, dynamic> json, String directoryPath)
+  Album.fromJson(Map<String, dynamic> json, List<Song> allSongs)
       :
         name = json['name'],
         albumArtist = json['albumArtist'],
         year = json['year'],
         albumArt = json['albumArt'],
-        songs = [],
+        songs = Song.idListToSongList(json['songs'].cast<String>(), allSongs),
         id = json['id'],
         lastModified = DateTime.fromMillisecondsSinceEpoch(json['lastModified']);
 
   //Function to turn a json file of several albums into a list of albums
-  static List<Album> loadAlbumFile(List<dynamic> data, String directoryPath)
+  static List<Album> loadAlbumFile(List<dynamic> data, List<Song> allSongs)
   {
       List<Album> newAlbums = List<Album>.empty(growable: true);
       data.forEach((element) {
-        newAlbums.add(Album.fromJson(element, directoryPath));
+        newAlbums.add(Album.fromJson(element, allSongs));
       });
       return newAlbums;
   }
@@ -96,5 +97,37 @@ class Album{
       newAlbums.add(element.toJson());
     });
     return newAlbums;
+  }
+
+  ///Converts an id list to a list of albums
+  static List<Album> idListToAlbumList(List<String> ids, List<Album> allAlbums)
+  {
+    List<Album> newAlbumList = [];
+    int length = allAlbums.length;
+    //Look through all albums
+    for(int i = 0; i < length; i++)
+      {
+        //If the album is in the id list, add it to the new album list
+        if(ids.contains(allAlbums[i].id))
+          {
+            newAlbumList.add(allAlbums[i]);
+          }
+        //If you have found all the ids end the loop
+        if(newAlbumList.length == ids.length)
+        {
+          break;
+        }
+      }
+    return newAlbumList;
+  }
+
+  ///Converts a list of albums to a list of ids
+  static List<String> albumListToIdList(List<Album> albums)
+  {
+    List<String> idList = [];
+    albums.forEach((album) {
+      idList.add(album.id);
+    });
+    return idList;
   }
 }
