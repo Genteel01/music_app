@@ -70,7 +70,7 @@ class Song {
       :
         name = json['name'],
         artist = json['artist'],
-        albumName = json['album'],
+        albumName = json['albumName'],
         duration = json['duration'],
         albumArtist = json['albumArtist'],
         discNumber = json['discNumber'],
