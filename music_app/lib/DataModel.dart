@@ -353,9 +353,9 @@ class DataModel extends ChangeNotifier {
     //TODO Updates metadata package with timing measurements before and after
     var retriever = new MetadataRetriever();
     //If the album art directory doesn't exist create it
-    if(!Directory(appDocumentsDirectory + "/albumart").existsSync())
+    if(!Directory(appDocumentsDirectory + "/albumArt").existsSync())
     {
-      Directory(appDocumentsDirectory + "/albumart").createSync();
+      Directory(appDocumentsDirectory + "/albumArt").createSync();
     }
 
     //If the songs file exists load everything from it
@@ -407,6 +407,7 @@ class DataModel extends ChangeNotifier {
       }
     }
 
+    print("LOGGING: " + appDocumentsDirectory);
     //Check for updated song metadata
     //TODO Remove song from all artists and albums at the start then re-sort it at the end
     /*if(File(newSong.filePath).lastModifiedSync().isAfter(newSong.lastModified))
@@ -735,6 +736,7 @@ class DataModel extends ChangeNotifier {
   {
     if(song.album != "")
       {
+        //return appDocumentsDirectory + "/albumArt/" + song.album;
         return albums.firstWhere((element) => element.id == song.album).albumArt;
       }
     else

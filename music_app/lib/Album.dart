@@ -35,7 +35,7 @@ class Album{
 
     if(newAlbumArt != null)
     {
-      albumArt = directoryPath + id;
+      albumArt = directoryPath + "/albumArt/" + id;
       File(albumArt).writeAsBytes(newAlbumArt);
     }
 
@@ -53,7 +53,7 @@ class Album{
           File(albumArt).delete();
         }
       }
-    albumArt = directoryPath + id;
+    albumArt = directoryPath + "/albumArt/" + id;
     File(albumArt).writeAsBytes(newAlbumArt);
   }
 
@@ -66,7 +66,6 @@ class Album{
         'albumArt' : albumArt,
         'id' : id,
         'songs' : Song.songListToIdList(songs)
-        //'albumArt': albumArt,
       };
 
   Album.fromJson(Map<String, dynamic> json, List<Song> allSongs)
