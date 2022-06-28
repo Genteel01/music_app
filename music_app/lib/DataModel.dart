@@ -547,19 +547,6 @@ class DataModel extends ChangeNotifier {
 
               currentAlbum.updateAlbum(albumYear, albumArtist, albumArt, DateTime.now(), appDocumentsDirectory);
             }
-            //If there is no album art look for some, to fix it sometimes not saving
-            if(currentAlbum.albumArt != "")
-              {
-                /*while(!File(currentAlbum.albumArt).existsSync())
-                {
-                  print("LOGGING: Searching for art for ${currentAlbum.name}");
-                  Uint8List? art = await getMostCommonAlbumArt(currentAlbum.songs, retriever);
-                  if(art != null)
-                    {
-                      currentAlbum.updateAlbumArt(appDocumentsDirectory, art);
-                    }
-                }*/
-              }
           }
       }
 

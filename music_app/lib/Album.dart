@@ -35,9 +35,8 @@ class Album{
 
     if(newAlbumArt != null)
     {
-      //TODO might not need Sync
       albumArt = directoryPath + id;
-      File(albumArt).writeAsBytesSync(newAlbumArt);
+      File(albumArt).writeAsBytes(newAlbumArt);
     }
 
     year = newYear;
@@ -54,9 +53,8 @@ class Album{
           File(albumArt).delete();
         }
       }
-    //TODO might not need Sync
     albumArt = directoryPath + id;
-    File(albumArt).writeAsBytesSync(newAlbumArt);
+    File(albumArt).writeAsBytes(newAlbumArt);
   }
 
   Map<String, dynamic> toJson() =>
