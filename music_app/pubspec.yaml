@@ -31,7 +31,7 @@ dependencies:
   draggable_scrollbar:
   auto_size_text: ^3.0.0-nullsafety.0
   marquee:
-  audio_service:
+  audio_service: 0.18.6
   uuid:
 
   # The following adds the Cupertino Icons font to your application.
