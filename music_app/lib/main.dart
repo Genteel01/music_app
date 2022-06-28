@@ -15,9 +15,7 @@ void main()  {
 class MyApp extends StatelessWidget {
   final ColorScheme crabColorScheme = ColorScheme(
       primary: Colours.primaryColour,
-      primaryVariant: Colours.primaryColour,
       secondary: Colours.secondaryColour,
-      secondaryVariant: Colours.secondaryColour,
       surface: Colours.secondaryColour,
       background: Colours.backgroundColour,
       error: Colors.red,

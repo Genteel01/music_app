@@ -26,7 +26,6 @@ import 'Sorting.dart';
 /*void _backgroundTaskEntrypoint() async {
   await AudioServiceBackground.run(() => AudioPlayerTask());
 }*/
-//TODO Go through Dart Analysis tab and solve issues
 late AudioHandler _audioHandler;
 
 class DataModel extends ChangeNotifier {
@@ -408,14 +407,33 @@ class DataModel extends ChangeNotifier {
     }
 
     //Check for updated song metadata
-    //TODO Remove song from all artists and albums at the start then re-sort it at the end
-    /*if(File(newSong.filePath).lastModifiedSync().isAfter(newSong.lastModified))
-    {
-      File songFile = File(newSong.filePath);
-      await retriever.setFile(songFile);
-      Metadata metaData = await retriever.metadata;
-      newSong.updateSong(metaData, songFile.lastModifiedSync());
-    }*/
+    await Future.forEach(songs, (Song song) async {
+      File songFile = File(song.filePath);
+      if(songFile.lastModifiedSync().isAfter(song.lastModified))
+      {
+        //Remove the song from artists and albums
+        albums.forEach((album) {
+          if(album.songs.contains(song))
+            {
+              album.songs.remove(song);
+            }
+        });
+        artists.forEach((artist) {
+          if(artist.songs.contains(song))
+          {
+            artist.songs.remove(song);
+          }
+        });
+
+        File songFile = File(song.filePath);
+        await retriever.setFile(songFile);
+        Metadata metaData = await retriever.metadata;
+        song.updateSong(metaData, songFile.lastModifiedSync());
+        //Add the song back to artists and albums
+        addToArtistsAndAlbums(song);
+      }
+    });
+
 
     //Check for new songs within the directories you are looking at
     await Future.forEach(settings.directoryPaths, (String directoryPath) async {
