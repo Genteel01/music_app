@@ -479,8 +479,13 @@ class DataModel extends ChangeNotifier {
         else
           {
             Album currentAlbum = albums[i - 1];
+            //Set the values for unknown album
+            if(currentAlbum.name == "Unknown Album")
+              {
+                currentAlbum.updateAlbum("Unknown Year", "Unknown Artist", null, DateTime.now(), appDocumentsDirectory);
+              }
             //Check if any of the songs was updated more recently than the album
-            if(currentAlbum.songs.any((song) => song.lastModified.isAfter(currentAlbum.lastModified)))
+            else if(currentAlbum.songs.any((song) => song.lastModified.isAfter(currentAlbum.lastModified)))
             {
               Map<String, int> yearCounts = {};
               Map<String, int> albumArtistCounts = {};
@@ -862,9 +867,9 @@ class DataModel extends ChangeNotifier {
       //If you didn't find an album make a new one
       if(songAlbum == null)
         {
-            String albumArtist =  newSong.albumName == "Unknown Album" ? "Various Artists" : newSong.albumArtist;
+          String albumArtist =  newSong.albumName == "Unknown Album" ? "Various Artists" : newSong.albumArtist;
 
-            songAlbum = Album(songs: [], name: newSong.albumName, albumArtist: albumArtist, albumArt: "", year: "Unknown Year", lastModified: DateTime.fromMillisecondsSinceEpoch(0));
+          songAlbum = Album([], newSong.albumName, albumArtist);
             albums.add(songAlbum);
       }
       songAlbum.songs.add(newSong);

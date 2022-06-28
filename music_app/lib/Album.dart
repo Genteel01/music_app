@@ -1,17 +1,27 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:uuid/uuid.dart';
+
 import 'Song.dart';
 
 class Album{
   List<Song> songs;
-
+  String id;
   String name;
   String albumArtist;
   String year;
   DateTime lastModified;
   String albumArt;
-  Album({required this.songs, required this.name, required this.albumArtist, required this.year, required this.lastModified, required this.albumArt});
+  Album(List<Song> songList, String albumName, String newAlbumArtist)
+  :
+      songs = songList,
+      name = albumName,
+      albumArtist = newAlbumArtist,
+      year = "Unknown Year",
+      lastModified = DateTime.fromMillisecondsSinceEpoch(0),
+      albumArt = "",
+      id = Uuid().v1();
 
   void updateAlbum(String newYear, String newArtist, Uint8List? newAlbumArt, DateTime newLastModified, String directoryPath)
   {
@@ -25,8 +35,8 @@ class Album{
 
     if(newAlbumArt != null)
     {
-      //TODO use UUID and might not need Sync
-      albumArt = directoryPath + year + albumArtist.substring(0, 1) + name.substring(0, 1);
+      //TODO might not need Sync
+      albumArt = directoryPath + id;
       File(albumArt).writeAsBytesSync(newAlbumArt);
     }
 
@@ -44,8 +54,8 @@ class Album{
           File(albumArt).delete();
         }
       }
-    //TODO use UUID and might not need Sync
-    albumArt = directoryPath + year + albumArtist.substring(0, 1) + name.substring(0, 1);
+    //TODO might not need Sync
+    albumArt = directoryPath + id;
     File(albumArt).writeAsBytesSync(newAlbumArt);
   }
 
@@ -55,7 +65,8 @@ class Album{
         'albumArtist': albumArtist,
         'year': year,
         'lastModified' : lastModified.millisecondsSinceEpoch,
-        'albumArt' : albumArt
+        'albumArt' : albumArt,
+        'id' : id
         //'albumArt': albumArt,
       };
 
@@ -66,6 +77,7 @@ class Album{
         year = json['year'],
         albumArt = json['albumArt'],
         songs = [],
+        id = json['id'],
         lastModified = DateTime.fromMillisecondsSinceEpoch(json['lastModified']);
 
   //Function to turn a json file of several albums into a list of albums
