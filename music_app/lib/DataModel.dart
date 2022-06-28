@@ -62,7 +62,6 @@ class DataModel extends ChangeNotifier {
 
   Random randomNumbers = new Random();
 
-  //TODO Make search use an alphabetical list of songs
   getSearchResults(String searchText)
   {
     searchResults.clear();
@@ -82,7 +81,10 @@ class DataModel extends ChangeNotifier {
         }
       });
 
-      songs.forEach((element) {
+      List<Song> searchableSongs = List.from(songs);
+      sortByTrackName(searchableSongs, false);
+
+      searchableSongs.forEach((element) {
         if (element.name.toUpperCase().contains(searchText.toUpperCase()) ||
             element.artist.toUpperCase().contains(searchText.toUpperCase()) ||
             element.albumName.toUpperCase().contains(searchText.toUpperCase()) ||
