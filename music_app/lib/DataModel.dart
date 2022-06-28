@@ -407,7 +407,6 @@ class DataModel extends ChangeNotifier {
       }
     }
 
-    print("LOGGING: " + appDocumentsDirectory);
     //Check for updated song metadata
     //TODO Remove song from all artists and albums at the start then re-sort it at the end
     /*if(File(newSong.filePath).lastModifiedSync().isAfter(newSong.lastModified))
