@@ -28,6 +28,7 @@ dependencies:
   flutter_media_metadata: any
   path_provider:
   just_audio:
+  audio_session:
   draggable_scrollbar:
   auto_size_text: ^3.0.0-nullsafety.0
   marquee:

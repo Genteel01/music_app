@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:audio_session/audio_session.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +53,7 @@ class DataModel extends ChangeNotifier {
 
   bool isPlaying = false;
   bool wasPlaying = false;
+  bool canPlay = true;
 
   //Whether you are currently using the seekbar
   bool isSeeking = false;
@@ -311,6 +313,26 @@ class DataModel extends ChangeNotifier {
         androidShowNotificationBadge: true
       ),
     );
+
+    final session = await AudioSession.instance;
+    await session.configure(AudioSessionConfiguration.music());
+
+    session.interruptionEventStream.listen((event) {
+      if (event.begin)
+        {
+          canPlay = false;
+          _audioHandler.pause();
+        }
+      else
+        {
+          canPlay = true;
+          _audioHandler.play();
+        }
+    });
+
+    session.becomingNoisyEventStream.listen((event) {
+      _audioHandler.pause();
+    });
 
     await fetch();
 
@@ -930,8 +952,10 @@ class DataModel extends ChangeNotifier {
     await _audioHandler.customAction("setStartingIndex", {"index":settings.playingIndex});
     //Set the playlist in the background audio service
     await _audioHandler.customAction("setPlaylist", makeSongMap(settings.upNext));
-    //Play the music
-    _audioHandler.play();
+    //Play the music if you are not currently interrupted
+    if(canPlay) {
+      _audioHandler.play();
+    }
     notifyListeners();
     saveSettings();
   }
@@ -991,7 +1015,10 @@ class DataModel extends ChangeNotifier {
   void playButton() async
   {
     //bool isPlaying = await AudioService.customAction("isPlaying");
-    isPlaying ? await _audioHandler.pause() : await _audioHandler.play();
+    //Block playing when audio is currently interrupted
+    if(canPlay) {
+      isPlaying ? await _audioHandler.pause() : await _audioHandler.play();
+    }
     notifyListeners();
   }
 
