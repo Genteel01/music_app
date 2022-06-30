@@ -953,9 +953,14 @@ class DataModel extends ChangeNotifier {
     //Set the playlist in the background audio service
     await _audioHandler.customAction("setPlaylist", makeSongMap(settings.upNext));
     //Play the music if you are not currently interrupted
-    if(canPlay) {
+    if(canPlay)
+    {
       _audioHandler.play();
     }
+    else
+      {
+        _audioHandler.pause();
+      }
     notifyListeners();
     saveSettings();
   }
