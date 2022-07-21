@@ -78,6 +78,7 @@ class PlaylistListBuilder extends StatelessWidget {
                                         TextButton(
                                           onPressed: () {
                                               Navigator.pop(context, false);
+                                              ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
                                             },
                                           child: const Text('Cancel'),
                                         ),
@@ -86,6 +87,7 @@ class PlaylistListBuilder extends StatelessWidget {
                                             if(!dataModel.playlists.any((element) => element.name == playlistNameController.text))
                                               {
                                                 Navigator.pop(context, true);
+                                                ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
                                               }
                                             else
                                               {
