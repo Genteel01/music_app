@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
+import 'package:music_app/ListHeader.dart';
 import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
@@ -152,7 +153,8 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
           bottomNavigationBar: CurrentlyPlayingBar(),
           body: Column(
               children: <Widget>[
-                Expanded(
+                playlist.songs.length == 0 ? ListHeader(text: "This playlist is empty!") :
+                  Expanded(
                   child: reordering! ? ReorderableListView.builder(
                       itemBuilder: (_, index) {
                         var song = playlist.songs[index];
