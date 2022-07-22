@@ -37,7 +37,10 @@ class _SongListState extends State<SongList> {
                 child: DraggableScrollbar.arrows(
                   backgroundColor: Theme.of(context).primaryColor,
                   controller: myScrollController,
-                  child: ListView.builder(
+                  child: ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
                     controller: myScrollController,
                       itemBuilder: (_, index) {
                         if(index == 0)
@@ -48,23 +51,27 @@ class _SongListState extends State<SongList> {
                             }
                           if(widget.playSongs && !dataModel.inSelectMode)
                             {
-                              return Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,),
-                                  SortDropdown(),
-                                ],
+                              return Container(height: Dimens.listItemSize,
+                                child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,),
+                                    SortDropdown(),
+                                  ],
+                                ),
                               );
                             }
                           else
                             {
-                              return Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(Dimens.xSmall),
-                                    child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.songs.length == 1 ? "${dataModel.songs.length} Song" : "${dataModel.songs.length} Songs", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
-                                  ),
-                                  if(!dataModel.inSelectMode) SortDropdown(),
-                                ],
+                              return Container(height: Dimens.listItemSize,
+                                child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(Dimens.xSmall),
+                                      child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.songs.length == 1 ? "${dataModel.songs.length} Song" : "${dataModel.songs.length} Songs", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
+                                    ),
+                                    if(!dataModel.inSelectMode) SortDropdown(),
+                                  ],
+                                ),
                               );
                             }
                         }
@@ -72,7 +79,6 @@ class _SongListState extends State<SongList> {
                         return SongListItem(song: song, allowSelection: true, futureSongs: dataModel.songs, index: index - 1, playSongs: widget.playSongs,);
                       },
                       itemCount: dataModel.songs.length + 1,
-                      itemExtent: Dimens.listItemSize,
                   ),
                 ),
               ),

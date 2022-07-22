@@ -40,12 +40,15 @@ class Dimens{
 }
 
 class Colours{
-  static const Color primaryColour = Color.fromARGB(255, 221, 68, 68);
-  static const Color secondaryColour = Color.fromARGB(255, 246, 160, 157);
-  static const Color backgroundColour = Color.fromARGB(255, 250, 250, 250);
-  static const Color searchHeaderTextColour = Color.fromARGB(255, 90, 90, 90);
+  static const Color primaryColour = Color.fromARGB(255, 0, 0, 64);
+  static const Color secondaryColour = Color.fromARGB(255, 64, 64, 128);
+  static const Color tertiaryColour = Color.fromARGB(255, 96, 96, 192);
+  static const Color backgroundColour = Color.fromARGB(255, 16, 16, 16);
+  static const Color modalBackgroundColour = Color.fromARGB(255, 32, 32, 32);
+  static const Color mainTextColour = Color.fromARGB(255, 255, 255, 255);
+  static const Color searchHeaderTextColour = Color.fromARGB(255, 165, 165, 165);
   static const Color buttonIconColour = Color.fromARGB(255, 250, 250, 250);
-  static const Color disabledButtonColour = Color.fromARGB(255, 158, 158, 158);
+  static const Color disabledButtonColour = Color.fromARGB(255, 128, 128, 128);
   static const Color redDisabledButtonColour = Color.fromARGB(255, 90, 0, 0);
   static const Color deepRed = Color.fromARGB(255, 156, 30, 30);
   static const Color listDividerColour = Color.fromARGB(255, 158, 158, 158);

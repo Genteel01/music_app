@@ -618,13 +618,13 @@ class DataModel extends ChangeNotifier {
     notifyListeners();
     //Save the songs, playlists, albums, and artist lists
     String albumsJson = jsonEncode(Album.saveAlbumFile(albums, appDocumentsDirectory));
-    File(appDocumentsDirectory + "/albums.txt").writeAsStringSync(albumsJson);
+    File(appDocumentsDirectory + "/albums.txt").writeAsString(albumsJson);
     String artistsJson = jsonEncode(Artist.saveArtistFile(artists));
-    File(appDocumentsDirectory + "/artists.txt").writeAsStringSync(artistsJson);
+    File(appDocumentsDirectory + "/artists.txt").writeAsString(artistsJson);
     String songsJson = jsonEncode(Song.saveSongFile(songs));
-    File(appDocumentsDirectory + "/songs.txt").writeAsStringSync(songsJson);
+    File(appDocumentsDirectory + "/songs.txt").writeAsString(songsJson);
     String playlistsJson = jsonEncode(Playlist.savePlaylistFile(playlists));
-    File(appDocumentsDirectory + "/playlists.txt").writeAsStringSync(playlistsJson);
+    File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
     //Save your settings
     saveSettings();
     print("LOGGING End: " + DateTime.now().toString());

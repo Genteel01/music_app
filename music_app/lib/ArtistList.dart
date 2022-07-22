@@ -34,7 +34,10 @@ class _ArtistListState extends State<ArtistList> {
                 child: DraggableScrollbar.arrows(
                   backgroundColor: Theme.of(context).primaryColor,
                   controller: myScrollController,
-                  child: ListView.builder(
+                  child: ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
                     controller: myScrollController,
                       itemBuilder: (_, index) {
                         if(index == 0)
@@ -43,9 +46,11 @@ class _ArtistListState extends State<ArtistList> {
                           {
                             return DirectoriesMenuListItem();
                           }
-                          return Padding(
-                            padding: const EdgeInsets.all(Dimens.xSmall),
-                            child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.artists.length == 1 ? dataModel.artists.length.toString() + " Artist" : dataModel.artists.length.toString() + " Artists", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
+                          return Container(height: Dimens.listItemSize,
+                            child: Padding(
+                              padding: const EdgeInsets.all(Dimens.xSmall),
+                              child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.artists.length == 1 ? dataModel.artists.length.toString() + " Artist" : dataModel.artists.length.toString() + " Artists", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
+                            ),
                           );
                         }
                         var artist = dataModel.artists[index - 1];
@@ -56,7 +61,6 @@ class _ArtistListState extends State<ArtistList> {
                         return ArtistListItem(artist: artist, allowSelection: true, goToDetails: widget.goToDetails);
                       },
                       itemCount: dataModel.artists.length + 1,
-                    itemExtent: Dimens.listItemSize,
                   ),
                 ),
               ),

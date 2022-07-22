@@ -26,8 +26,7 @@ class _ArtistListItemState extends State<ArtistListItem> {
     );
   }
   Widget buildWidget(BuildContext context, DataModel dataModel, _){
-    return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
-        border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
+    return Container(height: Dimens.listItemSize,
       child: Row(
         children: [
           if (dataModel.inSelectMode) Checkbox(value: dataModel.selectedIndices.contains(dataModel.artists.indexOf(widget.artist)), onChanged: (value) {

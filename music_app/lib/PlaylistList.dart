@@ -53,20 +53,22 @@ class PlaylistListBuilder extends StatelessWidget {
         child: DraggableScrollbar.arrows(
           backgroundColor: Theme.of(context).primaryColor,
           controller: myScrollController,
-          child: ListView.builder(
+          child: ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
             controller: myScrollController,
               itemBuilder: (_, index) {
                 //If it is the first item make the Create Playlist button
                 if(index == 0)
                   {
                     final playlistNameController = TextEditingController();
-                    return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
-                        border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
+                    return Container(height: Dimens.listItemSize,
                       child: Center(
                         child: ListTile(
-                          leading: Icon(Icons.add_box),
-                          title: Text("Create new Playlist"),
-                          subtitle: Text(dataModel.playlists.length == 1 ? "${dataModel.playlists.length} Playlist" : "${dataModel.playlists.length} Playlists"),
+                          leading: Icon(Icons.add_box, color: Colours.searchHeaderTextColour,),
+                          title: Text("Create New Playlist", style: TextStyle(color: Colours.searchHeaderTextColour),),
+                          subtitle: Text(dataModel.playlists.length == 1 ? "${dataModel.playlists.length} Playlist" : "${dataModel.playlists.length} Playlists", style: TextStyle(color: Colours.searchHeaderTextColour),),
                           onTap: () {
                             showDialog<bool>(
                                 context: context,

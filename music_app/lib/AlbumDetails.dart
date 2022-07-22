@@ -52,7 +52,10 @@ class AlbumDetails extends StatelessWidget {
                     child: DraggableScrollbar.arrows(
                       backgroundColor: Theme.of(context).primaryColor,
                       controller: myScrollController,
-                      child: ListView.builder(
+                      child: ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
                         controller: myScrollController,
                           itemBuilder: (_, index) {
                             //At the top of the list display the album art
@@ -72,7 +75,8 @@ class AlbumDetails extends StatelessWidget {
                                       Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [ListHeader(text: album.year), ListHeader(text: Strings.timeFormat(dataModel.calculateDuration(album.songs)))],),
                                     ],
                                   ),
-                                  ShuffleButton(dataModel: dataModel, futureSongs: album.songs)
+                                  Container(height: Dimens.listItemSize, child: ShuffleButton(dataModel: dataModel, futureSongs: album.songs)),
+                                  Divider(indent: Dimens.small, endIndent: Dimens.small,)
                                 ],);
                               }
                             var song = album.songs[index - 1];
@@ -83,6 +87,7 @@ class AlbumDetails extends StatelessWidget {
                                   children: [
                                     //Disc number
                                     ListHeader(text: "Disc ${song.discNumber}"),
+                                    Divider(indent: Dimens.small, endIndent: Dimens.small,),
                                     //Song list tile
                                     AlbumDetailsListItem(song: song, album: album, index: index - 1)
                                   ],

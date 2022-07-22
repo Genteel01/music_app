@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
+import 'Values.dart';
 
 
 class PathsList extends StatefulWidget {
@@ -19,12 +20,15 @@ class _PathsListState extends State<PathsList> {
     );
   }
   Widget buildList(BuildContext context, DataModel dataModel, _){
-    return ListView.builder(
+    return ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider(color: Colours.listDividerColour,);
+                    },
       itemBuilder: (_, index) {
         if(index == 0)
         {
           return ListTile(
-            leading: Icon(Icons.add),
+            leading: Icon(Icons.add, color: Colors.white,),
             title: Text("Add New Location"),
             onTap: () async {
               await dataModel.getNewDirectory();
