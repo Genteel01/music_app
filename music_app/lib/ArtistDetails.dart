@@ -57,7 +57,7 @@ class ArtistDetails extends StatelessWidget {
                           itemBuilder: (_, index) {
                             if(index == 0)
                             {
-                              return ShuffleButton(dataModel: dataModel, futureSongs: artist.songs);
+                              return Container(height: Dimens.listItemSize, child: ShuffleButton(dataModel: dataModel, futureSongs: artist.songs));
                             }
                             var song = artist.songs[index - 1];
                             //If you're at a new album print an album heading
@@ -66,6 +66,7 @@ class ArtistDetails extends StatelessWidget {
                               return Column(
                                 children: [
                                   ArtistDetailsAlbumHeader(song: song, index: index - 1),
+                                  Divider(),
                                   ArtistDetailsListItem(song: song, artist: artist, index: index - 1),
                                 ],
                               );

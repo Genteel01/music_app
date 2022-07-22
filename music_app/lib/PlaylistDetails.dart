@@ -159,13 +159,19 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                       itemBuilder: (_, index) {
                         var song = playlist.songs[index];
 
-                        return Container(key: Key(index.toString()), height: Dimens.listItemSize, decoration: BoxDecoration(
-                            border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
-                          child: ListTile(
-                            title: Text(song.name),
-                            subtitle: Text(song.artist),
-                            trailing: Icon(Icons.menu),
-                            leading: dataModel.getAlbumArt(song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(song))),
+                        return Container(key: Key(index.toString()),
+                          child: Column(
+                            children: [
+                              Container(height: Dimens.listItemSize,
+                                child: ListTile(
+                                  title: Text(song.name),
+                                  subtitle: Text(song.artist),
+                                  trailing: Icon(Icons.menu),
+                                  leading: dataModel.getAlbumArt(song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(song))),
+                                ),
+                              ),
+                              if(index != playlist.songs.length - 1) Divider()
+                            ],
                           ),
                         );
                       },

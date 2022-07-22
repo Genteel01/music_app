@@ -63,8 +63,7 @@ class PlaylistListBuilder extends StatelessWidget {
                 if(index == 0)
                   {
                     final playlistNameController = TextEditingController();
-                    return Container(height: Dimens.listItemSize, decoration: BoxDecoration(
-                        border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
+                    return Container(height: Dimens.listItemSize,
                       child: Center(
                         child: ListTile(
                           leading: Icon(Icons.add_box, color: Colours.searchHeaderTextColour,),

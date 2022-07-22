@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
+import 'Values.dart';
 
 
 class PathsList extends StatefulWidget {
@@ -21,7 +22,7 @@ class _PathsListState extends State<PathsList> {
   Widget buildList(BuildContext context, DataModel dataModel, _){
     return ListView.separated(
                     separatorBuilder: (context, index) {
-                      return Divider();
+                      return Divider(color: Colours.listDividerColour,);
                     },
       itemBuilder: (_, index) {
         if(index == 0)
