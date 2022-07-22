@@ -43,7 +43,7 @@ class _AlbumListItemState extends State<AlbumListItem> {
               title: Text(widget.album.name, maxLines: 2, overflow: TextOverflow.ellipsis,),
               trailing: Text(widget.album.songs.length == 1 ? "${widget.album.songs.length} track" : "${widget.album.songs.length} tracks"),
               subtitle: Text(widget.album.albumArtist, maxLines: 1, overflow: TextOverflow.ellipsis,),
-              leading: AspectRatio(aspectRatio: 1.0/1.0, child: Hero(tag: widget.album.name, child: widget.album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(widget.album.albumArt)))),
+              leading: AspectRatio(aspectRatio: 1.0/1.0, child: Hero(tag: widget.album.id, child: widget.album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(widget.album.albumArt)))),
               onTap: () {
                 if(!dataModel.inSelectMode && widget.goToDetails)
                   {

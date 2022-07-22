@@ -78,12 +78,24 @@ class PlaylistListBuilder extends StatelessWidget {
                                         TextButton(
                                           onPressed: () {
                                               Navigator.pop(context, false);
+                                              ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
                                             },
                                           child: const Text('Cancel'),
                                         ),
                                         TextButton(
                                           onPressed: () {
-                                            Navigator.pop(context, true);
+                                            if(!dataModel.playlists.any((element) => element.name == playlistNameController.text))
+                                              {
+                                                Navigator.pop(context, true);
+                                                ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
+                                              }
+                                            else
+                                              {
+                                                final snackBarMessage = SnackBar(
+                                                  content: Text("Playlist names must be unique"),
+                                                );
+                                                ScaffoldMessenger.of(context).showSnackBar(snackBarMessage);
+                                              }
                                           },
                                           child: const Text('Create'),
                                         ),
