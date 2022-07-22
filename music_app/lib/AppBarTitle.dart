@@ -30,11 +30,7 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
       children: [
         Row(
           children: [
-            Checkbox(fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-                if (states.contains(MaterialState.selected))
-                  return Colours.deepRed;
-                return null;
-              }),
+            Checkbox(
               value: dataModel.returnAllSelected(widget.album, widget.artist, widget.playlist), onChanged: (value) {
               !value! ?  dataModel.clearSelections() : dataModel.selectAll(widget.album, widget.artist, widget.playlist);
             },),
@@ -45,8 +41,9 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
           ],
         ),
         widget.rightButtonReplacement != null ? widget.rightButtonReplacement! :
-        ElevatedButton(style: ButtonStyle(backgroundColor: dataModel.hasSelections() ? MaterialStateProperty.all(Colours.primaryColour) : MaterialStateProperty.all(Colours.redDisabledButtonColour)),
-          child: Text(dataModel.selectionType == Playlist || widget.playlist != null ? "Remove" : "Add To"), onPressed: dataModel.hasSelections() ? () {
+        ElevatedButton(style: ElevatedButton.styleFrom(primary: dataModel.hasSelections() ? Colours.secondaryColour : Colours.primaryColour),
+          child: Text(dataModel.selectionType == Playlist || widget.playlist != null ? "Remove" : "Add To", style: TextStyle(color: dataModel.hasSelections() ? Colours.mainTextColour : Colours.searchHeaderTextColour),),
+          onPressed: dataModel.hasSelections() ? () {
           if(dataModel.selectionType == Playlist)
             {
               dataModel.deletePlaylists();

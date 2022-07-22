@@ -24,7 +24,7 @@ class _PathsListState extends State<PathsList> {
         if(index == 0)
         {
           return ListTile(
-            leading: Icon(Icons.add),
+            leading: Icon(Icons.add, color: Colors.white,),
             title: Text("Add New Location"),
             onTap: () async {
               await dataModel.getNewDirectory();

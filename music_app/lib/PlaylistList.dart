@@ -64,9 +64,9 @@ class PlaylistListBuilder extends StatelessWidget {
                         border: Border(top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), bottom: BorderSide(width: Dimens.thinBorderSize, color: Colours.listDividerColour))),
                       child: Center(
                         child: ListTile(
-                          leading: Icon(Icons.add_box),
-                          title: Text("Create new Playlist"),
-                          subtitle: Text(dataModel.playlists.length == 1 ? "${dataModel.playlists.length} Playlist" : "${dataModel.playlists.length} Playlists"),
+                          leading: Icon(Icons.add_box, color: Colours.searchHeaderTextColour,),
+                          title: Text("Create New Playlist", style: TextStyle(color: Colours.searchHeaderTextColour),),
+                          subtitle: Text(dataModel.playlists.length == 1 ? "${dataModel.playlists.length} Playlist" : "${dataModel.playlists.length} Playlists", style: TextStyle(color: Colours.searchHeaderTextColour),),
                           onTap: () {
                             showDialog<bool>(
                                 context: context,
