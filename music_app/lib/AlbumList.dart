@@ -34,7 +34,10 @@ class _AlbumListState extends State<AlbumList> {
                 child: DraggableScrollbar.arrows(
                   backgroundColor: Theme.of(context).primaryColor,
                   controller: myScrollController,
-                  child: ListView.builder(
+                  child: ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
                     controller: myScrollController,
                       itemBuilder: (_, index) {
                         if(index == 0)
@@ -56,7 +59,6 @@ class _AlbumListState extends State<AlbumList> {
                         return AlbumListItem(album: album, allowSelection: true, goToDetails: widget.goToDetails,);
                       },
                       itemCount: dataModel.albums.length + 1,
-                    itemExtent: Dimens.listItemSize,
                   ),
                 ),
               ),

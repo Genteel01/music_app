@@ -74,6 +74,7 @@ class MyApp extends StatelessWidget {
           dialogTheme: Theme.of(context).dialogTheme.copyWith(backgroundColor: Colours.modalBackgroundColour,),
           sliderTheme: Theme.of(context).sliderTheme.copyWith(thumbColor: Colours.secondaryColour, activeTrackColor: Colours.secondaryColour),
           canvasColor: Colours.secondaryColour,
+          dividerTheme: Theme.of(context).dividerTheme.copyWith(color: Colours.secondaryColour, thickness: Dimens.mediumBorderSize, indent: Dimens.xLarge, endIndent: Dimens.xLarge, space: 0),
           textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colours.secondaryColour)),
           inputDecorationTheme: InputDecorationTheme(enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colours.tertiaryColour)),
                                                       focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colours.secondaryColour)),

@@ -34,7 +34,10 @@ class _ArtistListState extends State<ArtistList> {
                 child: DraggableScrollbar.arrows(
                   backgroundColor: Theme.of(context).primaryColor,
                   controller: myScrollController,
-                  child: ListView.builder(
+                  child: ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
                     controller: myScrollController,
                       itemBuilder: (_, index) {
                         if(index == 0)
@@ -56,7 +59,6 @@ class _ArtistListState extends State<ArtistList> {
                         return ArtistListItem(artist: artist, allowSelection: true, goToDetails: widget.goToDetails);
                       },
                       itemCount: dataModel.artists.length + 1,
-                    itemExtent: Dimens.listItemSize,
                   ),
                 ),
               ),

@@ -19,7 +19,10 @@ class _PathsListState extends State<PathsList> {
     );
   }
   Widget buildList(BuildContext context, DataModel dataModel, _){
-    return ListView.builder(
+    return ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
       itemBuilder: (_, index) {
         if(index == 0)
         {

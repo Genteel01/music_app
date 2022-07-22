@@ -45,7 +45,10 @@ class SearchResults extends StatelessWidget {
             children: <Widget>[Expanded(
         child: Container(decoration: BoxDecoration(
               border: Border(bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour),)),
-            child: ListView.builder(
+            child: ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
                 itemBuilder: (_, index) {
                   var item = dataModel.searchResults[index];
                   //If you're at a new category of results print the result type as a heading

@@ -52,7 +52,10 @@ class AlbumDetails extends StatelessWidget {
                     child: DraggableScrollbar.arrows(
                       backgroundColor: Theme.of(context).primaryColor,
                       controller: myScrollController,
-                      child: ListView.builder(
+                      child: ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
                         controller: myScrollController,
                           itemBuilder: (_, index) {
                             //At the top of the list display the album art

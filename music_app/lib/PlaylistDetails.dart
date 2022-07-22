@@ -179,7 +179,10 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                     child: DraggableScrollbar.arrows(
                       backgroundColor: Theme.of(context).primaryColor,
                       controller: myScrollController,
-                      child: ListView.builder(
+                      child: ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
                         controller: myScrollController,
                           itemBuilder: (_, index) {
                             if(index == 0)

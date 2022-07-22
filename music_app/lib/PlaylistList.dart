@@ -53,7 +53,10 @@ class PlaylistListBuilder extends StatelessWidget {
         child: DraggableScrollbar.arrows(
           backgroundColor: Theme.of(context).primaryColor,
           controller: myScrollController,
-          child: ListView.builder(
+          child: ListView.separated(
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
             controller: myScrollController,
               itemBuilder: (_, index) {
                 //If it is the first item make the Create Playlist button
