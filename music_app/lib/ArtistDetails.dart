@@ -8,6 +8,7 @@ import 'Artist.dart';
 import 'ArtistDetailsListItem.dart';
 import 'CurrentlyPlayingBar.dart';
 import 'DataModel.dart';
+import 'DividedItem.dart';
 import 'ShuffleButton.dart';
 import 'Values.dart';
 
@@ -49,10 +50,7 @@ class ArtistDetails extends StatelessWidget {
                     child: DraggableScrollbar.arrows(
                       backgroundColor: Theme.of(context).primaryColor,
                       controller: myScrollController,
-                      child: ListView.separated(
-                    separatorBuilder: (context, index) {
-                      return Divider();
-                    },
+                      child: ListView.builder(
                         controller: myScrollController,
                           itemBuilder: (_, index) {
                             if(index == 0)
@@ -68,10 +66,11 @@ class ArtistDetails extends StatelessWidget {
                                   ArtistDetailsAlbumHeader(song: song, index: index - 1),
                                   Divider(),
                                   ArtistDetailsListItem(song: song, artist: artist, index: index - 1),
+                                  Divider()
                                 ],
                               );
                             }
-                            return ArtistDetailsListItem(song: song, artist: artist, index: index - 1);
+                            return DividedItem(child: ArtistDetailsListItem(song: song, artist: artist, index: index - 1));
                           },
                           itemCount: artist.songs.length + 1,
                       ),

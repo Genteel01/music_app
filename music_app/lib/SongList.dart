@@ -1,5 +1,6 @@
 import 'package:draggable_scrollbar/draggable_scrollbar.dart';
 import 'package:flutter/material.dart';
+import 'package:music_app/DividedItem.dart';
 import 'package:music_app/SortDropdown.dart';
 import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
@@ -37,10 +38,7 @@ class _SongListState extends State<SongList> {
                 child: DraggableScrollbar.arrows(
                   backgroundColor: Theme.of(context).primaryColor,
                   controller: myScrollController,
-                  child: ListView.separated(
-                    separatorBuilder: (context, index) {
-                      return Divider();
-                    },
+                  child: ListView.builder(
                     controller: myScrollController,
                       itemBuilder: (_, index) {
                         if(index == 0)
@@ -51,34 +49,39 @@ class _SongListState extends State<SongList> {
                             }
                           if(widget.playSongs && !dataModel.inSelectMode)
                             {
-                              return Container(height: Dimens.listItemSize,
-                                child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: [
-                                    ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,),
-                                    SortDropdown(),
-                                  ],
+                              return DividedItem(
+                                child: Container(height: Dimens.listItemSize,
+                                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      ShuffleButton(dataModel: dataModel, futureSongs: dataModel.songs,),
+                                      SortDropdown(),
+                                    ],
+                                  ),
                                 ),
                               );
                             }
                           else
                             {
-                              return Container(height: Dimens.listItemSize,
-                                child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(Dimens.xSmall),
-                                      child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.songs.length == 1 ? "${dataModel.songs.length} Song" : "${dataModel.songs.length} Songs", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
-                                    ),
-                                    if(!dataModel.inSelectMode) SortDropdown(),
-                                  ],
+                              return DividedItem(
+                                child: Container(height: Dimens.listItemSize,
+                                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(Dimens.xSmall),
+                                        child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.songs.length == 1 ? "${dataModel.songs.length} Song" : "${dataModel.songs.length} Songs", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
+                                      ),
+                                      if(!dataModel.inSelectMode) SortDropdown(),
+                                    ],
+                                  ),
                                 ),
                               );
                             }
                         }
                         var song = dataModel.songs[index - 1];
-                        return SongListItem(song: song, allowSelection: true, futureSongs: dataModel.songs, index: index - 1, playSongs: widget.playSongs,);
+                        return DividedItem(child: SongListItem(song: song, allowSelection: true, futureSongs: dataModel.songs, index: index - 1, playSongs: widget.playSongs,));
                       },
                       itemCount: dataModel.songs.length + 1,
+                      itemExtent: Dimens.listItemSize,
                   ),
                 ),
               ),

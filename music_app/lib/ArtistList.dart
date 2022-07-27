@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'ArtistListItem.dart';
 import 'DataModel.dart';
 import 'DirectoriesMenuListItem.dart';
+import 'DividedItem.dart';
 
 class ArtistList extends StatefulWidget {
   const ArtistList({Key? key, required this.goToDetails}) : super(key: key);
@@ -34,10 +35,7 @@ class _ArtistListState extends State<ArtistList> {
                 child: DraggableScrollbar.arrows(
                   backgroundColor: Theme.of(context).primaryColor,
                   controller: myScrollController,
-                  child: ListView.separated(
-                    separatorBuilder: (context, index) {
-                      return Divider();
-                    },
+                  child: ListView.builder(
                     controller: myScrollController,
                       itemBuilder: (_, index) {
                         if(index == 0)
@@ -46,11 +44,16 @@ class _ArtistListState extends State<ArtistList> {
                           {
                             return DirectoriesMenuListItem();
                           }
-                          return Container(height: Dimens.listItemSize,
-                            child: Padding(
-                              padding: const EdgeInsets.all(Dimens.xSmall),
-                              child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.artists.length == 1 ? dataModel.artists.length.toString() + " Artist" : dataModel.artists.length.toString() + " Artists", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
-                            ),
+                          return Column(
+                            children: [
+                              Container(height: Dimens.listItemSize,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(Dimens.xSmall),
+                                  child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.artists.length == 1 ? dataModel.artists.length.toString() + " Artist" : dataModel.artists.length.toString() + " Artists", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
+                                ),
+                              ),
+                              Divider()
+                            ],
                           );
                         }
                         var artist = dataModel.artists[index - 1];
@@ -58,9 +61,10 @@ class _ArtistListState extends State<ArtistList> {
                         {
                           return Container(height: 0);
                         }
-                        return ArtistListItem(artist: artist, allowSelection: true, goToDetails: widget.goToDetails);
+                        return DividedItem(child: ArtistListItem(artist: artist, allowSelection: true, goToDetails: widget.goToDetails));
                       },
                       itemCount: dataModel.artists.length + 1,
+                      itemExtent: Dimens.listItemSize,
                   ),
                 ),
               ),

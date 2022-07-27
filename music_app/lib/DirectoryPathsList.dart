@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'DataModel.dart';
+import 'DividedItem.dart';
 import 'Values.dart';
 
 
@@ -20,32 +21,34 @@ class _PathsListState extends State<PathsList> {
     );
   }
   Widget buildList(BuildContext context, DataModel dataModel, _){
-    return ListView.separated(
-                    separatorBuilder: (context, index) {
-                      return Divider(color: Colours.listDividerColour,);
-                    },
+    return ListView.builder(
       itemBuilder: (_, index) {
         if(index == 0)
         {
-          return ListTile(
-            leading: Icon(Icons.add, color: Colors.white,),
-            title: Text("Add New Location"),
-            onTap: () async {
-              await dataModel.getNewDirectory();
-            },
+          return DividedItem(
+            child: ListTile(
+              leading: Icon(Icons.add, color: Colors.white,),
+              title: Text("Add New Location"),
+              onTap: () async {
+                await dataModel.getNewDirectory();
+              },
+            ),
           );
         }
         var path = dataModel.settings.directoryPaths[index - 1];
 
-        return ListTile(
-          title: Text(path),
-          subtitle: Text("Hold to remove"),
-          onLongPress: () async {
-            await dataModel.removeDirectoryPath(path);
-          },
+        return DividedItem(
+          child: ListTile(
+            title: Text(path),
+            subtitle: Text("Hold to remove"),
+            onLongPress: () async {
+              await dataModel.removeDirectoryPath(path);
+            },
+          ),
         );
       },
       itemCount: dataModel.settings.directoryPaths.length + 1,
+      itemExtent: Dimens.listItemSize,
     );
   }
 }

@@ -12,6 +12,7 @@ import 'AlbumDetailsListItem.dart';
 import 'CurrentlyPlayingBar.dart';
 import 'DataModel.dart';
 import 'AppBarTitle.dart';
+import 'DividedItem.dart';
 import 'ShuffleButton.dart';
 
 class AlbumDetails extends StatelessWidget {
@@ -52,10 +53,7 @@ class AlbumDetails extends StatelessWidget {
                     child: DraggableScrollbar.arrows(
                       backgroundColor: Theme.of(context).primaryColor,
                       controller: myScrollController,
-                      child: ListView.separated(
-                    separatorBuilder: (context, index) {
-                      return Divider();
-                    },
+                      child: ListView.builder(
                         controller: myScrollController,
                           itemBuilder: (_, index) {
                             //At the top of the list display the album art
@@ -89,11 +87,12 @@ class AlbumDetails extends StatelessWidget {
                                     ListHeader(text: "Disc ${song.discNumber}"),
                                     Divider(indent: Dimens.small, endIndent: Dimens.small,),
                                     //Song list tile
-                                    AlbumDetailsListItem(song: song, album: album, index: index - 1)
+                                    AlbumDetailsListItem(song: song, album: album, index: index - 1),
+                                    Divider()
                                   ],
                                 );
                               }
-                            return AlbumDetailsListItem(song: song, album: album, index: index - 1);
+                            return DividedItem(child: AlbumDetailsListItem(song: song, album: album, index: index - 1));
                           },
                           itemCount: album.songs.length + 1,
                       ),

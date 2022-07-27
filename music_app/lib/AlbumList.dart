@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'AlbumListItem.dart';
 import 'DataModel.dart';
 import 'DirectoriesMenuListItem.dart';
+import 'DividedItem.dart';
 
 class AlbumList extends StatefulWidget {
   const AlbumList({Key? key, required this.goToDetails}) : super(key: key);
@@ -34,10 +35,7 @@ class _AlbumListState extends State<AlbumList> {
                 child: DraggableScrollbar.arrows(
                   backgroundColor: Theme.of(context).primaryColor,
                   controller: myScrollController,
-                  child: ListView.separated(
-                    separatorBuilder: (context, index) {
-                      return Divider();
-                    },
+                  child: ListView.builder(
                     controller: myScrollController,
                       itemBuilder: (_, index) {
                         if(index == 0)
@@ -46,11 +44,16 @@ class _AlbumListState extends State<AlbumList> {
                           {
                             return DirectoriesMenuListItem();
                           }
-                          return Container(height: Dimens.listItemSize,
-                            child: Padding(
-                              padding: const EdgeInsets.all(Dimens.xSmall),
-                              child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.albums.length == 1 ? "${dataModel.albums.length} Album" : "${dataModel.albums.length} Albums", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
-                            ),
+                          return Column(
+                            children: [
+                              Container(height: Dimens.listItemSize,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(Dimens.xSmall),
+                                  child: Align(alignment: Alignment.centerLeft, child: Text(dataModel.albums.length == 1 ? "${dataModel.albums.length} Album" : "${dataModel.albums.length} Albums", style: TextStyle(fontSize: Dimens.listHeaderFontSize,),)),
+                                ),
+                              ),
+                              Divider()
+                            ],
                           );
                         }
                         var album = dataModel.albums[index - 1];
@@ -58,9 +61,10 @@ class _AlbumListState extends State<AlbumList> {
                           {
                             return Container(height: 0);
                           }
-                        return AlbumListItem(album: album, allowSelection: true, goToDetails: widget.goToDetails,);
+                        return DividedItem(child: AlbumListItem(album: album, allowSelection: true, goToDetails: widget.goToDetails,));
                       },
                       itemCount: dataModel.albums.length + 1,
+                      itemExtent: Dimens.listItemSize,
                   ),
                 ),
               ),

@@ -8,6 +8,7 @@ import 'AlbumListItem.dart';
 import 'Artist.dart';
 import 'ArtistListItem.dart';
 import 'DataModel.dart';
+import 'DividedItem.dart';
 import 'ListHeader.dart';
 import 'Song.dart';
 import 'SongListItem.dart';
@@ -45,10 +46,7 @@ class SearchResults extends StatelessWidget {
             children: <Widget>[Expanded(
         child: Container(decoration: BoxDecoration(
               border: Border(bottom: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour), top: BorderSide(width: Dimens.mediumBorderSize, color: Colours.listDividerColour),)),
-            child: ListView.separated(
-                    separatorBuilder: (context, index) {
-                      return Divider();
-                    },
+            child: ListView.builder(
                 itemBuilder: (_, index) {
                   var item = dataModel.searchResults[index];
                   //If you're at a new category of results print the result type as a heading
@@ -67,6 +65,7 @@ class SearchResults extends StatelessWidget {
                           children: [
                             ListHeader(text: "Songs ($songCount)"),
                             SongListItem(song: song, allowSelection: false, futureSongs: dataModel.buildUpNext(), index: index - counter, playSongs: true,),
+                            Divider()
                           ],
                         );
                       }
@@ -78,6 +77,7 @@ class SearchResults extends StatelessWidget {
                           children: [
                             ListHeader(text: "Albums ($albumCount)"),
                             AlbumListItem(album: album, allowSelection: false, goToDetails: true,),
+                            Divider()
                           ],
                         );
                       }
@@ -90,6 +90,7 @@ class SearchResults extends StatelessWidget {
                           children: [
                             ListHeader(text: "Artists ($artistCount)"),
                             ArtistListItem(artist: artist, allowSelection: false, goToDetails: true,),
+                            Divider()
                           ],
                         );
                       }
@@ -103,22 +104,23 @@ class SearchResults extends StatelessWidget {
                       {
                         counter++;
                       }
-                      return SongListItem(song: song, allowSelection: false, futureSongs: dataModel.buildUpNext(), index: index - counter, playSongs: true,);
+                      return DividedItem(child: SongListItem(song: song, allowSelection: false, futureSongs: dataModel.buildUpNext(), index: index - counter, playSongs: true,));
                     }
                   //If the item is an album display an album list tile
                   else if(item.runtimeType == Album)
                     {
                       Album album = item as Album;
-                      return AlbumListItem(album: album, allowSelection: false, goToDetails: true,);
+                      return DividedItem(child: AlbumListItem(album: album, allowSelection: false, goToDetails: true,));
                     }
                   //If it is neither display an artist list tile
                   else
                     {
                       Artist artist = item as Artist;
-                      return ArtistListItem(artist: artist, allowSelection: false, goToDetails: true,);
+                      return DividedItem(child: ArtistListItem(artist: artist, allowSelection: false, goToDetails: true,));
                     }
                 },
-                itemCount: dataModel.searchResults.length
+                itemCount: dataModel.searchResults.length,
+                itemExtent: Dimens.listItemSize,
             ),
         ),
       )],
