@@ -42,7 +42,7 @@ class Dimens{
 class Colours{
   static const Color primaryColour = Color.fromARGB(255, 0, 0, 64);
   static const Color secondaryColour = Color.fromARGB(255, 64, 64, 128);
-  static const Color tertiaryColour = Color.fromARGB(255, 96, 96, 192);
+  static const Color tertiaryColour = Color.fromARGB(255, 112, 112, 208);
   static const Color backgroundColour = Color.fromARGB(255, 16, 16, 16);
   static const Color modalBackgroundColour = Color.fromARGB(255, 32, 32, 32);
   static const Color mainTextColour = Color.fromARGB(255, 255, 255, 255);

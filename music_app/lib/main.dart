@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
           indicatorColor: Colours.primaryColour,
           checkboxTheme: CheckboxThemeData(fillColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
             if (states.contains(MaterialState.selected))
-              return Colours.secondaryColour;
+              return Colours.tertiaryColour;
             return null;
           })),
           popupMenuTheme: Theme.of(context).popupMenuTheme.copyWith(color: Colours.secondaryColour),
@@ -69,7 +69,7 @@ class MyApp extends StatelessWidget {
             displayColor: Colours.mainTextColour,
           ),
           progressIndicatorTheme: Theme.of(context).progressIndicatorTheme.copyWith(color: Colours.secondaryColour),
-          listTileTheme: Theme.of(context).listTileTheme.copyWith(selectedColor: Colours.secondaryColour),
+          listTileTheme: Theme.of(context).listTileTheme.copyWith(selectedColor: Colours.tertiaryColour),
           bottomSheetTheme: Theme.of(context).bottomSheetTheme.copyWith(backgroundColor: Colours.modalBackgroundColour),
           dialogTheme: Theme.of(context).dialogTheme.copyWith(backgroundColor: Colours.modalBackgroundColour,),
           sliderTheme: Theme.of(context).sliderTheme.copyWith(thumbColor: Colours.secondaryColour, activeTrackColor: Colours.secondaryColour),
