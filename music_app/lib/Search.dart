@@ -64,6 +64,7 @@ class SearchResults extends StatelessWidget {
                         return Column(
                           children: [
                             ListHeader(text: "Songs ($songCount)"),
+                            Divider(),
                             SongListItem(song: song, allowSelection: false, futureSongs: dataModel.buildUpNext(), index: index - counter, playSongs: true,),
                             Divider()
                           ],
@@ -76,6 +77,7 @@ class SearchResults extends StatelessWidget {
                         return Column(
                           children: [
                             ListHeader(text: "Albums ($albumCount)"),
+                            Divider(),
                             AlbumListItem(album: album, allowSelection: false, goToDetails: true,),
                             Divider()
                           ],
@@ -89,8 +91,9 @@ class SearchResults extends StatelessWidget {
                         return Column(
                           children: [
                             ListHeader(text: "Artists ($artistCount)"),
+                            Divider(),
                             ArtistListItem(artist: artist, allowSelection: false, goToDetails: true,),
-                            Divider()
+                            Divider(),
                           ],
                         );
                       }
@@ -120,7 +123,6 @@ class SearchResults extends StatelessWidget {
                     }
                 },
                 itemCount: dataModel.searchResults.length,
-                itemExtent: Dimens.listItemSize,
             ),
         ),
       )],
