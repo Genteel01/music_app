@@ -54,7 +54,7 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
               context: context,
               builder: (BuildContext context) =>
                   AlertDialog(
-                    title: const Text("New Playlist"),
+                    title: const Text("Rename Playlist"),
                     content: TextField(controller: playlistNameController, textCapitalization: TextCapitalization.sentences, decoration: InputDecoration(hintText: playlist.name),),
                     actions: <Widget>[
                       TextButton(
@@ -65,14 +65,26 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(context, true);
+                          if(!dataModel.playlists.any((element) => (element.name == playlistNameController.text) && !(element == playlist)))
+                          {
+                            Navigator.pop(context, true);
+                          }
+                          else
+                          {
+                            final snackBarMessage = SnackBar(
+                              content: Text("Playlist names must be unique"),
+                            );
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
+                            ScaffoldMessenger.of(context).showSnackBar(snackBarMessage);
+                          }
                         },
-                        child: const Text('Create'),
+                        child: const Text('Rename'),
                       ),
                     ],
                   )
           ).then((value)
           {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
             if(value != null && value)
               {
                 dataModel.renamePlaylist(playlist, playlistNameController.text);

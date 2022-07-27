@@ -88,13 +88,13 @@ class PlaylistListBuilder extends StatelessWidget {
                                               if(!dataModel.playlists.any((element) => element.name == playlistNameController.text))
                                                 {
                                                   Navigator.pop(context, true);
-                                                  ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
                                                 }
                                               else
                                                 {
                                                   final snackBarMessage = SnackBar(
                                                     content: Text("Playlist names must be unique"),
                                                   );
+                                                  ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
                                                   ScaffoldMessenger.of(context).showSnackBar(snackBarMessage);
                                                 }
                                             },
@@ -104,6 +104,7 @@ class PlaylistListBuilder extends StatelessWidget {
                                       )
                               ).then((value)
                               {
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
                                   if(value != null && value)
                                     {
                                       dataModel.createPlaylist(playlistNameController.text);
