@@ -321,12 +321,13 @@ class DataModel extends ChangeNotifier {
       if (event.begin)
         {
           canPlay = false;
+          wasPlaying = isPlaying;
           _audioHandler.pause();
         }
       else
         {
           canPlay = true;
-          _audioHandler.play();
+          if(wasPlaying) _audioHandler.play();
         }
     });
 
