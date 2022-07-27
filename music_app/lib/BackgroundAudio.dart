@@ -34,7 +34,7 @@ class AudioPlayerTask extends BaseAudioHandler {
     audioPlayer.playerStateStream.listen((state) {
       if(state.processingState == ProcessingState.completed)
       {
-        audioPlayer.seek(null, index: 0);
+        audioPlayer.seek(Duration(), index: 0);
         pause();
       }
     });
@@ -72,7 +72,7 @@ class AudioPlayerTask extends BaseAudioHandler {
   Future<void> skipToNext() async {
     if(audioPlayer.currentIndex == futureMediaItems.length - 1 && audioPlayer.loopMode == LoopMode.off)
       {
-        await audioPlayer.seek(null, index: 0);
+        await audioPlayer.seek(Duration(), index: 0);
         pause();
       }
     else
@@ -91,7 +91,7 @@ class AudioPlayerTask extends BaseAudioHandler {
     {
       if(audioPlayer.currentIndex == 0 && audioPlayer.loopMode == LoopMode.off)
         {
-          await audioPlayer.seek(null, index: futureMediaItems.length - 1);
+          await audioPlayer.seek(Duration(), index: futureMediaItems.length - 1);
         }
       else
         {
