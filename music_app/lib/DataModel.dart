@@ -459,13 +459,17 @@ class DataModel extends ChangeNotifier {
       }
     });
 
+    loading = false;
+    notifyListeners();
 
     //Check for new songs within the directories you are looking at
     await Future.forEach(settings.directoryPaths, (String directoryPath) async {
       try
       {
-        var directoryMap = Directory(directoryPath).listSync(recursive: true);
-        await Future.forEach(directoryMap, (FileSystemEntity filePath) async {
+        var directories = Directory(directoryPath).list(recursive: true);
+
+        directories.listen((filePath) async {
+          print("Logging listening");
           String _path = filePath.path.toLowerCase();
           if(_path.endsWith("mp3") || _path.endsWith("flac") || _path.endsWith("m4a") || _path.endsWith("wma"))
           {
@@ -480,6 +484,9 @@ class DataModel extends ChangeNotifier {
               addToArtistsAndAlbums(newSong,);
             }
           }
+        }).onDone(() {
+          print("Logging Done");
+          handleAfterLoad(retriever);
         });
       }
       catch(error)
@@ -488,7 +495,11 @@ class DataModel extends ChangeNotifier {
       }
     });
 
+    print("LOGGING End: " + DateTime.now().toString());
+  }
 
+  Future<void> handleAfterLoad(MetadataRetriever retriever) async
+  {
     //Sort the song and album lists
     sortSongs(settings.sort);
 
@@ -505,93 +516,93 @@ class DataModel extends ChangeNotifier {
 
     //Go through each album
     for (int i = albums.length; i > 0; i--)
+    {
+      //Delete the album if it has no songs
+      if(albums[i - 1].songs.length == 0)
       {
-        //Delete the album if it has no songs
-        if(albums[i - 1].songs.length == 0)
-          {
-            //Delete the album art if it exists
-            if(File(albums[i - 1].albumArt).existsSync())
-            {
-              File(albums[i - 1].albumArt).delete();
-            }
+        //Delete the album art if it exists
+        if(File(albums[i - 1].albumArt).existsSync())
+        {
+          File(albums[i - 1].albumArt).delete();
+        }
 
-            albums.removeAt(i - 1);
-            notifyListeners();
-          }
-        //If you aren't removing it check if the album's metadata needs to be updated
-        else
-          {
-            Album currentAlbum = albums[i - 1];
-            //Set the values for unknown album
-            if(currentAlbum.name == "Unknown Album")
-              {
-                currentAlbum.updateAlbum("Unknown Year", "Unknown Artist", null, DateTime.now(), appDocumentsDirectory);
-              }
-            //Check if any of the songs was updated more recently than the album
-            else if(currentAlbum.songs.any((song) => song.lastModified.isAfter(currentAlbum.lastModified)))
-            {
-              Map<String, int> yearCounts = {};
-              Map<String, int> albumArtistCounts = {};
-              Map<String, int> artistCounts = {};
-              //Go through each song in the album
-              currentAlbum.songs.forEach((song) {
-                //Count the occurrences of the year, artist, and albumartist strings
-                if(song.year != "Unknown Year")
-                  {
-                    if(yearCounts.containsKey(song.year))
-                      {
-                        yearCounts[song.year] = yearCounts[song.year]! + 1;
-                      }
-                    else
-                      {
-                        yearCounts[song.year] = 1;
-                      }
-                  }
-
-                if(song.albumArtist != "Unknown Artist")
-                  {
-                    if(albumArtistCounts.containsKey(song.albumArtist))
-                    {
-                      albumArtistCounts[song.albumArtist] = albumArtistCounts[song.albumArtist]! + 1;
-                    }
-                    else
-                    {
-                      albumArtistCounts[song.albumArtist] = 1;
-                    }
-                  }
-
-                if(song.artist != "Unknown Artist")
-                  {
-                    if(artistCounts.containsKey(song.artist))
-                    {
-                      artistCounts[song.artist] = artistCounts[song.artist]! + 1;
-                    }
-                    else
-                    {
-                      artistCounts[song.artist] = 1;
-                    }
-                  }
-              });
-
-              String albumYear = "Unknown Year";
-              if(yearCounts.isNotEmpty) albumYear = getMostCommonString(yearCounts);
-
-              String albumArtist = "Unknown Artist";
-              if(albumArtistCounts.isNotEmpty)
-                {
-                  albumArtist = getMostCommonString(albumArtistCounts);
-                }
-              else if(artistCounts.isNotEmpty)
-                {
-                  albumArtist = getMostCommonString(artistCounts);
-                }
-
-              Uint8List? albumArt = await getMostCommonAlbumArt(currentAlbum.songs, retriever);
-
-              currentAlbum.updateAlbum(albumYear, albumArtist, albumArt, DateTime.now(), appDocumentsDirectory);
-            }
-          }
+        albums.removeAt(i - 1);
+        notifyListeners();
       }
+      //If you aren't removing it check if the album's metadata needs to be updated
+      else
+      {
+        Album currentAlbum = albums[i - 1];
+        //Set the values for unknown album
+        if(currentAlbum.name == "Unknown Album")
+        {
+          currentAlbum.updateAlbum("Unknown Year", "Unknown Artist", null, DateTime.now(), appDocumentsDirectory);
+        }
+        //Check if any of the songs was updated more recently than the album
+        else if(currentAlbum.songs.any((song) => song.lastModified.isAfter(currentAlbum.lastModified)))
+        {
+          Map<String, int> yearCounts = {};
+          Map<String, int> albumArtistCounts = {};
+          Map<String, int> artistCounts = {};
+          //Go through each song in the album
+          currentAlbum.songs.forEach((song) {
+            //Count the occurrences of the year, artist, and albumartist strings
+            if(song.year != "Unknown Year")
+            {
+              if(yearCounts.containsKey(song.year))
+              {
+                yearCounts[song.year] = yearCounts[song.year]! + 1;
+              }
+              else
+              {
+                yearCounts[song.year] = 1;
+              }
+            }
+
+            if(song.albumArtist != "Unknown Artist")
+            {
+              if(albumArtistCounts.containsKey(song.albumArtist))
+              {
+                albumArtistCounts[song.albumArtist] = albumArtistCounts[song.albumArtist]! + 1;
+              }
+              else
+              {
+                albumArtistCounts[song.albumArtist] = 1;
+              }
+            }
+
+            if(song.artist != "Unknown Artist")
+            {
+              if(artistCounts.containsKey(song.artist))
+              {
+                artistCounts[song.artist] = artistCounts[song.artist]! + 1;
+              }
+              else
+              {
+                artistCounts[song.artist] = 1;
+              }
+            }
+          });
+
+          String albumYear = "Unknown Year";
+          if(yearCounts.isNotEmpty) albumYear = getMostCommonString(yearCounts);
+
+          String albumArtist = "Unknown Artist";
+          if(albumArtistCounts.isNotEmpty)
+          {
+            albumArtist = getMostCommonString(albumArtistCounts);
+          }
+          else if(artistCounts.isNotEmpty)
+          {
+            albumArtist = getMostCommonString(artistCounts);
+          }
+
+          Uint8List? albumArt = await getMostCommonAlbumArt(currentAlbum.songs, retriever);
+
+          currentAlbum.updateAlbum(albumYear, albumArtist, albumArt, DateTime.now(), appDocumentsDirectory);
+        }
+      }
+    }
 
     //Go through each artist
     for (int i = artists.length; i > 0; i--)
@@ -603,16 +614,16 @@ class DataModel extends ChangeNotifier {
         notifyListeners();
       }
       else
-        {
-          Artist currentArtist = artists[i - 1];
-          currentArtist.songs.forEach((song) {
-            Album songAlbum = albums.firstWhere((element) => element.id == song.album);
-            if(!currentArtist.albums.contains(songAlbum))
-              {
-                currentArtist.albums.add(songAlbum);
-              }
-          });
-        }
+      {
+        Artist currentArtist = artists[i - 1];
+        currentArtist.songs.forEach((song) {
+          Album songAlbum = albums.firstWhere((element) => element.id == song.album);
+          if(!currentArtist.albums.contains(songAlbum))
+          {
+            currentArtist.albums.add(songAlbum);
+          }
+        });
+      }
     }
 
     loading = false;
@@ -628,7 +639,6 @@ class DataModel extends ChangeNotifier {
     File(appDocumentsDirectory + "/playlists.txt").writeAsString(playlistsJson);
     //Save your settings
     saveSettings();
-    print("LOGGING End: " + DateTime.now().toString());
   }
 
   Future<Uint8List?> getMostCommonAlbumArt(List<Song> songList, MetadataRetriever retriever) async
