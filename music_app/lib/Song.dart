@@ -126,14 +126,14 @@ class Song {
   static List<Song> idListToSongList(List<String> ids, List<Song> allSongs)
   {
     List<Song> newSongList = [];
-    int length = allSongs.length;
-    //Look through all songs
+    int length = ids.length;
+    //Look through all ids
     for(int i = 0; i < length; i++)
     {
-      //If the song is in the id list, add it to the new song list
-      if(ids.contains(allSongs[i].id))
+      //If the id is in the song list, add it to the new song list
+      if(allSongs.any((element) => element.id == ids[i]))
       {
-        newSongList.add(allSongs[i]);
+        newSongList.add(allSongs.firstWhere((element) => element.id == ids[i]));
       }
       //If you have found all the ids end the loop
       if(newSongList.length == ids.length)

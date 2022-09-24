@@ -458,6 +458,7 @@ class DataModel extends ChangeNotifier {
         addToArtistsAndAlbums(song);
       }
     });
+    sortSongs(settings.sort);
 
     loading = false;
     notifyListeners();
