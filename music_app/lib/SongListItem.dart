@@ -8,7 +8,7 @@ import 'DataModel.dart';
 import 'Song.dart';
 
 class SongListItem extends StatefulWidget {
-  const SongListItem({Key? key, required this.song, required this.allowSelection, required this.futureSongs, required this.index, required this.playSongs}) : super(key: key);
+  const SongListItem({Key? key, required this.song, required this.allowSelection, required this.futureSongs, required this.index, required this.playSongs, this.heroTag = ""}) : super(key: key);
   final Song song;
   //Selection will be disabled if the item is being shown in search results
   final bool allowSelection;
@@ -18,6 +18,8 @@ class SongListItem extends StatefulWidget {
   final int index;
   //When adding to a playlist from the playlist details screen we don't want to be able to play songs
   final bool playSongs;
+
+  final String heroTag;
 
   @override
   _SongListItemState createState() => _SongListItemState();
@@ -52,7 +54,9 @@ class _SongListItemState extends State<SongListItem> {
                   Icon(Icons.play_arrow)
                 ],
               ) : Text(widget.song.durationString()),
-              leading: AspectRatio(aspectRatio: 1.0/1.0, child: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song)))),
+              leading: AspectRatio(aspectRatio: 1.0/1.0, child: widget.heroTag != "" ? Hero(tag: widget.heroTag,
+                  child: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song)))) :
+              dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song)))),
               onTap: () {
                 if(!dataModel.inSelectMode && widget.playSongs)
                   {

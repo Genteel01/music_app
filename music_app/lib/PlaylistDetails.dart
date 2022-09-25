@@ -206,7 +206,7 @@ class _PlaylistDetailsState extends State<PlaylistDetails> {
                             }
                             var song = playlist.songs[index - 1];
 
-                            return DividedItem(child: SongListItem(song: song, allowSelection: true, futureSongs: playlist.songs, index: index - 1, playSongs: true,));
+                            return DividedItem(child: SongListItem(song: song, allowSelection: true, futureSongs: playlist.songs, index: index - 1, playSongs: true, heroTag: index == 1 ? playlist.name : "",));
                           },
                           itemCount: playlist.songs.length + 1,
                           itemExtent: Dimens.listItemSize,
