@@ -17,8 +17,9 @@ import 'ShuffleButton.dart';
 
 class AlbumDetails extends StatelessWidget {
   final int index;
+  final String heroTag;
 
-  AlbumDetails({required this.index}) : super();
+  AlbumDetails({required this.index, required this.heroTag}) : super();
   @override
   Widget build(BuildContext context) {
     return Consumer<DataModel>(
@@ -60,7 +61,7 @@ class AlbumDetails extends StatelessWidget {
                             if(index == 0)
                               {
                                 return Column(children: [
-                                  InkWell(child: Hero(tag: album.id, child: album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(album.albumArt))), onTap: () {
+                                  InkWell(child: Hero(tag: heroTag, child: album.albumArt == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(album.albumArt))), onTap: () {
                                       Navigator.push(context, MaterialPageRoute(
                                           builder: (context) {
                                             return AlbumArtView(image: album.albumArt, tagName: album.name,);

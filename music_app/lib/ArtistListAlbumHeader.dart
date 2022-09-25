@@ -23,7 +23,7 @@ class ArtistDetailsAlbumHeader extends StatelessWidget {
       onTap: () {
         if(!dataModel.inSelectMode)
         {
-          Navigator.push(context, PageRouteBuilder(pageBuilder: (_, __, ___) => AlbumDetails(index: dataModel.albums.indexOf(dataModel.albums.firstWhere((element) => element.id == song.album))))
+          Navigator.push(context, PageRouteBuilder(pageBuilder: (_, __, ___) => AlbumDetails(index: dataModel.albums.indexOf(dataModel.albums.firstWhere((element) => element.id == song.album)), heroTag: song.artist,))
             /*MaterialPageRoute(
                         builder: (context) {
                           return AlbumDetails(index: dataModel.albums.indexOf(widget.album));
@@ -37,7 +37,7 @@ class ArtistDetailsAlbumHeader extends StatelessWidget {
         padding: const EdgeInsets.only(top: Dimens.small, bottom: Dimens.small, left: Dimens.small, right: Dimens.small),
         child: Row(
           children: [
-            Hero(tag: song.artist,
+            Hero(tag: index == 0 ? song.artist : "",
               child: SizedBox(width: Dimens.listItemSize, height: Dimens.listItemSize,
                   child: dataModel.getAlbumArt(song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(song)))
               ),
