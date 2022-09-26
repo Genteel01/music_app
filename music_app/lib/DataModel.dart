@@ -375,7 +375,7 @@ class DataModel extends ChangeNotifier {
     errorMessage = "";
 
     //TODO Updates metadata package with timing measurements before and after
-    var retriever = new MetadataRetriever();
+    //var retriever = new MetadataRetriever();
     //If the album art directory doesn't exist create it
     if(!Directory(appDocumentsDirectory + "/albumArt").existsSync())
     {
@@ -451,8 +451,7 @@ class DataModel extends ChangeNotifier {
         });
 
         File songFile = File(song.filePath);
-        await retriever.setFile(songFile);
-        Metadata metaData = await retriever.metadata;
+        Metadata metaData = await MetadataRetriever.fromFile(songFile);
         song.updateSong(metaData, songFile.lastModifiedSync());
         //Add the song back to artists and albums
         addToArtistsAndAlbums(song);
@@ -460,34 +459,47 @@ class DataModel extends ChangeNotifier {
     });
     sortSongs(settings.sort);
 
-    loading = false;
-    notifyListeners();
+    if(songs.length > 0 || settings.directoryPaths.length == 0)
+      {
+        loading = false;
+        notifyListeners();
+      }
 
     //Check for new songs within the directories you are looking at
     await Future.forEach(settings.directoryPaths, (String directoryPath) async {
       try
       {
         var directories = Directory(directoryPath).list(recursive: true);
-
+        int started = 0;
+        int completed = 0;
+        bool streamIsClosed = false;
         directories.listen((filePath) async {
-          print("Logging listening");
+
           String _path = filePath.path.toLowerCase();
           if(_path.endsWith("mp3") || _path.endsWith("flac") || _path.endsWith("m4a") || _path.endsWith("wma"))
           {
             if(!songs.any((element) => element.filePath == filePath.path))
             {
+              started++;
               Song newSong;
               File file = File(filePath.path);
-              await retriever.setFile(file);
-              Metadata metaData = await retriever.metadata;
+
+              Metadata metaData = await MetadataRetriever.fromFile(file);
               newSong = Song(metaData, filePath.path, file.lastModifiedSync());
               songs.add(newSong);
               addToArtistsAndAlbums(newSong,);
+              completed++;
             }
           }
+
+          if(completed == started && streamIsClosed)
+          {
+            print("Logging Done");
+            handleAfterLoad();
+          }
         }).onDone(() {
-          print("Logging Done");
-          handleAfterLoad(retriever);
+          streamIsClosed = true;
+          print("Logging Stream Closed");
         });
       }
       catch(error)
@@ -495,12 +507,12 @@ class DataModel extends ChangeNotifier {
         errorMessage = errorMessage + "The directory \"" + directoryPath + "\" contains inaccessible system files, and could not be mapped\n";
       }
     });
-
-    print("LOGGING End: " + DateTime.now().toString());
   }
 
-  Future<void> handleAfterLoad(MetadataRetriever retriever) async
+  Future<void> handleAfterLoad() async
   {
+    loading = true;
+    notifyListeners();
     //Sort the song and album lists
     sortSongs(settings.sort);
 
@@ -598,7 +610,7 @@ class DataModel extends ChangeNotifier {
             albumArtist = getMostCommonString(artistCounts);
           }
 
-          Uint8List? albumArt = await getMostCommonAlbumArt(currentAlbum.songs, retriever);
+          Uint8List? albumArt = await getMostCommonAlbumArt(currentAlbum.songs);
 
           currentAlbum.updateAlbum(albumYear, albumArtist, albumArt, DateTime.now(), appDocumentsDirectory);
         }
@@ -629,6 +641,8 @@ class DataModel extends ChangeNotifier {
 
     loading = false;
     notifyListeners();
+
+    print("LOGGING End: " + DateTime.now().toString());
     //Save the songs, playlists, albums, and artist lists
     String albumsJson = jsonEncode(Album.saveAlbumFile(albums, appDocumentsDirectory));
     File(appDocumentsDirectory + "/albums.txt").writeAsString(albumsJson);
@@ -642,19 +656,19 @@ class DataModel extends ChangeNotifier {
     saveSettings();
   }
 
-  Future<Uint8List?> getMostCommonAlbumArt(List<Song> songList, MetadataRetriever retriever) async
+  Future<Uint8List?> getMostCommonAlbumArt(List<Song> songList) async
   {
     Map<Uint8List, int> artCounts = {};
 
     await Future.forEach(songList, (Song song) async {
       File file = File(song.filePath);
-      await retriever.setFile(file);
-      if (retriever.albumArt != null) {
+      Metadata metadata = await MetadataRetriever.fromFile(file);
+      if (metadata.albumArt != null) {
         Iterable<Uint8List> countedArts = artCounts.keys;
         bool foundArt = false;
         for(int i = 0; i < countedArts.length; i++)
           {
-            if(areAlbumArtsEqual(countedArts.elementAt(i), retriever.albumArt!))
+            if(areAlbumArtsEqual(countedArts.elementAt(i), metadata.albumArt!))
               {
                 artCounts[countedArts.elementAt(i)] = artCounts[countedArts.elementAt(i)]! + 1;
                 foundArt = true;
@@ -662,7 +676,7 @@ class DataModel extends ChangeNotifier {
           }
         if(!foundArt)
           {
-            artCounts[retriever.albumArt!] = 1;
+            artCounts[metadata.albumArt!] = 1;
           }
       }
 
