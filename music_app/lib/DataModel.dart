@@ -431,32 +431,6 @@ class DataModel extends ChangeNotifier {
       }
     }
 
-    //Check for updated song metadata
-    await Future.forEach(songs, (Song song) async {
-      File songFile = File(song.filePath);
-      if(songFile.lastModifiedSync().isAfter(song.lastModified))
-      {
-        //Remove the song from artists and albums
-        albums.forEach((album) {
-          if(album.songs.contains(song))
-            {
-              album.songs.remove(song);
-            }
-        });
-        artists.forEach((artist) {
-          if(artist.songs.contains(song))
-          {
-            artist.songs.remove(song);
-          }
-        });
-
-        File songFile = File(song.filePath);
-        Metadata metaData = await MetadataRetriever.fromFile(songFile);
-        song.updateSong(metaData, songFile.lastModifiedSync());
-        //Add the song back to artists and albums
-        addToArtistsAndAlbums(song);
-      }
-    });
     sortSongs(settings.sort);
 
     if(songs.length > 0 || settings.directoryPaths.length == 0)
@@ -465,11 +439,13 @@ class DataModel extends ChangeNotifier {
         notifyListeners();
       }
 
+    int directoriesCompleted = 0;
     //Check for new songs within the directories you are looking at
     await Future.forEach(settings.directoryPaths, (String directoryPath) async {
       try
       {
         var directories = Directory(directoryPath).list(recursive: true);
+
         int started = 0;
         int completed = 0;
         bool streamIsClosed = false;
@@ -495,11 +471,24 @@ class DataModel extends ChangeNotifier {
           if(completed == started && streamIsClosed)
           {
             print("Logging Done");
-            handleAfterLoad();
+            directoriesCompleted++;
+            if(directoriesCompleted == settings.directoryPaths.length)
+            {
+              handleAfterLoad();
+            }
           }
         }).onDone(() {
           streamIsClosed = true;
+          if(started == 0 || completed == started)
+            {
+              directoriesCompleted++;
+              if(directoriesCompleted == settings.directoryPaths.length)
+              {
+                handleAfterLoad();
+              }
+            }
           print("Logging Stream Closed");
+          print("Logging Started: $started, Completed: $completed");
         });
       }
       catch(error)
@@ -511,8 +500,33 @@ class DataModel extends ChangeNotifier {
 
   Future<void> handleAfterLoad() async
   {
-    loading = true;
-    notifyListeners();
+    //Check for updated song metadata
+    await Future.forEach(songs, (Song song) async {
+      File songFile = File(song.filePath);
+      if(songFile.lastModifiedSync().isAfter(song.lastModified))
+      {
+        //Remove the song from artists and albums
+        albums.forEach((album) {
+          if(album.songs.contains(song))
+          {
+            album.songs.remove(song);
+          }
+        });
+        artists.forEach((artist) {
+          if(artist.songs.contains(song))
+          {
+            artist.songs.remove(song);
+          }
+        });
+
+        File songFile = File(song.filePath);
+        Metadata metaData = await MetadataRetriever.fromFile(songFile);
+        song.updateSong(metaData, songFile.lastModifiedSync());
+        //Add the song back to artists and albums
+        addToArtistsAndAlbums(song);
+      }
+    });
+
     //Sort the song and album lists
     sortSongs(settings.sort);
 
