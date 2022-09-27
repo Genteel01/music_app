@@ -24,9 +24,44 @@ import 'Settings.dart';
 import 'Song.dart';
 import 'Sorting.dart';
 
-/*void _backgroundTaskEntrypoint() async {
-  await AudioServiceBackground.run(() => AudioPlayerTask());
-}*/
+
+//TODO In OnResume equivalent, if the background audio stuff isn't initialised, initialise it
+//TODO Add search to add to playlist screen
+//TODO Make search results selectable
+  //TODO Change selection to just select all songs from the playlist/artist/album instead of the playlist/artist/album itself (Make sure there can be no repeats)
+    //TODO Make it possible to switch tabs when selecting
+//TODO Fix Hero to album art page
+//TODO Fix Hero from artist page to album pages (already works for first album)
+//TODO Try currently playing modal colour as appbar colour
+//TODO Autofocus search text box
+//TODO Make search text box caret colour lighter
+//TODO Sometimes switching shuffle on/off shows the wrong song and doesn't keep the progress through the song
+//TODO Sometimes doesn't update the lock screen/notifications currently playing song
+//TODO Sometimes breaks after finishing a playlist
+//TODO Add artist/album shuffle to respective lists
+//TODO Redo currently playing modal text
+  //TODO Consider making it a separate page
+//TODO Redo album details artist/trackcount text
+//TODO See if a settings option can be made to take you to the samsung adapt sound settings page
+//TODO Add sorting options for albums and artists (name, number of tracks, artist: number of albums, album: year, album: artist) (All in both directions)
+//TODO Try maintaining scroll position when switching tabs (hopefully updating/changing scrollbar package will make this automatic)
+//TODO Put a small, right side margin on the scrollbar
+//TODO Make the scrollbar slightly transparent and make it change colour when in use
+//TODO Maybe add importing/exporting data
+//TODO Track number of plays and last play time on songs
+//TODO Add song sorting options for number of plays, last play time, and date added (Using the existing tracked last modified date)
+//TODO Up next list viewer
+//TODO Seekbar possible doesn't work if you just tap it instead of dragging
+//TODO Picking a new song over and over eventually crashes due to lack of memory
+//TODO Sometimes a non functioning version of the notification drawer controls gets stuck in the drawer, alongside the working controls
+//TODO Loading upNext file might be broken when shuffle is on
+//TODO Maybe prevent the screen from turning off in fetch() (and the finish function afterwards)
+//TODO Vibrate phone when selecting
+//TODO EITHER Lock screen to portrait OR make sure all screens work in landscape (currently playing model is definitely broken)
+//TODO Alphabetical scroll bar? (Probably not)
+
+
+
 late AudioHandler _audioHandler;
 
 class DataModel extends ChangeNotifier {
@@ -673,7 +708,7 @@ class DataModel extends ChangeNotifier {
   Future<Uint8List?> getMostCommonAlbumArt(List<Song> songList) async
   {
     Map<Uint8List, int> artCounts = {};
-
+    //TODO Async this somehow maybe
     await Future.forEach(songList, (Song song) async {
       File file = File(song.filePath);
       Metadata metadata = await MetadataRetriever.fromFile(file);
