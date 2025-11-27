@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:music_app/ImageOrDefault.dart';
 import 'package:music_app/Values.dart';
 import 'package:provider/provider.dart';
 
@@ -56,7 +57,7 @@ class _SongListItemState extends State<SongListItem> {
               ) : Text(widget.song.durationString()),
               leading: AspectRatio(aspectRatio: 1.0/1.0, child: widget.heroTag != "" ? Hero(tag: widget.heroTag,
                   child: dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song)))) :
-              dataModel.getAlbumArt(widget.song) == "" ? Image.asset("assets/images/music_note.jpg") : Image.file(File(dataModel.getAlbumArt(widget.song)))),
+              ImageOrDefault(imagePath: dataModel.getAlbumArt(widget.song), condition: dataModel.getAlbumArt(widget.song) == "")),
               onTap: () {
                 if(!dataModel.inSelectMode && widget.playSongs)
                   {
