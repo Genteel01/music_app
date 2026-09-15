@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:music_app/Values.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import 'AlbumList.dart';
@@ -96,10 +97,12 @@ class _MyTabBarState extends State<MyTabBar> with WidgetsBindingObserver {
                     Padding(
                       padding: const EdgeInsets.only(left: Dimens.xSmall),
                       child: IconButton(icon: Icon(Icons.settings), color: dataModel.errorMessage == "" ? Colours.buttonIconColour : Colors.red, onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(
-                            builder: (context) {
-                              return SettingsPage();
-                            }));
+                        //Navigator.push(context, MaterialPageRoute(
+                        //    builder: (context) {
+                        //      return SettingsPage();
+                        //    }));
+                        Permission.audio.request();
+                        //Permission.accessMediaLocation.request();
                       },),
                     ),
                   ],

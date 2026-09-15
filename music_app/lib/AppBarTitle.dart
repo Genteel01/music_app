@@ -41,7 +41,7 @@ class _SelectingAppBarTitleState extends State<SelectingAppBarTitle> {
           ],
         ),
         widget.rightButtonReplacement != null ? widget.rightButtonReplacement! :
-        ElevatedButton(style: ElevatedButton.styleFrom(primary: dataModel.hasSelections() ? Colours.secondaryColour : Colours.primaryColour),
+        ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: dataModel.hasSelections() ? Colours.secondaryColour : Colours.primaryColour),
           child: Text(dataModel.selectionType == Playlist || widget.playlist != null ? "Remove" : "Add To", style: TextStyle(color: dataModel.hasSelections() ? Colours.mainTextColour : Colours.searchHeaderTextColour),),
           onPressed: dataModel.hasSelections() ? () {
           if(dataModel.selectionType == Playlist)

@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(15)))
           ),
           floatingActionButtonTheme: FloatingActionButtonThemeData(foregroundColor: Colors.white, backgroundColor: Colours.secondaryColour),
-          elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: Colours.secondaryColour)),
+          elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: Colours.secondaryColour)),
           //dialogBackgroundColor: Color.fromARGB(255, 255, 240, 201),
           scaffoldBackgroundColor: Colours.backgroundColour,
           textSelectionTheme: TextSelectionThemeData(selectionHandleColor: Colours.secondaryColour, selectionColor: Colours.secondaryColour, cursorColor: Colours.secondaryColour),
@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
           sliderTheme: Theme.of(context).sliderTheme.copyWith(thumbColor: Colours.secondaryColour, activeTrackColor: Colours.secondaryColour),
           canvasColor: Colours.secondaryColour,
           dividerTheme: Theme.of(context).dividerTheme.copyWith(color: Colours.secondaryColour, thickness: Dimens.mediumBorderSize, indent: Dimens.xLarge, endIndent: Dimens.xLarge, space: 0),
-          textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(primary: Colours.secondaryColour)),
+          textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(backgroundColor: Colours.secondaryColour)),
           inputDecorationTheme: InputDecorationTheme(enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colours.tertiaryColour)),
                                                       focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colours.secondaryColour)),
                                                       hintStyle: TextStyle(color: Colours.searchHeaderTextColour))
